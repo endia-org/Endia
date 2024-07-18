@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Fehrenbach"
+  given-names: "Tillmann"
+  orcid: "https://orcid.org/0009-0001-4831-9729"
+title: "Endia - Scientific Computing in Mojo"
+version: 24.7
+doi: 10.5281/zenodo.1234
+date-released: 2024-07-18
+url: "https://github.com/endia-org/Endia"
+license: Apache-2.0
+keywords:
+  - "scientific computing"
+  - "Mojo"
+  - "compiler"
+  - "machine learning"
+repository-code: "https://github.com/endia-org/Endia"
+abstract: "Endia is an open-source project for scientific computing in Mojo, aiming to provide high-performance numerical methods and tools for researchers and developers."

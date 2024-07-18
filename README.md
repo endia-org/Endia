@@ -13,18 +13,17 @@
 
 <div align="center">
   
-  [Website] | [Docs] | [Getting Started] | [Our Mission]
+  [Website] | [Docs] | [Getting Started]
 
-  [Website]: https://endia.org
-  [Docs]: https://endia.org
-  [Getting Started]: #getting-started
-  [Our Mission]: #our-mission
+  [Website]: https://endia.vercel.app/
+  [Docs]: https://endia.vercel.app/docs/array
+  [Getting Started]: https://endia.vercel.app/docs/get_started
 
 </div>
 
 ## Installation
 
-1. **Install [Mojo and MAX](https://docs.modular.com/max/install)** 🔥 (v24.4)
+1. **Install [Mojo and MAX](https://docs.modular.com/max/install)** 🔥 (v24.4.0)
 
 2. **Clone the repository**:
 
@@ -42,7 +41,7 @@
 
     Required dependencies: `torch`, `numpy`, `graphviz`. These will be installed automatically by the setup script.
 
-## Getting Started
+## A tiny example
 
 In this guide, we'll demonstrate how to compute the **value**, **gradient**, and the **Hessian** (i.e. the second-order derivative) of a simple function. First by using Endia's Pytorch-like API and then by using a more Jax-like functional API. In both examples, we initially define a function **foo** that takes an array and returns the sum of the squares of its elements.
 

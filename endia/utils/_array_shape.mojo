@@ -69,7 +69,7 @@ struct ShapeNode(CollectionElement):
 
 
 @value
-struct ArrayShape(CollectionElement, Stringable):
+struct ArrayShape(CollectionElement, Stringable, EqualityComparable):
     """
     ArrayShape is a lightweight handle that provides an efficient way to work with and manage array shapes. It serves
     as a convenient wrapper around a ShapeNode instance, allowing for inexpensive copying of shapes without duplicating
@@ -224,6 +224,17 @@ struct ArrayShape(CollectionElement, Stringable):
         self.set_storage_offset(storage_offset)
         self.set_ndim(len(shape))
         self.set_size(size)
+
+    fn __eq__(self, other: ArrayShape) -> Bool:
+        var equal = True
+        for i in range(len(self.shape())):
+            if self.shape()[i] != other.shape()[i]:
+                equal = False
+                break
+        return equal
+
+    fn __ne__(self, other: ArrayShape) -> Bool:
+        return not self.__eq__(other)
 
 
 # recursive shape computation until all parents are computed

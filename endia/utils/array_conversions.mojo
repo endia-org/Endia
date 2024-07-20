@@ -82,9 +82,19 @@ fn is_close_to_tensor(
 
     if wrong_occurences > 0:
         # print("Warning: Number of wrong occurences: ", wrong_occurences, "out of", size, "total elements at relative tolerance", rtol, "!")
-        print("\n\033[33mWarning:\033[0m #wrong_elements / #total_elements =", wrong_occurences / size, "at relative tolerance", rtol, "!")
-        print("\033[33mDont't panic:\033[0m If the above relative number of wrong elements is very small (e.g. 1e-4), then you can ignore the test failure.")
-        return False                
+        print(
+            "\n\033[33mWarning:\033[0m #wrong_elements / #total_elements =",
+            wrong_occurences / size,
+            "at relative tolerance",
+            rtol,
+            "!",
+        )
+        print(
+            "\033[33mDont't panic:\033[0m If the above relative number of wrong"
+            " elements is very small (e.g. 1e-4), then you can ignore the test"
+            " failure."
+        )
+        return False
     return True
 
 

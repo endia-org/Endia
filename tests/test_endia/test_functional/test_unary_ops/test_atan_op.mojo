@@ -38,7 +38,7 @@ def run_test_atan_grad(msg: String = "atan_grad"):
 
 def run_test_atan_complex(msg: String = "atan_complex"):
     torch = Python.import_module("torch")
-    arg0 = nd.randn_complex(List(2, 3, 4))
+    arg0 = nd.randn_complex(List(2, 30, 40))
     arg0_torch = nd.utils.to_torch(arg0)
 
     res = nd.atan(arg0)

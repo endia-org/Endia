@@ -54,8 +54,8 @@ def benchmark_mlp_jit():
     beta1 = 0.9
     beta2 = 0.999
     eps = 1e-8
-    num_iters = 1000
-    every = 1000
+    num_iters = 200
+    every = 10
     avg_loss = SIMD[dtype, 1](0)
 
     # setup input, target, params and velocity
@@ -122,10 +122,10 @@ def benchmark_mlp_jit():
 
         # print loss
         if t % every == 0:
-            print("Iter: ", t, " Loss: ", avg_loss / every)
+            print("- Iter: ", t, " Loss: ", avg_loss / every)
             avg_loss = 0
             print(
-                "Total: ",
+                "  Total: ",
                 time_all / every,
                 " Value_and_Grad: ",
                 time_fwd / every,

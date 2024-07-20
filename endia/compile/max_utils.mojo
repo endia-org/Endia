@@ -119,37 +119,51 @@ def build_graph(
         elif len(tmp_args) == 1:
             # unary op
             arg0 = symbol_trace[tmp_args[0].id()]
-            if array[].name() == "relu":
-                symbol_trace.append(ops.relu(arg0))
-            elif array[].name() == "softmax":
-                symbol_trace.append(ops.softmax(arg0))
-            elif array[].name() == "neg":
-                symbol_trace.append(-arg0)
-            elif array[].name() == "sin":
-                symbol_trace.append(ops.sin(arg0))
+            if array[].name() == "abs":
+                symbol_trace.append(ops.abs(arg0))
+            # elif array[].name() == "acos":
+            #     symbol_trace.append(ops.acos(arg0))
+            # elif array[].name() == "asin":
+            #     symbol_trace.append(ops.asin(arg0))
+            # elif array[].name() == "atan":
+            #     symbol_trace.append(ops.atan(arg0))
             elif array[].name() == "cos":
                 symbol_trace.append(ops.cos(arg0))
+            # elif array[].name() == "cosh":
+            #     symbol_trace.append(ops.cosh(arg0))
             elif array[].name() == "exp":
                 symbol_trace.append(ops.exp(arg0))
             elif array[].name() == "log":
                 symbol_trace.append(ops.log(arg0))
+            elif array[].name() == "neg":
+                symbol_trace.append(-arg0)
+            elif array[].name() == "reciprocal":
+                symbol_trace.append(1 / arg0)
+            elif array[].name() == "relu":
+                symbol_trace.append(ops.relu(arg0))
+            elif array[].name() == "sigmoid":
+                symbol_trace.append(ops.sigmoid(arg0))
+            # elif array[].name() == "sign":
+            #     symbol_trace.append(ops.sign(arg0))
+            elif array[].name() == "sin":
+                symbol_trace.append(ops.sin(arg0))
+            # elif array[].name() == "sinh":
+            #     symbol_trace.append(ops.sinh(arg0))
             elif array[].name() == "sqrt":
                 symbol_trace.append(ops.sqrt(arg0))
-            elif array[].name() == "ge_zero":
-                symbol_trace.append(
-                    ops.greater(
-                        arg0,
-                        graph.constant(Tensor[DType.float32](List(1), 0)),
-                    )
-                )
+            # elif array[].name() == "tan":
+            #     symbol_trace.append(ops.tan(arg0))
+            elif array[].name() == "tanh":
+                symbol_trace.append(ops.tanh(arg0))
+
             else:
                 print("Unknown unary op:", array[].name())
 
         elif len(tmp_args) == 2:
-            # binary op
             var arg1 = symbol_trace[tmp_args[0].id()]
             var arg2 = symbol_trace[tmp_args[1].id()]
 
+            # binary ops
             if array[].name() == "add":
                 symbol_trace.append(ops.add(arg1, arg2))
             elif array[].name() == "sub":
@@ -162,6 +176,20 @@ def build_graph(
                 symbol_trace.append(ops.pow(arg1, arg2))
             elif array[].name() == "matmul":
                 symbol_trace.append(ops.matmul(arg1, arg2))
+
+            # comparison ops
+            elif array[].name() == "greater_equal":
+                symbol_trace.append(ops.greater_equal(arg1, arg2))
+            elif array[].name() == "greater":
+                symbol_trace.append(ops.greater(arg1, arg2))
+            elif array[].name() == "equal":
+                symbol_trace.append(ops.equal(arg1, arg2))
+            elif array[].name() == "not_equal":
+                symbol_trace.append(ops.not_equal(arg1, arg2))
+            elif array[].name() == "less":
+                symbol_trace.append(ops.greater(arg2, arg1))
+            elif array[].name() == "less_equal":
+                symbol_trace.append(ops.greater_equal(arg2, arg1))
             else:
                 print("Unknown binary op:", array[].name())
         else:

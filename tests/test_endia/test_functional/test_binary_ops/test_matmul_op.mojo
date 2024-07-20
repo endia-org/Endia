@@ -4,8 +4,8 @@ from python import Python
 
 def run_test_matmul(msg: String = "matmul"):
     torch = Python.import_module("torch")
-    arg0 = nd.randn(List(2, 3, 4))
-    arg1 = nd.randn(List(4, 5))
+    arg0 = nd.randn(List(2, 30, 40))
+    arg1 = nd.randn(List(40, 50))
     arg0_torch = nd.utils.to_torch(arg0)
     arg1_torch = nd.utils.to_torch(arg1)
 
@@ -20,8 +20,8 @@ def run_test_matmul(msg: String = "matmul"):
 
 def run_test_matmul_grad(msg: String = "matmul_grad"):
     torch = Python.import_module("torch")
-    arg0 = nd.randn(List(2, 3, 4), requires_grad=True)
-    arg1 = nd.randn(List(4, 5), requires_grad=True)
+    arg0 = nd.randn(List(2, 30, 40), requires_grad=True)
+    arg1 = nd.randn(List(40, 50), requires_grad=True)
     arg0_torch = nd.utils.to_torch(arg0)
     arg1_torch = nd.utils.to_torch(arg1)
 
@@ -48,8 +48,8 @@ def run_test_matmul_grad(msg: String = "matmul_grad"):
 
 def run_test_matmul_complex(msg: String = "matmul_complex"):
     torch = Python.import_module("torch")
-    arg0 = nd.randn_complex(List(2, 3, 4))
-    arg1 = nd.randn_complex(List(4, 5))
+    arg0 = nd.randn_complex(List(2, 30, 40))
+    arg1 = nd.randn_complex(List(40, 50))
     arg0_torch = nd.utils.to_torch(arg0)
     arg1_torch = nd.utils.to_torch(arg1)
 

@@ -53,53 +53,44 @@ fn to_torch_tensor(arg: Array) raises -> PythonObject:
 
 @always_inline
 fn is_close_to_tensor(
-    arr: Array, arr_torch: PythonObject, atol: Float32 = 10e-3
+    arr: Array, arr_torch: PythonObject, rtol: Float32
 ) raises -> Bool:
     """
     Asserts that the values in the endia Array and the torch tensor are equal.
     """
-    # var int_tol = int(100000)
-    var tolerance = int(1 / atol)
     var shape = arr.shape()
     var size = 1
     for i in range(shape.size):
         size *= shape[i]
     var flattened = arr_torch.flatten()
-    var rel_false_values = SIMD[dtype, 1](0)
+    var wrong_occurences: Int = 0
     for i in range(size):
-        var arr_val = (arr.load(i) * tolerance).roundeven()
-        var torch_val = (
-            flattened[i].to_float64().cast[dtype]() * tolerance
-        ).roundeven()
+        var arr_val = arr.load(i)
+        var torch_val = flattened[i].to_float64().cast[dtype]()
         if not isnan(arr_val) and not isinf(arr_val):
-            if arr_val != torch_val:
-                # if the read in number is greater than a certain threshold, neglect the values after the comma
-                var int_tol = SIMD[dtype, 1](100)
-                if (
-                    abs(arr.load(i)) > int_tol
-                    and abs(flattened[i].to_float64().cast[dtype]()) > int_tol
-                ):
-                    if (
-                        abs(arr_val // tolerance).roundeven()
-                        == abs(torch_val // tolerance).roundeven()
-                    ):
-                        continue
-                print(
-                    "Incorrect value at index",
-                    i,
-                    " - endia_val=",
-                    arr.load(i),
-                    " - torch_val=",
-                    flattened[i].to_float64().cast[dtype](),
-                )
-                rel_false_values += 1
-                return False
+            var rel_diff = arr_val / torch_val
+            if rel_diff < 1 - rtol or rel_diff > 1 + rtol:
+                wrong_occurences += 1
+                # print(
+                #     "Incorrect value at index",
+                #     i,
+                #     " - endia_val =",
+                #     arr.load(i),
+                #     " - torch_val =",
+                #     flattened[i].to_float64().cast[dtype](),
+                # )
+
+    if wrong_occurences > 0:
+        # print("Warning: Number of wrong occurences: ", wrong_occurences, "out of", size, "total elements at relative tolerance", rtol, "!")
+        print("\n\033[33mWarning:\033[0m #wrong_elements / #total_elements =", wrong_occurences / size, "at relative tolerance", rtol, "!")
+        print("\033[33mDont't panic:\033[0m If the above relative number of wrong elements is very small (e.g. 1e-4), then you can ignore the test failure.")
+        return False                
     return True
 
 
 @always_inline
 fn is_close(
-    arr: Array, arr_torch: PythonObject, atol: Float32 = 10e-3
+    arr: Array, arr_torch: PythonObject, rtol: Float32 = 10e-5
 ) raises -> Bool:
     """
     Asserts that the values in the endia Array and the torch tensor are equal.
@@ -110,6 +101,6 @@ fn is_close(
         var torch_real = arr_torch.real
         var torch_imag = arr_torch.imag
         return is_close_to_tensor(
-            real, torch_real, atol
-        ) and is_close_to_tensor(imag, torch_imag, atol)
-    return is_close_to_tensor(arr, arr_torch, atol)
+            real, torch_real, rtol
+        ) and is_close_to_tensor(imag, torch_imag, rtol)
+    return is_close_to_tensor(arr, arr_torch, rtol)

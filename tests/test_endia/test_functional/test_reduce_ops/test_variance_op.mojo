@@ -4,7 +4,7 @@ from python import Python
 
 def run_test_variance(msg: String = "variance"):
     torch = Python.import_module("torch")
-    arr = nd.randn(List(2, 3, 4))
+    arr = nd.randn(List(2, 30, 40))
     arr_torch = nd.utils.to_torch(arr)
     variance_torch = Python.import_module("torch.var").variance
 
@@ -22,7 +22,7 @@ def run_test_variance(msg: String = "variance"):
 
 def run_test_variance_grad(msg: String = "variance_grad"):
     torch = Python.import_module("torch")
-    arr = nd.randn(List(2, 3, 4), requires_grad=True)
+    arr = nd.randn(List(2, 30, 40), requires_grad=True)
     arr_torch = nd.utils.to_torch(arr)
     variance_torch = Python.import_module("torch.var").variance
 

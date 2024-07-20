@@ -38,8 +38,8 @@ def setup_params(
     return params
 
 
-def benchmark_mlp_func():
-    print("\nRunning MLP benchmark in a functional eager mode with grad:")
+def benchmark_mlp_jit_with_MAX():
+    print("\nRunning MLP benchmark with MAX JIT compilation:")
 
     # define the forward function
     def fwd(args: List[nd.Array]) -> nd.Array:
@@ -54,8 +54,8 @@ def benchmark_mlp_func():
     beta1 = 0.9
     beta2 = 0.999
     eps = 1e-8
-    num_iters = 2000
-    every = 500
+    num_iters = 200
+    every = 10
     avg_loss = SIMD[dtype, 1](0)
 
     # setup input, target, params and velocity
@@ -70,7 +70,7 @@ def benchmark_mlp_func():
         v.append(nd.zeros_like(args[i]))
 
     # setup fwd and grad function as one call
-    value_and_grad_fwd = nd.value_and_grad(fwd)
+    value_and_grad_fwd = nd.jit(nd.value_and_grad(fwd), compile_with_MAX=False)
 
     # setup time variables
     start = Float64(0)

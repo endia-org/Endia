@@ -38,7 +38,7 @@ def run_test_to_abs_grad(msg: String = "abs_grad"):
 
 def run_test_to_abs_complex(msg: String = "abs_complex"):
     torch = Python.import_module("torch")
-    arg0 = nd.randn_complex(List(2, 3, 4))
+    arg0 = nd.randn_complex(List(2, 30, 40))
     arg0_torch = nd.utils.to_torch(arg0)
 
     res = nd.to_abs(arg0)

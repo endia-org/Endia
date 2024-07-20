@@ -4,8 +4,8 @@ from python import Python
 
 def run_test_div(msg: String = "div"):
     torch = Python.import_module("torch")
-    arg0 = nd.randn(List(2, 3, 4))
-    arg1 = nd.randn(List(3, 4))
+    arg0 = nd.randn(List(2, 30, 40))
+    arg1 = nd.randn(List(30, 40))
     arg0_torch = nd.utils.to_torch(arg0)
     arg1_torch = nd.utils.to_torch(arg1)
 
@@ -20,8 +20,8 @@ def run_test_div(msg: String = "div"):
 
 def run_test_div_grad(msg: String = "div_grad"):
     torch = Python.import_module("torch")
-    arg0 = nd.randn(List(2, 3, 4), requires_grad=True)
-    arg1 = nd.randn(List(3, 4), requires_grad=True)
+    arg0 = nd.randn(List(2, 30, 40), requires_grad=True)
+    arg1 = nd.randn(List(30, 40), requires_grad=True)
     arg0_torch = nd.utils.to_torch(arg0)
     arg1_torch = nd.utils.to_torch(arg1)
 
@@ -48,8 +48,8 @@ def run_test_div_grad(msg: String = "div_grad"):
 
 def run_test_div_complex(msg: String = "div_complex"):
     torch = Python.import_module("torch")
-    arg0 = nd.randn_complex(List(2, 3, 4))
-    arg1 = nd.randn_complex(List(3, 4))
+    arg0 = nd.randn_complex(List(2, 30, 40))
+    arg1 = nd.randn_complex(List(30, 40))
     arg0_torch = nd.utils.to_torch(arg0)
     arg1_torch = nd.utils.to_torch(arg1)
 

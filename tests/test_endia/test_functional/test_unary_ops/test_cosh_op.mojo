@@ -38,7 +38,7 @@ def run_test_cosh_grad(msg: String = "cosh_grad"):
 
 def run_test_cosh_complex(msg: String = "cosh_complex"):
     torch = Python.import_module("torch")
-    arg0 = nd.randn_complex(List(2, 3, 4))
+    arg0 = nd.randn_complex(List(2, 30, 40))
     arg0_torch = nd.utils.to_torch(arg0)
 
     res = nd.cosh(arg0)

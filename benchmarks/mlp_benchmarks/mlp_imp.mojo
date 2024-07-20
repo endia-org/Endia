@@ -14,8 +14,8 @@ def benchmark_mlp_imp():
     print("\nRunning MLP benchmark in eager mode.")
 
     batch_size = 128
-    num_iters = 1000
-    every = 1000
+    num_iters = 2000
+    every = 500
 
     avg_loss = SIMD[dtype, 1](0)
     x = nd.Array(List(batch_size, 1))
@@ -70,7 +70,7 @@ def benchmark_mlp_imp():
         end_time += (end - start) / 1000000000
 
         if i % every == 0:
-            print("Iter: ", i, " Loss: ", avg_loss / every)
+            print("- Iter: ", i, " Loss: ", avg_loss / every)
             avg_loss = 0
 
             fwd_time /= every
@@ -79,7 +79,7 @@ def benchmark_mlp_imp():
             end_time /= every
 
             print(
-                "Total:",
+                "  Total:",
                 end_time,
                 "Fwd: ",
                 fwd_time,

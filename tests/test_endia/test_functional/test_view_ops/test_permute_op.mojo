@@ -4,7 +4,7 @@ from python import Python
 
 def run_test_permute(msg: String = "permute"):
     torch = Python.import_module("torch")
-    arr = nd.randn(List(2, 3, 4))
+    arr = nd.randn(List(2, 30, 40))
     arr_torch = nd.utils.to_torch(arr)
 
     res = nd.permute(arr, List(2, 0, 1))
@@ -18,7 +18,7 @@ def run_test_permute(msg: String = "permute"):
 
 def run_test_permute_grad(msg: String = "permute_grad"):
     torch = Python.import_module("torch")
-    arr = nd.randn(List(2, 3, 4), requires_grad=True)
+    arr = nd.randn(List(2, 30, 40), requires_grad=True)
     arr_torch = nd.utils.to_torch(arr)
 
     res = nd.sum((nd.permute(arr, List(2, 0, 1))))

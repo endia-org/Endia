@@ -38,7 +38,7 @@ def run_test_cos_grad(msg: String = "cos_grad"):
 
 def run_test_cos_complex(msg: String = "cos_complex"):
     torch = Python.import_module("torch")
-    arg0 = nd.randn_complex(List(2, 3, 4))
+    arg0 = nd.randn_complex(List(2, 30, 40))
     arg0_torch = nd.utils.to_torch(arg0)
 
     res = nd.cos(arg0)

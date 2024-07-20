@@ -38,7 +38,7 @@ def run_test_tan_grad(msg: String = "tan_grad"):
 
 def run_test_tan_complex(msg: String = "tan_complex"):
     torch = Python.import_module("torch")
-    arg0 = nd.randn_complex(List(2, 3, 4))
+    arg0 = nd.randn_complex(List(2, 30, 40))
     arg0_torch = nd.utils.to_torch(arg0)
 
     res = nd.tan(arg0)

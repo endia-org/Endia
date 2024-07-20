@@ -56,7 +56,7 @@ fn test_conv(ndim: Int) raises:
         # print()
     # elif ndim == 2:
     #     input_shape = List[Int](in_channels, 32, 32)
-    #     kernel_size = List[Int](3, 3)
+    #     kernel_size = List[Int](30, 3)
     #     stride = List[Int](1, 1)
     #     padding = List[Int](1, 1)
     #     dilation = List[Int](1, 1)
@@ -69,7 +69,7 @@ fn test_conv(ndim: Int) raises:
     #     print("out:", res)
     # else:  # 3D
     #     input_shape = List[Int](in_channels, 16, 16, 16)
-    #     kernel_size = List[Int](4, 4, 4)
+    #     kernel_size = List[Int](40, 40, 40)
     #     stride = List[Int](2,2,1)
     #     padding = List[Int](1, 1, 1)
     #     dilation = List[Int](1, 1, 1)

@@ -38,7 +38,7 @@ def run_test_sqrt_grad(msg: String = "sqrt_grad"):
 
 def run_test_sqrt_complex(msg: String = "sqrt_complex"):
     torch = Python.import_module("torch")
-    arg0 = nd.randn_complex(List(2, 3, 4))
+    arg0 = nd.randn_complex(List(2, 30, 40))
     arg0_torch = nd.utils.to_torch(arg0)
 
     res = nd.sqrt(arg0)

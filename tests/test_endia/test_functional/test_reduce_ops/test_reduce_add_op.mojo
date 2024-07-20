@@ -4,7 +4,7 @@ from python import Python
 
 def run_test_reduce_add(msg: String = "reduce_add"):
     torch = Python.import_module("torch")
-    arr = nd.randn(List(2, 3, 4))
+    arr = nd.randn(List(2, 30, 40))
     arr_torch = nd.utils.to_torch(arr)
 
     axis = List(1)
@@ -21,7 +21,7 @@ def run_test_reduce_add(msg: String = "reduce_add"):
 
 def run_test_reduce_add_grad(msg: String = "reduce_add_grad"):
     torch = Python.import_module("torch")
-    arr = nd.randn(List(2, 3, 4), requires_grad=True)
+    arr = nd.randn(List(2, 30, 40), requires_grad=True)
     arr_torch = nd.utils.to_torch(arr)
 
     axis = List(1)

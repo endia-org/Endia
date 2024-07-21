@@ -394,3 +394,23 @@ fn broadcast_shapes(inout curr: ArrayShape, args: List[ArrayShape]) raises:
                 raise "Error: Incompatible shapes for broadcasting"
 
     curr.setup(shape)
+
+
+fn clone_shape_during_runtime(inout curr: ArrayShape, args: List[ArrayShape]) raises:
+    """ 
+    This functions sets upt the curr array_shape to be the same as the arg array_shape.
+    """
+    var arg = args[0]
+    curr.setup(arg.shape(), arg.stride(), arg.storage_offset())
+
+fn clone_shape(arg0: ArrayShape) raises -> ArrayShape:
+    """
+    Clones the shape of an ArrayShape during runtime.
+
+    Args:
+        arg0: The ArrayShape to clone.
+
+    Returns:
+        The cloned ArrayShape.
+    """
+    return setup_array_shape(List(arg0), "clone_shape", clone_shape_during_runtime)

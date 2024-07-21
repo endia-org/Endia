@@ -1,6 +1,6 @@
-from endia.utils import op_array, setup_shape_and_data
+from endia.utils import op_array, setup_shape_and_data, clone_shape
 from endia import Array
-
+    
 
 def custom_mul_callable(inout curr: Array, args: List[Array]) -> None:
     """This operation defines what should happen when the operation is called.
@@ -34,7 +34,7 @@ def custom_mul(arg0: Array, arg1: Array) -> Array:
 
     # register the resulting array, its shape, its operation name, and its parents
     return op_array(
-        array_shape=arg0.array_shape(),
+        array_shape=clone_shape(arg0.array_shape()),
         args=List(arg0, arg1),
         name="mul",
         callable=custom_mul_callable,

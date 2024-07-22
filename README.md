@@ -1,10 +1,10 @@
 <div align="center">
-  <img src="./assets/titleimage3.png" alt="Title Image" />
+  <img src="./assets/titleimage.png" alt="Title Image" />
 </div>
 
 ###
 
-**Endia** is a dynamic Array library for Accelerated Scientific Computing. It offers:
+**Endia** is a dynamic Array library for Scientific Computing, similar to PyTorch, Numpy and JAX. It offers:
 
 - **Automatic differentiation**: Compute derivatives of arbitrary order.
 - **Complex number support:** Use Endia for advanced scientific applications.
@@ -23,14 +23,25 @@
 
 ## Installation
 
-1. **Install [Mojo and MAX](https://docs.modular.com/max/install)** 🔥 (v24.4.0)
+1. **Install [Mojo and MAX](https://docs.modular.com/max/install)** 🔥 (v24.4)
 
-2. **Clone the repository**:
+2. **Clone the repository**: Choose one of the following options to clone the repository:
 
-    ```bash
-    git clone https://github.com/endia-org/Endia.git
-    cd Endia
-    ```
+    - **Stable Version (main-branch):** This is the most stable version of the project.
+
+      ```bash
+      git clone https://github.com/endia-org/Endia.git
+      cd Endia
+      git checkout main
+      ```
+
+    - **Development Version (nightly-branch):** This version contains the latest features and updates.
+
+      ```bash
+      git clone https://github.com/endia-org/Endia.git
+      cd Endia
+      git checkout nightly
+      ```
 
 3. **Set Up Environment**:
 

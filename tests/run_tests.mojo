@@ -110,6 +110,14 @@ def run_unit_tests():
     run_test_std()
     run_test_std_grad()
 
+    run_test_reduce_max()
+
+    run_test_reduce_argmax()
+
+    run_test_reduce_min()
+
+    run_test_reduce_argmin()
+
     # Unit Test: Test view ops
     run_test_expand()
     run_test_expand_grad()

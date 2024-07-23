@@ -1,6 +1,6 @@
 from endia.utils import op_array, setup_shape_and_data, clone_shape
 from endia import Array
-    
+
 
 def custom_mul_callable(inout curr: Array, args: List[Array]) -> None:
     """This operation defines what should happen when the operation is called.

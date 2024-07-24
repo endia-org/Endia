@@ -133,8 +133,6 @@ print(dy2_dx2)  # out: [2.0, 2.0, 2.0]
 - 🚀 **Mojo-Powered Clarity:** High-performance open-source code that remains readable and pythonic through and through
 - 📐 **Explainability:** Prioritize clarity and educational value over exhaustive features
 
-<!-- This project originated from a [Mechanistic Interpretability](https://www.neelnanda.io/mechanistic-interpretability/quickstart) endeavor, aiming to build a tool that would allow people to more easily explore the inner workings of AI models, giving them the power to find, tweak, and reason about internal circuits and learned features. This field of research is in its infancy, and it often requires knowledge about the entire stack of machine learning tools. People who deeply understand PyTorch and are able to conduct high-level research with it simultaneously are actually quite rare, and we need more of them! The goal of Endia is to make this knowledge more accessible and to provide a stepping stone for people to dive deeper into the field. As of now, Endia is in its early stages, and we are working on expanding its feature set and making it more robust. We are also developing a series of tutorials and educational materials to help **you** get started with Endia and to understand the underlying concepts of automatic differentiation, complex numbers, optimization, and more. -->
-
 ## Contributing
 
 Contributions to Endia are welcome! If you'd like to contribute, please follow the contribution guidelines in the [CONTRIBUTING.md](https://github.com/endia-org/Endia/blob/main/CONTRIBUTING.md) file in the repository.
@@ -144,14 +142,14 @@ Contributions to Endia are welcome! If you'd like to contribute, please follow t
 If you use Endia in your research or project, please cite it as follows:
 
 ```bibtex
-@software{Fehrenbach_Endia_-_Scientific_2024,
-author = {Fehrenbach, Tillmann},
-license = {Apache-2.0},
-month = jul,
-title = {{Endia - Scientific Computing in Mojo}},
-url = {https://github.com/endia-org/Endia},
-version = {24.4.0},
-year = {2024}
+@software{Fehrenbach_Endia_2024,
+  author = {Fehrenbach, Tillmann},
+  license = {Apache-2.0},
+  month = jul,
+  title = {{Endia}},
+  url = {https://github.com/endia-org/Endia},
+  version = {24.4.0},
+  year = {2024}
 }
 ```
 

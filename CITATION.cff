@@ -4,7 +4,7 @@ authors:
 - family-names: "Fehrenbach"
   given-names: "Tillmann"
   orcid: "https://orcid.org/0009-0001-4831-9729"
-title: "Endia - Scientific Computing in Mojo"
+title: "Endia"
 version: 24.7
 doi: 10.5281/zenodo.1234
 date-released: 2024-07-18

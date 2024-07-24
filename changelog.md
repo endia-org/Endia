@@ -8,6 +8,7 @@ Nightly: Endia 24.4.1
 
 - Adding more primitive operations to the MAX graph utils, such that we have a one-to-one mapping between the operations in the MAX graph and the operations in Endia and all operations can be JIT-ed.
 - Added a JIT mlp benchmark without MAX in mlp_jit.mojo. Renamed the file with the JIT with MAX mlp benchmark to mlp_jit_with_MAX.mojo.
+- Adding spacial operations: conv1d, conv2d, conv3d, max_pool1d, max_pool2d, max_pool3d, avg_pool1d, avg_pool2d, avg_pool3d. 
 
 ### Changed
 

@@ -137,6 +137,19 @@ def run_unit_tests():
     run_test_less_equal()
     run_test_less()
 
+    # Unit Test: Test spacial ops
+    run_test_conv1d()
+    run_test_conv2d()
+    run_test_conv3d()
+
+    run_test_max_pool1d()
+    run_test_max_pool2d()
+    run_test_max_pool3d()
+
+    run_test_avg_pool1d()
+    run_test_avg_pool2d()
+    run_test_avg_pool3d()
+
 
 def run_integration_tests():
     # integration Tests: Test random functions

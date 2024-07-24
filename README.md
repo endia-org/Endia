@@ -148,7 +148,7 @@ If you use Endia in your research or project, please cite it as follows:
   month = jul,
   title = {{Endia}},
   url = {https://github.com/endia-org/Endia},
-  version = {24.4.0},
+  version = {24.4.1},
   year = {2024}
 }
 ```

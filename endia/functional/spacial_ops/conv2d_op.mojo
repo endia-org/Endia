@@ -260,19 +260,19 @@ fn conv2d(
     Applies a 2D convolution over an input image composed of several input planes.
 
     Args:
-        arg0: Input tensor of shape (batch_size, in_channels, height, width)
-        kernel: Convolution kernel of shape (out_channels, in_channels // groups, kernel_height, kernel_width)
-        bias: Bias tensor of shape (out_channels)
-        in_channels: Number of channels in the input image
-        out_channels: Number of channels produced by the convolution
-        kernel_size: Size of the convolving kernel
-        stride: Stride of the convolution
-        padding: Zero-padding added to both sides of the input
-        dilation: Spacing between kernel elements
-        groups: Number of blocked connections from input channels to output channels
+        arg0: Input tensor of shape (batch_size, in_channels, height, width).
+        kernel: Convolution kernel of shape (out_channels, in_channels // groups, kernel_height, kernel_width).
+        bias: Bias tensor of shape (out_channels).
+        in_channels: Number of channels in the input image.
+        out_channels: Number of channels produced by the convolution.
+        kernel_size: Size of the convolving kernel.
+        stride: Stride of the convolution.
+        padding: Zero-padding added to both sides of the input.
+        dilation: Spacing between kernel elements.
+        groups: Number of blocked connections from input channels to output channels.
 
     Returns:
-        Output tensor of shape (batch_size, out_channels, output_height, output_width)
+        Output tensor of shape (batch_size, out_channels, output_height, output_width).
     """
     return Conv2d.fwd(
         arg0,

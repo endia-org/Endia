@@ -211,19 +211,19 @@ fn conv1d(
     Applies a 1D convolution over an input signal composed of several input planes.
 
     Args:
-        arg0: Input tensor of shape (batch_size, in_channels, length)
-        kernel: Convolution kernel of shape (out_channels, in_channels // groups, kernel_size)
-        bias: Bias tensor of shape (out_channels)
-        in_channels: Number of channels in the input image
-        out_channels: Number of channels produced by the convolution
-        kernel_size: Size of the convolving kernel
-        stride: Stride of the convolution
-        padding: Zero-padding added to both sides of the input
-        dilation: Spacing between kernel elements
-        groups: Number of blocked connections from input channels to output channels
+        arg0: Input tensor of shape (batch_size, in_channels, length).
+        kernel: Convolution kernel of shape (out_channels, in_channels // groups, kernel_size).
+        bias: Bias tensor of shape (out_channels).
+        in_channels: Number of channels in the input image.
+        out_channels: Number of channels produced by the convolution.
+        kernel_size: Size of the convolving kernel.
+        stride: Stride of the convolution.
+        padding: Zero-padding added to both sides of the input.
+        dilation: Spacing between kernel elements.
+        groups: Number of blocked connections from input channels to output channels.
 
     Returns:
-        Output tensor of shape (batch_size, out_channels, output_length)
+        Output tensor of shape (batch_size, out_channels, output_length).
     """
     return Conv1d.fwd(
         arg0,

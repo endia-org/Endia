@@ -225,6 +225,7 @@ fn reduce_argmax(
     Args:
         arg0: The input array.
         axis: The axis along which to reduce the array.
+        keepdims: If True, retains the reduced dimensions with length 1.
 
     Returns:
         An array containing the sum of the input array along the specified axis.

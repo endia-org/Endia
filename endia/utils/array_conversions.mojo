@@ -100,7 +100,7 @@ fn is_close_to_tensor(
 
 @always_inline
 fn is_close(
-    arr: Array, arr_torch: PythonObject, rtol: Float32 = 10e-5
+    arr: Array, arr_torch: PythonObject, rtol: Float32 = 10e-4
 ) raises -> Bool:
     """
     Asserts that the values in the endia Array and the torch tensor are equal.

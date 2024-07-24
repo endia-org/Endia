@@ -183,6 +183,9 @@ struct ReduceArgMin(DifferentiableReduceOp):
         - Automatic differentiation (forward and reverse modes).
         - Complex valued arguments.
         """
+        if arg0.is_complex():
+            raise "Warning in reduce_argmin:  The reduce_argmin operation does not support complex numbers."
+
         var arr_shape = setup_array_shape(
             List(arg0.array_shape(), list_to_array_shape(axis)),
             "reduce_arg_min",

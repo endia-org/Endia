@@ -8,6 +8,7 @@ from endia.functional._utils import (
 )
 from endia.functional._utils import setup_array_shape, contiguous, op_array
 
+
 struct AvgPool3d:
     """
     Namespace for 3D average pooling operations.
@@ -45,13 +46,34 @@ struct AvgPool3d:
         new_shape.append(batch_size)
         new_shape.append(channels)
         new_shape.append(
-            (input_shape[2] + 2 * padding_depth - dilation_depth * (kernel_depth - 1) - 1) // stride_depth + 1
+            (
+                input_shape[2]
+                + 2 * padding_depth
+                - dilation_depth * (kernel_depth - 1)
+                - 1
+            )
+            // stride_depth
+            + 1
         )
         new_shape.append(
-            (input_shape[3] + 2 * padding_height - dilation_height * (kernel_height - 1) - 1) // stride_height + 1
+            (
+                input_shape[3]
+                + 2 * padding_height
+                - dilation_height * (kernel_height - 1)
+                - 1
+            )
+            // stride_height
+            + 1
         )
         new_shape.append(
-            (input_shape[4] + 2 * padding_width - dilation_width * (kernel_width - 1) - 1) // stride_width + 1
+            (
+                input_shape[4]
+                + 2 * padding_width
+                - dilation_width * (kernel_width - 1)
+                - 1
+            )
+            // stride_width
+            + 1
         )
         curr.setup(new_shape)
 
@@ -95,7 +117,7 @@ struct AvgPool3d:
                             var start_x = out_x * stride_width - padding_width
                             var sum_val = SIMD[dtype, 1](0)
                             var count = 0
-                            
+
                             for kz in range(kernel_depth):
                                 var z = start_z + kz * dilation_depth
                                 if z >= 0 and z < input_shape[2]:
@@ -104,13 +126,40 @@ struct AvgPool3d:
                                         if y >= 0 and y < input_shape[3]:
                                             for kx in range(kernel_width):
                                                 var x = start_x + kx * dilation_width
-                                                if x >= 0 and x < input_shape[4]:
-                                                    var idx = batch * input_stride[0] + channel * input_stride[1] + z * input_stride[2] + y * input_stride[3] + x * input_stride[4]
-                                                    sum_val += input_data.load(idx)
+                                                if (
+                                                    x >= 0
+                                                    and x < input_shape[4]
+                                                ):
+                                                    var idx = batch * input_stride[
+                                                        0
+                                                    ] + channel * input_stride[
+                                                        1
+                                                    ] + z * input_stride[
+                                                        2
+                                                    ] + y * input_stride[
+                                                        3
+                                                    ] + x * input_stride[
+                                                        4
+                                                    ]
+                                                    sum_val += input_data.load(
+                                                        idx
+                                                    )
                                                     count += 1
 
-                            var out_idx = batch * out_stride[0] + channel * out_stride[1] + out_z * out_stride[2] + out_y * out_stride[3] + out_x * out_stride[4]
-                            out_data.store(out_idx, sum_val / count if count > 0 else SIMD[dtype, 1](0))
+                            var out_idx = batch * out_stride[
+                                0
+                            ] + channel * out_stride[1] + out_z * out_stride[
+                                2
+                            ] + out_y * out_stride[
+                                3
+                            ] + out_x * out_stride[
+                                4
+                            ]
+                            out_data.store(
+                                out_idx,
+                                sum_val / count if count
+                                > 0 else SIMD[dtype, 1](0),
+                            )
 
     @staticmethod
     fn vjp(primals: List[Array], grad: Array, out: Array) raises -> List[Array]:
@@ -154,7 +203,17 @@ struct AvgPool3d:
 
         var args = List(arg0)
 
-        return op_array(arr_shape, args, NA, "avg_pool3d", AvgPool3d.__call__, AvgPool3d.jvp, AvgPool3d.vjp, False)
+        return op_array(
+            arr_shape,
+            args,
+            NA,
+            "avg_pool3d",
+            AvgPool3d.__call__,
+            AvgPool3d.jvp,
+            AvgPool3d.vjp,
+            False,
+        )
+
 
 fn avg_pool3d(
     arg0: Array,

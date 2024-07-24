@@ -1,4 +1,4 @@
-# from endia import Array 
+# from endia import Array
 
 
 # trait DifferentiableSpacialOp:

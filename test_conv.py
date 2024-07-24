@@ -3,7 +3,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-
 def test_conv1d():
     # Create input tensor: batch size 2, 3 channels, 5 elements each
     batch_size = 2
@@ -17,12 +16,22 @@ def test_conv1d():
     groups = 1
     num_elements = batch_size * in_channels * elements
 
-    input = torch.arange(0, num_elements, dtype=torch.float32).reshape(batch_size, in_channels, elements)
+    input = torch.arange(0, num_elements, dtype=torch.float32).reshape(
+        batch_size, in_channels, elements
+    )
     # print("Input shape:", input.shape)
     # print("Input:\n", input)
 
     # Define the convolution layer
-    conv1d = nn.Conv1d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=stride, padding=padding, dilation=dilation, groups=groups)
+    conv1d = nn.Conv1d(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=kernel_size,
+        stride=stride,
+        padding=padding,
+        dilation=dilation,
+        groups=groups,
+    )
 
     # Set kernel to ones and bias to zero
     with torch.no_grad():
@@ -38,9 +47,6 @@ def test_conv1d():
 
     print("\nOutput shape:", output.shape)
     print("Output:\n", output)
-
-
-
 
 
 def test_conv2d():
@@ -60,12 +66,22 @@ def test_conv2d():
     groups = 1
     num_elements = batch_size * in_channels * elements * elements
 
-    input = torch.arange(0, num_elements, dtype=torch.float32).reshape(batch_size, in_channels, elements, elements)
+    input = torch.arange(0, num_elements, dtype=torch.float32).reshape(
+        batch_size, in_channels, elements, elements
+    )
     # print("Input shape:", input.shape)
     # print("Input:\n", input)
 
     # Define the convolution layer
-    conv2d = nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=(kernel_height, kernel_width), stride=(stride_height, stride_width), padding=(padding_height, padding_width), dilation=(dilation_height, dilation_width), groups=groups)
+    conv2d = nn.Conv2d(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=(kernel_height, kernel_width),
+        stride=(stride_height, stride_width),
+        padding=(padding_height, padding_width),
+        dilation=(dilation_height, dilation_width),
+        groups=groups,
+    )
 
     # Set kernel to ones and bias to zero
     with torch.no_grad():
@@ -106,12 +122,22 @@ def test_conv3d():
     groups = 1
 
     # Create input tensor
-    input_tensor = torch.arange(batch_size * in_channels * depth * height * width, dtype=torch.float32).reshape(batch_size, in_channels, depth, height, width)
+    input_tensor = torch.arange(
+        batch_size * in_channels * depth * height * width, dtype=torch.float32
+    ).reshape(batch_size, in_channels, depth, height, width)
     # print("Input shape:", input_tensor.shape)
     # print("Input:\n", input_tensor)
 
     # Define the convolution layer
-    conv3d = nn.Conv3d(in_channels=in_channels, out_channels=out_channels, kernel_size=(kernel_depth, kernel_height, kernel_width), stride=(stride_depth, stride_height, stride_width), padding=(padding_depth, padding_height, padding_width), dilation=(dilation_depth, dilation_height, dilation_width), groups=groups)
+    conv3d = nn.Conv3d(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=(kernel_depth, kernel_height, kernel_width),
+        stride=(stride_depth, stride_height, stride_width),
+        padding=(padding_depth, padding_height, padding_width),
+        dilation=(dilation_depth, dilation_height, dilation_width),
+        groups=groups,
+    )
 
     # Set kernel to ones and bias to zero
     with torch.no_grad():
@@ -129,7 +155,6 @@ def test_conv3d():
     print("Output:\n", output)
 
 
-
 def test_pool1d_pytorch():
     # Parameters for the pooling operation
     kernel_size = 3
@@ -141,7 +166,12 @@ def test_pool1d_pytorch():
     input_tensor = torch.arange(0, 40, dtype=torch.float32).reshape(2, 2, 10)
 
     # Define the 1D pooling layer
-    pool1d = nn.MaxPool1d(kernel_size=kernel_size, stride=stride, padding=padding, dilation=dilation)
+    pool1d = nn.MaxPool1d(
+        kernel_size=kernel_size,
+        stride=stride,
+        padding=padding,
+        dilation=dilation,
+    )
 
     # Apply the pooling operation
     output = pool1d(input_tensor)
@@ -158,16 +188,24 @@ def test_max_pool2d_pytorch():
     dilation = (1, 1)
 
     # Create an input tensor: batch size 2, channels 2, height 10, width 10
-    input_tensor = torch.arange(0, 400, dtype=torch.float32).reshape(2, 2, 10, 10)
+    input_tensor = torch.arange(0, 400, dtype=torch.float32).reshape(
+        2, 2, 10, 10
+    )
 
     # Define the 2D pooling layer
-    pool2d = nn.MaxPool2d(kernel_size=kernel_size, stride=stride, padding=padding, dilation=dilation)
+    pool2d = nn.MaxPool2d(
+        kernel_size=kernel_size,
+        stride=stride,
+        padding=padding,
+        dilation=dilation,
+    )
 
     # Apply the pooling operation
     output = pool2d(input_tensor)
 
     # Print the output
     print("Output:\n", output)
+
 
 def test_max_pool3d_pytorch():
     # Parameters for the pooling operation
@@ -177,10 +215,17 @@ def test_max_pool3d_pytorch():
     dilation = (1, 1, 1)
 
     # Create an input tensor: batch size 2, channels 2, depth 10, height 10, width 10
-    input_tensor = torch.arange(0, 4000, dtype=torch.float32).reshape(2, 2, 10, 10, 10)
+    input_tensor = torch.arange(0, 4000, dtype=torch.float32).reshape(
+        2, 2, 10, 10, 10
+    )
 
     # Define the 3D pooling layer
-    pool3d = nn.MaxPool3d(kernel_size=kernel_size, stride=stride, padding=padding, dilation=dilation)
+    pool3d = nn.MaxPool3d(
+        kernel_size=kernel_size,
+        stride=stride,
+        padding=padding,
+        dilation=dilation,
+    )
 
     # Apply the pooling operation
     output = pool3d(input_tensor)
@@ -199,13 +244,16 @@ def test_avg_pool1d_pytorch():
     input_tensor = torch.arange(0, 40, dtype=torch.float32).reshape(2, 2, 10)
 
     # Define the 1D average pooling layer
-    pool1d = nn.AvgPool1d(kernel_size=kernel_size, stride=stride, padding=padding)
+    pool1d = nn.AvgPool1d(
+        kernel_size=kernel_size, stride=stride, padding=padding
+    )
 
     # Apply the pooling operation
     output = pool1d(input_tensor)
 
     # Print the output
     print("Avg Pool 1D Output:\n", output)
+
 
 def test_avg_pool2d_pytorch():
     # Parameters for the pooling operation
@@ -214,16 +262,21 @@ def test_avg_pool2d_pytorch():
     padding = (1, 1)
 
     # Create an input tensor: batch size 2, channels 2, height 10, width 10
-    input_tensor = torch.arange(0, 400, dtype=torch.float32).reshape(2, 2, 10, 10)
+    input_tensor = torch.arange(0, 400, dtype=torch.float32).reshape(
+        2, 2, 10, 10
+    )
 
     # Define the 2D average pooling layer
-    pool2d = nn.AvgPool2d(kernel_size=kernel_size, stride=stride, padding=padding)
+    pool2d = nn.AvgPool2d(
+        kernel_size=kernel_size, stride=stride, padding=padding
+    )
 
     # Apply the pooling operation
     output = pool2d(input_tensor)
 
     # Print the output
     print("Avg Pool 2D Output:\n", output)
+
 
 def test_avg_pool3d_pytorch():
     # Parameters for the pooling operation
@@ -232,16 +285,21 @@ def test_avg_pool3d_pytorch():
     padding = (1, 1, 1)
 
     # Create an input tensor: batch size 2, channels 2, depth 10, height 10, width 10
-    input_tensor = torch.arange(0, 4000, dtype=torch.float32).reshape(2, 2, 10, 10, 10)
+    input_tensor = torch.arange(0, 4000, dtype=torch.float32).reshape(
+        2, 2, 10, 10, 10
+    )
 
     # Define the 3D average pooling layer
-    pool3d = nn.AvgPool3d(kernel_size=kernel_size, stride=stride, padding=padding)
+    pool3d = nn.AvgPool3d(
+        kernel_size=kernel_size, stride=stride, padding=padding
+    )
 
     # Apply the pooling operation
     output = pool3d(input_tensor)
 
     # Print the output
     print("Avg Pool 3D Output:\n", output)
+
 
 if __name__ == "__main__":
     test_conv1d()
@@ -256,6 +314,3 @@ if __name__ == "__main__":
     test_avg_pool1d_pytorch()
     test_avg_pool2d_pytorch()
     test_avg_pool3d_pytorch()
-
-
-

@@ -42,10 +42,24 @@ struct AvgPool2d:
         new_shape.append(batch_size)
         new_shape.append(channels)
         new_shape.append(
-            (input_shape[2] + 2 * padding_height - dilation_height * (kernel_height - 1) - 1) // stride_height + 1
+            (
+                input_shape[2]
+                + 2 * padding_height
+                - dilation_height * (kernel_height - 1)
+                - 1
+            )
+            // stride_height
+            + 1
         )
         new_shape.append(
-            (input_shape[3] + 2 * padding_width - dilation_width * (kernel_width - 1) - 1) // stride_width + 1
+            (
+                input_shape[3]
+                + 2 * padding_width
+                - dilation_width * (kernel_width - 1)
+                - 1
+            )
+            // stride_width
+            + 1
         )
         curr.setup(new_shape)
 
@@ -83,19 +97,36 @@ struct AvgPool2d:
                         var start_x = out_x * stride_width - padding_width
                         var sum_val = SIMD[dtype, 1](0)
                         var count = 0
-                        
+
                         for ky in range(kernel_height):
                             var y = start_y + ky * dilation_height
                             if y >= 0 and y < input_shape[2]:
                                 for kx in range(kernel_width):
                                     var x = start_x + kx * dilation_width
                                     if x >= 0 and x < input_shape[3]:
-                                        var idx = batch * input_stride[0] + channel * input_stride[1] + y * input_stride[2] + x * input_stride[3]
+                                        var idx = batch * input_stride[
+                                            0
+                                        ] + channel * input_stride[
+                                            1
+                                        ] + y * input_stride[
+                                            2
+                                        ] + x * input_stride[
+                                            3
+                                        ]
                                         sum_val += input_data.load(idx)
                                         count += 1
 
-                        var out_idx = batch * out_stride[0] + channel * out_stride[1] + out_y * out_stride[2] + out_x * out_stride[3]
-                        out_data.store(out_idx, sum_val / count if count > 0 else SIMD[dtype, 1](0))
+                        var out_idx = batch * out_stride[
+                            0
+                        ] + channel * out_stride[1] + out_y * out_stride[
+                            2
+                        ] + out_x * out_stride[
+                            3
+                        ]
+                        out_data.store(
+                            out_idx,
+                            sum_val / count if count > 0 else SIMD[dtype, 1](0),
+                        )
 
     @staticmethod
     fn vjp(primals: List[Array], grad: Array, out: Array) raises -> List[Array]:
@@ -135,7 +166,17 @@ struct AvgPool2d:
 
         var args = List(arg0)
 
-        return op_array(arr_shape, args, NA, "avg_pool2d", AvgPool2d.__call__, AvgPool2d.jvp, AvgPool2d.vjp, False)
+        return op_array(
+            arr_shape,
+            args,
+            NA,
+            "avg_pool2d",
+            AvgPool2d.__call__,
+            AvgPool2d.jvp,
+            AvgPool2d.vjp,
+            False,
+        )
+
 
 fn avg_pool2d(
     arg0: Array,

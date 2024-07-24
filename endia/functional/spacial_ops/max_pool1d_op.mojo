@@ -73,7 +73,7 @@ from utils.numerics import min_or_neg_inf, max_or_inf
 #                 for out_index in range(out_shape[2]):
 #                     var start = out_index * stride - padding
 #                     var max_val = SIMD[dtype, 1](min_or_neg_inf[dtype]())
-                    
+
 #                     for k in range(kernel_size):
 #                         var i = start + k * dilation
 #                         if i >= 0 and i < input_shape[2]:
@@ -108,9 +108,7 @@ from utils.numerics import min_or_neg_inf, max_or_inf
 #     return op_array(arr_shape, args, NA, "max_pool1d", fwd, default_jvp, vjp, False)
 
 
-
 struct MaxPool1d:
-
     @staticmethod
     fn compute_shape(inout curr: ArrayShape, args: List[ArrayShape]) raises:
         """
@@ -139,7 +137,9 @@ struct MaxPool1d:
         new_shape.append(batch_size)
         new_shape.append(channels)
         new_shape.append(
-            (input_shape[2] + 2 * padding - dilation * (kernel_size - 1) - 1) // stride + 1
+            (input_shape[2] + 2 * padding - dilation * (kernel_size - 1) - 1)
+            // stride
+            + 1
         )
         curr.setup(new_shape)
 
@@ -170,15 +170,19 @@ struct MaxPool1d:
                 for out_index in range(out_shape[2]):
                     var start = out_index * stride - padding
                     var max_val = SIMD[dtype, 1](min_or_neg_inf[dtype]())
-                    
+
                     for k in range(kernel_size):
                         var i = start + k * dilation
                         if i >= 0 and i < input_shape[2]:
-                            var idx = batch * input_stride[0] + channel * input_stride[1] + i * input_stride[2]
+                            var idx = batch * input_stride[
+                                0
+                            ] + channel * input_stride[1] + i * input_stride[2]
                             var val = input_data.load(idx)
                             max_val = max(max_val, val)
 
-                    var out_idx = batch * out_stride[0] + channel * out_stride[1] + out_index * out_stride[2]
+                    var out_idx = batch * out_stride[0] + channel * out_stride[
+                        1
+                    ] + out_index * out_stride[2]
                     out_data.store(out_idx, max_val)
 
     @staticmethod
@@ -215,7 +219,16 @@ struct MaxPool1d:
 
         var args = List(arg0)
 
-        return op_array(arr_shape, args, NA, "max_pool1d", MaxPool1d.__call__, MaxPool1d.jvp, MaxPool1d.vjp, False)
+        return op_array(
+            arr_shape,
+            args,
+            NA,
+            "max_pool1d",
+            MaxPool1d.__call__,
+            MaxPool1d.jvp,
+            MaxPool1d.vjp,
+            False,
+        )
 
 
 fn max_pool1d(

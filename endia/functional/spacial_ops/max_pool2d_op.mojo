@@ -9,6 +9,7 @@ from endia.functional._utils import (
 from endia.functional._utils import setup_array_shape, contiguous, op_array
 from utils.numerics import min_or_neg_inf, max_or_inf
 
+
 struct MaxPool2d:
     """
     Namespace for 2D max pooling operations.
@@ -46,10 +47,24 @@ struct MaxPool2d:
         new_shape.append(batch_size)
         new_shape.append(channels)
         new_shape.append(
-            (input_shape[2] + 2 * padding_height - dilation_height * (kernel_height - 1) - 1) // stride_height + 1
+            (
+                input_shape[2]
+                + 2 * padding_height
+                - dilation_height * (kernel_height - 1)
+                - 1
+            )
+            // stride_height
+            + 1
         )
         new_shape.append(
-            (input_shape[3] + 2 * padding_width - dilation_width * (kernel_width - 1) - 1) // stride_width + 1
+            (
+                input_shape[3]
+                + 2 * padding_width
+                - dilation_width * (kernel_width - 1)
+                - 1
+            )
+            // stride_width
+            + 1
         )
         curr.setup(new_shape)
 
@@ -86,18 +101,32 @@ struct MaxPool2d:
                         var start_y = out_y * stride_height - padding_height
                         var start_x = out_x * stride_width - padding_width
                         var max_val = SIMD[dtype, 1](min_or_neg_inf[dtype]())
-                        
+
                         for ky in range(kernel_height):
                             var y = start_y + ky * dilation_height
                             if y >= 0 and y < input_shape[2]:
                                 for kx in range(kernel_width):
                                     var x = start_x + kx * dilation_width
                                     if x >= 0 and x < input_shape[3]:
-                                        var idx = batch * input_stride[0] + channel * input_stride[1] + y * input_stride[2] + x * input_stride[3]
+                                        var idx = batch * input_stride[
+                                            0
+                                        ] + channel * input_stride[
+                                            1
+                                        ] + y * input_stride[
+                                            2
+                                        ] + x * input_stride[
+                                            3
+                                        ]
                                         var val = input_data.load(idx)
                                         max_val = max(max_val, val)
 
-                        var out_idx = batch * out_stride[0] + channel * out_stride[1] + out_y * out_stride[2] + out_x * out_stride[3]
+                        var out_idx = batch * out_stride[
+                            0
+                        ] + channel * out_stride[1] + out_y * out_stride[
+                            2
+                        ] + out_x * out_stride[
+                            3
+                        ]
                         out_data.store(out_idx, max_val)
 
     @staticmethod
@@ -116,7 +145,6 @@ struct MaxPool2d:
         padding: Tuple[Int, Int] = (0, 0),
         dilation: Tuple[Int, Int] = (1, 1),
     ) raises -> Array:
-
         var arr_shape = setup_array_shape(
             List(
                 arg0.array_shape(),
@@ -134,12 +162,22 @@ struct MaxPool2d:
                 ),
             ),
             "max_pool2d_shape",
-            MaxPool2d.compute_shape            
+            MaxPool2d.compute_shape,
         )
 
         var args = List(arg0)
 
-        return op_array(arr_shape, args, NA, "max_pool2d", MaxPool2d.__call__, MaxPool2d.jvp, MaxPool2d.vjp, False)
+        return op_array(
+            arr_shape,
+            args,
+            NA,
+            "max_pool2d",
+            MaxPool2d.__call__,
+            MaxPool2d.jvp,
+            MaxPool2d.vjp,
+            False,
+        )
+
 
 fn max_pool2d(
     arg0: Array,
@@ -162,4 +200,3 @@ fn max_pool2d(
         The output tensor.
     """
     return MaxPool2d.fwd(arg0, kernel_size, stride, padding, dilation)
-

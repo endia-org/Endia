@@ -8,6 +8,7 @@ from endia.functional._utils import (
 )
 from endia.functional._utils import setup_array_shape, contiguous, op_array
 
+
 struct Conv3d:
     """
     Namespace for 3D convolution operations.
@@ -51,13 +52,34 @@ struct Conv3d:
         new_shape.append(batch_size)
         new_shape.append(out_channels)
         new_shape.append(
-            (input_shape[2] + 2 * padding_depth - dilation_depth * (kernel_depth - 1) - 1) // stride_depth + 1
+            (
+                input_shape[2]
+                + 2 * padding_depth
+                - dilation_depth * (kernel_depth - 1)
+                - 1
+            )
+            // stride_depth
+            + 1
         )
         new_shape.append(
-            (input_shape[3] + 2 * padding_height - dilation_height * (kernel_height - 1) - 1) // stride_height + 1
+            (
+                input_shape[3]
+                + 2 * padding_height
+                - dilation_height * (kernel_height - 1)
+                - 1
+            )
+            // stride_height
+            + 1
         )
         new_shape.append(
-            (input_shape[4] + 2 * padding_width - dilation_width * (kernel_width - 1) - 1) // stride_width + 1
+            (
+                input_shape[4]
+                + 2 * padding_width
+                - dilation_width * (kernel_width - 1)
+                - 1
+            )
+            // stride_width
+            + 1
         )
         curr.setup(new_shape)
 
@@ -126,30 +148,79 @@ struct Conv3d:
                                 var group_kernel_offset = group * in_channels_per_group
 
                                 for in_channel in range(in_channels_per_group):
-                                    var base_input_idx_channel = base_input_idx_batch + (group_input_offset + in_channel) * input_stride[1]
-                                    var base_kernel_idx_channel = base_kernel_idx_out_channel + (group_kernel_offset + in_channel) * kernel_stride[1]
+                                    var base_input_idx_channel = base_input_idx_batch + (
+                                        group_input_offset + in_channel
+                                    ) * input_stride[
+                                        1
+                                    ]
+                                    var base_kernel_idx_channel = base_kernel_idx_out_channel + (
+                                        group_kernel_offset + in_channel
+                                    ) * kernel_stride[
+                                        1
+                                    ]
 
                                     for kz in range(kernel_depth):
                                         var input_z_index = output_z_index + kz * dilation_depth
 
-                                        if input_z_index >= 0 and input_z_index < input_shape[2]:
+                                        if (
+                                            input_z_index >= 0
+                                            and input_z_index < input_shape[2]
+                                        ):
                                             for ky in range(kernel_height):
                                                 var input_y_index = output_y_index + ky * dilation_height
 
-                                                if input_y_index >= 0 and input_y_index < input_shape[3]:
-                                                    for kx in range(kernel_width):
+                                                if (
+                                                    input_y_index >= 0
+                                                    and input_y_index
+                                                    < input_shape[3]
+                                                ):
+                                                    for kx in range(
+                                                        kernel_width
+                                                    ):
                                                         var input_x_index = output_x_index + kx * dilation_width
 
-                                                        if input_x_index >= 0 and input_x_index < input_shape[4]:
-                                                            var final_input_idx = base_input_idx_channel + input_z_index * input_stride[2] + input_y_index * input_stride[3] + input_x_index * input_stride[4]
-                                                            var final_kernel_idx = base_kernel_idx_channel + kz * kernel_stride[2] + ky * kernel_stride[3] + kx * kernel_stride[4]
-                                                            value += input_data.load(final_input_idx) * kernel_data.load(final_kernel_idx)
+                                                        if (
+                                                            input_x_index >= 0
+                                                            and input_x_index
+                                                            < input_shape[4]
+                                                        ):
+                                                            var final_input_idx = base_input_idx_channel + input_z_index * input_stride[
+                                                                2
+                                                            ] + input_y_index * input_stride[
+                                                                3
+                                                            ] + input_x_index * input_stride[
+                                                                4
+                                                            ]
+                                                            var final_kernel_idx = base_kernel_idx_channel + kz * kernel_stride[
+                                                                2
+                                                            ] + ky * kernel_stride[
+                                                                3
+                                                            ] + kx * kernel_stride[
+                                                                4
+                                                            ]
+                                                            value += input_data.load(
+                                                                final_input_idx
+                                                            ) * kernel_data.load(
+                                                                final_kernel_idx
+                                                            )
 
-                            var out_idx = batch * out_stride[0] + out_channel * out_stride[1] + out_z * out_stride[2] + out_y * out_stride[3] + out_x * out_stride[4]
-                            out_data.store(out_idx, value + bias_data.load(out_channel))
+                            var out_idx = batch * out_stride[
+                                0
+                            ] + out_channel * out_stride[
+                                1
+                            ] + out_z * out_stride[
+                                2
+                            ] + out_y * out_stride[
+                                3
+                            ] + out_x * out_stride[
+                                4
+                            ]
+                            out_data.store(
+                                out_idx, value + bias_data.load(out_channel)
+                            )
 
         _ = curr
-        _ = kernel 
+        _ = kernel
         _ = bias
         _ = in_channels
         _ = out_channels
@@ -188,14 +259,13 @@ struct Conv3d:
         dilation: Tuple[Int, Int, Int] = (1, 1, 1),
         groups: Int = 1,
     ) raises -> Array:
-
         var arr_shape = setup_array_shape(
             List(
                 arg0.array_shape(),
                 list_to_array_shape(
                     concat_lists(
                         in_channels,
-                        out_channels,      
+                        out_channels,
                         kernel_size[0],
                         kernel_size[1],
                         kernel_size[2],
@@ -208,7 +278,7 @@ struct Conv3d:
                         dilation[0],
                         dilation[1],
                         dilation[2],
-                        groups        
+                        groups,
                     )
                 ),
             ),
@@ -220,7 +290,17 @@ struct Conv3d:
         var args = List(arg0, kernel, bias)
 
         # return op_array(arr_shape, args, NA, "conv3d", fwd, default_jvp, vjp, False)
-        return op_array(arr_shape, args, NA, "conv3d", Conv3d.__call__, Conv3d.jvp, Conv3d.vjp, False)
+        return op_array(
+            arr_shape,
+            args,
+            NA,
+            "conv3d",
+            Conv3d.__call__,
+            Conv3d.jvp,
+            Conv3d.vjp,
+            False,
+        )
+
 
 fn conv3d(
     arg0: Array,
@@ -252,6 +332,15 @@ fn conv3d(
     Returns:
         Array: The output array.
     """
-    return Conv3d.fwd(arg0, kernel, bias, in_channels, out_channels, kernel_size, stride, padding, dilation, groups)
-
-
+    return Conv3d.fwd(
+        arg0,
+        kernel,
+        bias,
+        in_channels,
+        out_channels,
+        kernel_size,
+        stride,
+        padding,
+        dilation,
+        groups,
+    )

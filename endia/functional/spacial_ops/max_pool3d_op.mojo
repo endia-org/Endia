@@ -9,10 +9,12 @@ from endia.functional._utils import (
 from endia.functional._utils import setup_array_shape, contiguous, op_array
 from utils.numerics import min_or_neg_inf, max_or_inf
 
+
 struct MaxPool3d:
     """
     Namespace for 3D max pooling operations.
     """
+
     @staticmethod
     fn compute_shape(inout curr: ArrayShape, args: List[ArrayShape]) raises:
         """
@@ -49,13 +51,34 @@ struct MaxPool3d:
         new_shape.append(batch_size)
         new_shape.append(channels)
         new_shape.append(
-            (input_shape[2] + 2 * padding_depth - dilation_depth * (kernel_depth - 1) - 1) // stride_depth + 1
+            (
+                input_shape[2]
+                + 2 * padding_depth
+                - dilation_depth * (kernel_depth - 1)
+                - 1
+            )
+            // stride_depth
+            + 1
         )
         new_shape.append(
-            (input_shape[3] + 2 * padding_height - dilation_height * (kernel_height - 1) - 1) // stride_height + 1
+            (
+                input_shape[3]
+                + 2 * padding_height
+                - dilation_height * (kernel_height - 1)
+                - 1
+            )
+            // stride_height
+            + 1
         )
         new_shape.append(
-            (input_shape[4] + 2 * padding_width - dilation_width * (kernel_width - 1) - 1) // stride_width + 1
+            (
+                input_shape[4]
+                + 2 * padding_width
+                - dilation_width * (kernel_width - 1)
+                - 1
+            )
+            // stride_width
+            + 1
         )
         curr.setup(new_shape)
 
@@ -97,8 +120,10 @@ struct MaxPool3d:
                             var start_z = out_z * stride_depth - padding_depth
                             var start_y = out_y * stride_height - padding_height
                             var start_x = out_x * stride_width - padding_width
-                            var max_val = SIMD[dtype, 1](min_or_neg_inf[dtype]())
-                            
+                            var max_val = SIMD[dtype, 1](
+                                min_or_neg_inf[dtype]()
+                            )
+
                             for kz in range(kernel_depth):
                                 var z = start_z + kz * dilation_depth
                                 if z >= 0 and z < input_shape[2]:
@@ -107,12 +132,35 @@ struct MaxPool3d:
                                         if y >= 0 and y < input_shape[3]:
                                             for kx in range(kernel_width):
                                                 var x = start_x + kx * dilation_width
-                                                if x >= 0 and x < input_shape[4]:
-                                                    var idx = batch * input_stride[0] + channel * input_stride[1] + z * input_stride[2] + y * input_stride[3] + x * input_stride[4]
-                                                    var val = input_data.load(idx)
+                                                if (
+                                                    x >= 0
+                                                    and x < input_shape[4]
+                                                ):
+                                                    var idx = batch * input_stride[
+                                                        0
+                                                    ] + channel * input_stride[
+                                                        1
+                                                    ] + z * input_stride[
+                                                        2
+                                                    ] + y * input_stride[
+                                                        3
+                                                    ] + x * input_stride[
+                                                        4
+                                                    ]
+                                                    var val = input_data.load(
+                                                        idx
+                                                    )
                                                     max_val = max(max_val, val)
 
-                            var out_idx = batch * out_stride[0] + channel * out_stride[1] + out_z * out_stride[2] + out_y * out_stride[3] + out_x * out_stride[4]
+                            var out_idx = batch * out_stride[
+                                0
+                            ] + channel * out_stride[1] + out_z * out_stride[
+                                2
+                            ] + out_y * out_stride[
+                                3
+                            ] + out_x * out_stride[
+                                4
+                            ]
                             out_data.store(out_idx, max_val)
 
     @staticmethod
@@ -131,7 +179,6 @@ struct MaxPool3d:
         padding: Tuple[Int, Int, Int] = (0, 0, 0),
         dilation: Tuple[Int, Int, Int] = (1, 1, 1),
     ) raises -> Array:
-
         var arr_shape = setup_array_shape(
             List(
                 arg0.array_shape(),
@@ -153,12 +200,21 @@ struct MaxPool3d:
                 ),
             ),
             "max_pool3d_shape",
-            MaxPool3d.compute_shape
+            MaxPool3d.compute_shape,
         )
 
         var args = List(arg0)
 
-        return op_array(arr_shape, args, NA, "max_pool3d", MaxPool3d.__call__, MaxPool3d.jvp, MaxPool3d.vjp, False)
+        return op_array(
+            arr_shape,
+            args,
+            NA,
+            "max_pool3d",
+            MaxPool3d.__call__,
+            MaxPool3d.jvp,
+            MaxPool3d.vjp,
+            False,
+        )
 
 
 fn max_pool3d(

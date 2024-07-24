@@ -38,7 +38,9 @@ struct AvgPool1d:
         new_shape.append(batch_size)
         new_shape.append(channels)
         new_shape.append(
-            (input_shape[2] + 2 * padding - dilation * (kernel_size - 1) - 1) // stride + 1
+            (input_shape[2] + 2 * padding - dilation * (kernel_size - 1) - 1)
+            // stride
+            + 1
         )
         curr.setup(new_shape)
 
@@ -70,16 +72,23 @@ struct AvgPool1d:
                     var start = out_index * stride - padding
                     var sum_val = SIMD[dtype, 1](0)
                     var count = 0
-                    
+
                     for k in range(kernel_size):
                         var i = start + k * dilation
                         if i >= 0 and i < input_shape[2]:
-                            var idx = batch * input_stride[0] + channel * input_stride[1] + i * input_stride[2]
+                            var idx = batch * input_stride[
+                                0
+                            ] + channel * input_stride[1] + i * input_stride[2]
                             sum_val += input_data.load(idx)
                             count += 1
 
-                    var out_idx = batch * out_stride[0] + channel * out_stride[1] + out_index * out_stride[2]
-                    out_data.store(out_idx, sum_val / count if count > 0 else SIMD[dtype, 1](0))
+                    var out_idx = batch * out_stride[0] + channel * out_stride[
+                        1
+                    ] + out_index * out_stride[2]
+                    out_data.store(
+                        out_idx,
+                        sum_val / count if count > 0 else SIMD[dtype, 1](0),
+                    )
 
     @staticmethod
     fn vjp(primals: List[Array], grad: Array, out: Array) raises -> List[Array]:
@@ -88,7 +97,6 @@ struct AvgPool1d:
     @staticmethod
     fn jvp(primals: List[Array], tangents: List[Array]) raises -> Array:
         return default_jvp(primals, tangents)
-
 
     @staticmethod
     fn fwd(
@@ -117,7 +125,17 @@ struct AvgPool1d:
         var args = List(arg0)
 
         # return op_array(arr_shape, args, NA, "avg_pool1d", fwd, default_jvp, vjp, False)
-        return op_array(arr_shape, args, NA, "avg_pool1d", AvgPool1d.__call__, AvgPool1d.jvp, AvgPool1d.vjp, False)
+        return op_array(
+            arr_shape,
+            args,
+            NA,
+            "avg_pool1d",
+            AvgPool1d.__call__,
+            AvgPool1d.jvp,
+            AvgPool1d.vjp,
+            False,
+        )
+
 
 fn avg_pool1d(
     arg0: Array,

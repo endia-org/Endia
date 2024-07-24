@@ -1,4 +1,4 @@
-import endia as nd 
+import endia as nd
 
 
 def test_conv1d():
@@ -12,13 +12,25 @@ def test_conv1d():
     padding = 1
     dilation = 1
     groups = 1
-    
+
     a = nd.arange(shape=List(batch_size, in_channels, elements))
     kernel = nd.ones(shape=List(out_channels, in_channels, kernel_size))
     bias = nd.zeros(shape=List(out_channels))
-    
-    out = nd.conv1d(a, kernel, bias, in_channels, out_channels, kernel_size, stride, padding, dilation, groups)
+
+    out = nd.conv1d(
+        a,
+        kernel,
+        bias,
+        in_channels,
+        out_channels,
+        kernel_size,
+        stride,
+        padding,
+        dilation,
+        groups,
+    )
     print(out)
+
 
 # PyTorch version:
 # import torch
@@ -74,11 +86,24 @@ def test_conv2d():
     dilation_width = 1
     dilation_height = 1
     groups = 1
-    
+
     a = nd.arange(shape=List(batch_size, in_channels, elements, elements))
-    kernel = nd.ones(shape=List(out_channels, in_channels, kernel_width, kernel_height))
+    kernel = nd.ones(
+        shape=List(out_channels, in_channels, kernel_width, kernel_height)
+    )
     bias = nd.zeros(shape=List(out_channels))
-    out = nd.conv2d(a, kernel, bias, in_channels=in_channels, out_channels=out_channels, kernel_size=(kernel_width, kernel_height), stride=(stride_width, stride_height), padding=(padding_width, padding_height), dilation=(dilation_width, dilation_height), groups=groups)
+    out = nd.conv2d(
+        a,
+        kernel,
+        bias,
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=(kernel_width, kernel_height),
+        stride=(stride_width, stride_height),
+        padding=(padding_width, padding_height),
+        dilation=(dilation_width, dilation_height),
+        groups=groups,
+    )
     print(out)
 
 
@@ -103,13 +128,29 @@ def test_conv3d():
     dilation_height = 1
     dilation_width = 1
     groups = 1
-    
+
     a = nd.arange(shape=List(batch_size, in_channels, depth, height, width))
-    kernel = nd.ones(shape=List(out_channels, in_channels, kernel_depth, kernel_height, kernel_width))
+    kernel = nd.ones(
+        shape=List(
+            out_channels, in_channels, kernel_depth, kernel_height, kernel_width
+        )
+    )
     bias = nd.zeros(shape=List(out_channels))
-    
-    out = nd.conv3d(a, kernel, bias, in_channels, out_channels, (kernel_depth, kernel_height, kernel_width), (stride_depth, stride_height, stride_width), (padding_depth, padding_height, padding_width), (dilation_depth, dilation_height, dilation_width), groups)
+
+    out = nd.conv3d(
+        a,
+        kernel,
+        bias,
+        in_channels,
+        out_channels,
+        (kernel_depth, kernel_height, kernel_width),
+        (stride_depth, stride_height, stride_width),
+        (padding_depth, padding_height, padding_width),
+        (dilation_depth, dilation_height, dilation_width),
+        groups,
+    )
     print(out)
+
 
 def test_max_pool1d():
     # Parameters for the pooling operation
@@ -122,10 +163,17 @@ def test_max_pool1d():
     input_tensor = nd.arange(List(2, 2, 10))
 
     # Define the 1D pooling layer
-    output = nd.max_pool1d(input_tensor, kernel_size=kernel_size, stride=stride, padding=padding, dilation=dilation)
+    output = nd.max_pool1d(
+        input_tensor,
+        kernel_size=kernel_size,
+        stride=stride,
+        padding=padding,
+        dilation=dilation,
+    )
 
     # Print the output
     print("Output:\n", output)
+
 
 def test_max_pool2d():
     # Parameters for the pooling operation
@@ -138,10 +186,17 @@ def test_max_pool2d():
     input_tensor = nd.arange(List(2, 2, 10, 10))
 
     # Define the 2D pooling layer
-    output = nd.max_pool2d(input_tensor, kernel_size=kernel_size, stride=stride, padding=padding, dilation=dilation)
+    output = nd.max_pool2d(
+        input_tensor,
+        kernel_size=kernel_size,
+        stride=stride,
+        padding=padding,
+        dilation=dilation,
+    )
 
     # Print the output
     print("Output:\n", output)
+
 
 def test_max_pool3d():
     # Parameters for the pooling operation
@@ -154,10 +209,17 @@ def test_max_pool3d():
     input_tensor = nd.arange(List(2, 2, 10, 10, 10))
 
     # Define the 3D pooling layer
-    output = nd.max_pool3d(input_tensor, kernel_size=kernel_size, stride=stride, padding=padding, dilation=dilation)
+    output = nd.max_pool3d(
+        input_tensor,
+        kernel_size=kernel_size,
+        stride=stride,
+        padding=padding,
+        dilation=dilation,
+    )
 
     # Print the output
     print("Output:\n", output)
+
 
 def test_avg_pool1d():
     # Parameters for the pooling operation
@@ -170,10 +232,17 @@ def test_avg_pool1d():
     input_tensor = nd.arange(List(2, 2, 10))
 
     # Define the 1D average pooling layer
-    output = nd.avg_pool1d(input_tensor, kernel_size=kernel_size, stride=stride, padding=padding, dilation=dilation)
+    output = nd.avg_pool1d(
+        input_tensor,
+        kernel_size=kernel_size,
+        stride=stride,
+        padding=padding,
+        dilation=dilation,
+    )
 
     # Print the output
     print("Avg Pool 1D Output:\n", output)
+
 
 def test_avg_pool2d():
     # Parameters for the pooling operation
@@ -186,10 +255,17 @@ def test_avg_pool2d():
     input_tensor = nd.arange(List(2, 2, 10, 10))
 
     # Define the 2D average pooling layer
-    output = nd.avg_pool2d(input_tensor, kernel_size=kernel_size, stride=stride, padding=padding, dilation=dilation)
+    output = nd.avg_pool2d(
+        input_tensor,
+        kernel_size=kernel_size,
+        stride=stride,
+        padding=padding,
+        dilation=dilation,
+    )
 
     # Print the output
     print("Avg Pool 2D Output:\n", output)
+
 
 def test_avg_pool3d():
     # Parameters for the pooling operation
@@ -202,23 +278,31 @@ def test_avg_pool3d():
     input_tensor = nd.arange(List(2, 2, 10, 10, 10))
 
     # Define the 3D average pooling layer
-    output = nd.avg_pool3d(input_tensor, kernel_size=kernel_size, stride=stride, padding=padding, dilation=dilation)
+    output = nd.avg_pool3d(
+        input_tensor,
+        kernel_size=kernel_size,
+        stride=stride,
+        padding=padding,
+        dilation=dilation,
+    )
 
     # Print the output
     print("Avg Pool 3D Output:\n", output)
+
 
 def main():
     test_conv1d()
     test_conv2d()
     test_conv3d()
-    
+
     test_max_pool1d()
     test_max_pool2d()
     test_max_pool3d()
-    
+
     # Add tests for average pooling
     test_avg_pool1d()
     test_avg_pool2d()
     test_avg_pool3d()
+
 
 # ... [rest of the code remains unchanged] ...

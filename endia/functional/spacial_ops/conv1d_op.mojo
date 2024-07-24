@@ -40,7 +40,9 @@ struct Conv1d:
         new_shape.append(batch_size)
         new_shape.append(out_channels)
         new_shape.append(
-            (input_shape[2] + 2 * padding - dilation * (kernel_size - 1) - 1) // stride + 1
+            (input_shape[2] + 2 * padding - dilation * (kernel_size - 1) - 1)
+            // stride
+            + 1
         )
         curr.setup(new_shape)
 
@@ -92,19 +94,38 @@ struct Conv1d:
                         var group_kernel_offset = group * in_channels_per_group
 
                         for in_channel in range(in_channels_per_group):
-                            var base_input_idx_channel = base_input_idx_batch + (group_input_offset + in_channel) * input_stride[1]
-                            var base_kernel_idx_channel = base_kernel_idx_out_channel + (group_kernel_offset + in_channel) * kernel_stride[1]
+                            var base_input_idx_channel = base_input_idx_batch + (
+                                group_input_offset + in_channel
+                            ) * input_stride[
+                                1
+                            ]
+                            var base_kernel_idx_channel = base_kernel_idx_out_channel + (
+                                group_kernel_offset + in_channel
+                            ) * kernel_stride[
+                                1
+                            ]
 
                             for k in range(kernel_size):
                                 var input_index = output_index + k * dilation
 
-                                if input_index >= 0 and input_index < input_shape[2]:
-                                    var final_input_idx = base_input_idx_channel + input_index * input_stride[2]
-                                    var final_kernel_idx = base_kernel_idx_channel + k * kernel_stride[2]
+                                if (
+                                    input_index >= 0
+                                    and input_index < input_shape[2]
+                                ):
+                                    var final_input_idx = base_input_idx_channel + input_index * input_stride[
+                                        2
+                                    ]
+                                    var final_kernel_idx = base_kernel_idx_channel + k * kernel_stride[
+                                        2
+                                    ]
 
-                                    value += input_data.load(final_input_idx) * kernel_data.load(final_kernel_idx)
+                                    value += input_data.load(
+                                        final_input_idx
+                                    ) * kernel_data.load(final_kernel_idx)
 
-                    var out_idx = batch * out_stride[0] + out_channel * out_stride[1] + out_index * out_stride[2]
+                    var out_idx = batch * out_stride[
+                        0
+                    ] + out_channel * out_stride[1] + out_index * out_stride[2]
                     out_data.store(out_idx, value)
 
     @staticmethod
@@ -149,7 +170,17 @@ struct Conv1d:
 
         var args = List(arg0, kernel, bias)
 
-        return op_array(arr_shape, args, NA, "conv1d", Conv1d.__call__, Conv1d.jvp, Conv1d.vjp, False)
+        return op_array(
+            arr_shape,
+            args,
+            NA,
+            "conv1d",
+            Conv1d.__call__,
+            Conv1d.jvp,
+            Conv1d.vjp,
+            False,
+        )
+
 
 fn conv1d(
     arg0: Array,
@@ -181,4 +212,15 @@ fn conv1d(
     Returns:
         Output tensor of shape (batch_size, out_channels, output_length)
     """
-    return Conv1d.fwd(arg0, kernel, bias, in_channels, out_channels, kernel_size, stride, padding, dilation, groups)
+    return Conv1d.fwd(
+        arg0,
+        kernel,
+        bias,
+        in_channels,
+        out_channels,
+        kernel_size,
+        stride,
+        padding,
+        dilation,
+        groups,
+    )

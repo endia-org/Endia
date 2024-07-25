@@ -94,37 +94,37 @@ fn visualize_graph(arg: Array, filename: String = "computation_graph") raises:
     dot.attr(rankdir="TB")
 
     # Set graph background to black
-    dot.attr(bgcolor="#2a2436")
+    dot.attr(bgcolor="white")
 
     # Change node attributes for better visibility on black background
     dot.attr(
         "node",
         shape="box",
         style="rounded,filled",
-        roundedcorners="0.1",
+        roundedcorners="0.03",
         fontcolor="black",
     )
 
     for node in graph_data["nodes"]:
         var node_color = "white"  # Dark gray for standard nodes
         if len(node["args"]) == 0:
-            node_color = "#4dacff"  # Steel blue for input nodes
+            node_color = "#b1d8fa"  # Steel blue for input nodes
         elif node["is_view"] == 1:
             node_color = "#ffc2a3"  # Dim gray for view nodes
 
         var attrs = " " + str(node["id"]) + ', "' + node["type"] + '", '
         var shape = node["shape"]
-        attrs += "["
+        attrs += "("
         for j in range(len(shape)):
             attrs += str(shape[j])
             if j != len(shape) - 1:
                 attrs += ","
-        attrs += "] "
+        attrs += ") "
 
         dot.node(str(node["id"]), attrs, fillcolor=node_color)
 
         for arg in node["args"]:
-            dot.edge(str(arg), str(node["id"]), color="white")
+            dot.edge(str(arg), str(node["id"]), color="black")
 
         # Add grad edge if exists
         if node["grad"] is not None:

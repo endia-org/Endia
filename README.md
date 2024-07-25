@@ -146,6 +146,7 @@ If you use Endia in your research or project, please cite it as follows:
   author = {Fehrenbach, Tillmann},
   license = {Apache-2.0},
   month = jul,
+  doi=10.5281/zenodo.12810766,
   title = {{Endia}},
   url = {https://github.com/endia-org/Endia},
   version = {24.4.1},

@@ -36,30 +36,34 @@ struct Conv3d:
             curr: The ArrayShape to store the result of the computation.
             args: The input ArrayShape, and the convolution parameters encoded in an ArrayShape.
         """
-        var arg = args[0]  # Input tensor
-        var params = array_shape_to_list(args[1])  # Convolution parameters
 
-        var input_shape = arg.shape_node[].shape
+        var input_shape = args[0].shape_node[].shape
+        var kernel_shape = args[1].shape_node[].shape
+        var params = array_shape_to_list(args[2])  # Convolution parameters
         var ndim = len(input_shape)
         if ndim != 5:
             raise "Input must be 5-dimensional (batch_size, in_channels, depth, height, width) for 3D convolution!"
 
         var batch_size = input_shape[0]
-        var in_channels = params[0]
-        var out_channels = params[1]
-        var kernel_depth = params[2]
-        var kernel_height = params[3]
-        var kernel_width = params[4]
-        var stride_depth = params[5]
-        var stride_height = params[6]
-        var stride_width = params[7]
-        var padding_depth = params[8]
-        var padding_height = params[9]
-        var padding_width = params[10]
-        var dilation_depth = params[11]
-        var dilation_height = params[12]
-        var dilation_width = params[13]
-        var groups = params[14]
+        var in_channels = input_shape[1]
+
+        if in_channels != kernel_shape[1]:
+            raise "Input channels must match kernel channels for 3D convolution!"
+
+        var out_channels = kernel_shape[0]
+        var kernel_depth = kernel_shape[2]
+        var kernel_height = kernel_shape[3]
+        var kernel_width = kernel_shape[4]
+        var stride_depth = params[0]
+        var stride_height = params[1]
+        var stride_width = params[2]
+        var padding_depth = params[3]
+        var padding_height = params[4]
+        var padding_width = params[5]
+        var dilation_depth = params[6]
+        var dilation_height = params[7]
+        var dilation_width = params[8]
+        var groups = params[9]
 
         var new_shape = List[Int]()
         new_shape.append(batch_size)
@@ -99,26 +103,28 @@ struct Conv3d:
     @staticmethod
     fn __call__(inout curr: Array, args: List[Array]) raises:
         # Extract shape parameters
-        var params = array_shape_to_list(curr.array_shape().args()[1])
+        var params = array_shape_to_list(curr.array_shape().args()[2])
 
         # Setup shape and data
         setup_shape_and_data(curr)
 
-        var in_channels = params[0]
-        var out_channels = params[1]
-        var kernel_depth = params[2]
-        var kernel_height = params[3]
-        var kernel_width = params[4]
-        var stride_depth = params[5]
-        var stride_height = params[6]
-        var stride_width = params[7]
-        var padding_depth = params[8]
-        var padding_height = params[9]
-        var padding_width = params[10]
-        var dilation_depth = params[11]
-        var dilation_height = params[12]
-        var dilation_width = params[13]
-        var groups = params[14]
+        var arg_shape = args[0].shape()
+        var kernel_shape = args[1].shape()
+        var in_channels = arg_shape[1]
+        var out_channels = kernel_shape[0]
+        var kernel_depth = kernel_shape[2]
+        var kernel_height = kernel_shape[3]
+        var kernel_width = kernel_shape[4]
+        var stride_depth = params[0]
+        var stride_height = params[1]
+        var stride_width = params[2]
+        var padding_depth = params[3]
+        var padding_height = params[4]
+        var padding_width = params[5]
+        var dilation_depth = params[6]
+        var dilation_height = params[7]
+        var dilation_width = params[8]
+        var groups = params[9]
 
         var in_channels_per_group = in_channels // groups
         var out_channels_per_group = out_channels // groups
@@ -264,9 +270,6 @@ struct Conv3d:
         arg0: Array,
         kernel: Array,
         bias: Array,
-        in_channels: Int,
-        out_channels: Int,
-        kernel_size: Tuple[Int, Int, Int] = (1, 1, 1),
         stride: Tuple[Int, Int, Int] = (1, 1, 1),
         padding: Tuple[Int, Int, Int] = (0, 0, 0),
         dilation: Tuple[Int, Int, Int] = (1, 1, 1),
@@ -275,13 +278,9 @@ struct Conv3d:
         var arr_shape = setup_array_shape(
             List(
                 arg0.array_shape(),
+                kernel.array_shape(),
                 list_to_array_shape(
                     concat_lists(
-                        in_channels,
-                        out_channels,
-                        kernel_size[0],
-                        kernel_size[1],
-                        kernel_size[2],
                         stride[0],
                         stride[1],
                         stride[2],
@@ -319,9 +318,6 @@ fn conv3d(
     arg0: Array,
     kernel: Array,
     bias: Array,
-    in_channels: Int,
-    out_channels: Int,
-    kernel_size: Tuple[Int, Int, Int] = (1, 1, 1),
     stride: Tuple[Int, Int, Int] = (1, 1, 1),
     padding: Tuple[Int, Int, Int] = (0, 0, 0),
     dilation: Tuple[Int, Int, Int] = (1, 1, 1),
@@ -334,9 +330,6 @@ fn conv3d(
         arg0: The input array.
         kernel: The convolution kernel.
         bias: The bias tensor.
-        in_channels: The number of input channels.
-        out_channels: The number of output channels.
-        kernel_size: The size of the kernel (depth, height, width).
         stride: The stride of the convolution operation. Defaults to (1, 1, 1).
         padding: The padding to apply to the input. Defaults to (0, 0, 0).
         dilation: The dilation to apply to the input. Defaults to (1, 1, 1).
@@ -349,9 +342,6 @@ fn conv3d(
         arg0,
         kernel,
         bias,
-        in_channels,
-        out_channels,
-        kernel_size,
         stride,
         padding,
         dilation,

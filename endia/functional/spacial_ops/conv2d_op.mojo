@@ -32,26 +32,32 @@ struct Conv2d:
         """
         Computes the shape of an array after a 2-dimensional convolution operation.
         """
-        var arg = args[0]  # Input tensor
-        var params = array_shape_to_list(args[1])  # Convolution parameters
 
-        var input_shape = arg.shape_node[].shape
+        var input_shape = args[0].shape_node[].shape
+        var kernel_shape = args[1].shape_node[].shape
+        var params = array_shape_to_list(args[2])  # Convolution parameters
+
         var ndim = len(input_shape)
         if ndim != 4:
             raise "Input must be 4-dimensional (batch_size, in_channels, height, width) for 2D convolution!"
 
         var batch_size = input_shape[0]
-        var in_channels = params[0]
-        var out_channels = params[1]
-        var kernel_height = params[2]
-        var kernel_width = params[3]
-        var stride_height = params[4]
-        var stride_width = params[5]
-        var padding_height = params[6]
-        var padding_width = params[7]
-        var dilation_height = params[8]
-        var dilation_width = params[9]
-        var groups = params[10]
+        var in_channels = input_shape[1]
+
+        if in_channels != kernel_shape[1]:
+            raise "Input channels must match kernel channels for 2D convolution!"
+
+        var out_channels = kernel_shape[0]
+        var kernel_height = kernel_shape[2]
+        var kernel_width = kernel_shape[3]
+
+        var stride_height = params[0]
+        var stride_width = params[1]
+        var padding_height = params[2]
+        var padding_width = params[3]
+        var dilation_height = params[4]
+        var dilation_width = params[5]
+        var groups = params[6]
 
         var new_shape = List[Int]()
         new_shape.append(batch_size)
@@ -80,21 +86,24 @@ struct Conv2d:
 
     @staticmethod
     fn __call__(inout curr: Array, args: List[Array]) raises:
-        var params = array_shape_to_list(curr.array_shape().args()[1])
+        var params = array_shape_to_list(curr.array_shape().args()[2])
 
         setup_shape_and_data(curr)
 
-        var in_channels = params[0]
-        var out_channels = params[1]
-        var kernel_height = params[2]
-        var kernel_width = params[3]
-        var stride_height = params[4]
-        var stride_width = params[5]
-        var padding_height = params[6]
-        var padding_width = params[7]
-        var dilation_height = params[8]
-        var dilation_width = params[9]
-        var groups = params[10]
+        var arg_shape = args[0].shape()
+        var kernel_shape = args[1].shape()
+        var batch_size = arg_shape[0]
+        var in_channels = arg_shape[1]
+        var out_channels = kernel_shape[0]
+        var kernel_height = kernel_shape[2]
+        var kernel_width = kernel_shape[3]
+        var stride_height = params[0]
+        var stride_width = params[1]
+        var padding_height = params[2]
+        var padding_width = params[3]
+        var dilation_height = params[4]
+        var dilation_width = params[5]
+        var groups = params[6]
 
         var in_channels_per_group = in_channels // groups
         var out_channels_per_group = out_channels // groups
@@ -115,7 +124,7 @@ struct Conv2d:
         var kernel_stride = kernel.stride()
         var input_shape = input.shape()
 
-        for batch in range(out_shape[0]):
+        for batch in range(batch_size):
             var base_input_idx_batch = batch * input_stride[0]
 
             for out_channel in range(out_channels):
@@ -199,9 +208,6 @@ struct Conv2d:
         arg0: Array,
         kernel: Array,
         bias: Array,
-        in_channels: Int,
-        out_channels: Int,
-        kernel_size: Tuple[Int, Int] = (1, 1),
         stride: Tuple[Int, Int] = (1, 1),
         padding: Tuple[Int, Int] = (0, 0),
         dilation: Tuple[Int, Int] = (1, 1),
@@ -210,12 +216,9 @@ struct Conv2d:
         var arr_shape = setup_array_shape(
             List(
                 arg0.array_shape(),
+                kernel.array_shape(),
                 list_to_array_shape(
                     concat_lists(
-                        in_channels,
-                        out_channels,
-                        kernel_size[0],
-                        kernel_size[1],
                         stride[0],
                         stride[1],
                         padding[0],
@@ -248,9 +251,6 @@ fn conv2d(
     arg0: Array,
     kernel: Array,
     bias: Array,
-    in_channels: Int,
-    out_channels: Int,
-    kernel_size: Tuple[Int, Int] = (1, 1),
     stride: Tuple[Int, Int] = (1, 1),
     padding: Tuple[Int, Int] = (0, 0),
     dilation: Tuple[Int, Int] = (1, 1),
@@ -263,9 +263,6 @@ fn conv2d(
         arg0: Input tensor of shape (batch_size, in_channels, height, width).
         kernel: Convolution kernel of shape (out_channels, in_channels // groups, kernel_height, kernel_width).
         bias: Bias tensor of shape (out_channels).
-        in_channels: Number of channels in the input image.
-        out_channels: Number of channels produced by the convolution.
-        kernel_size: Size of the convolving kernel.
         stride: Stride of the convolution.
         padding: Zero-padding added to both sides of the input.
         dilation: Spacing between kernel elements.
@@ -278,9 +275,6 @@ fn conv2d(
         arg0,
         kernel,
         bias,
-        in_channels,
-        out_channels,
-        kernel_size,
         stride,
         padding,
         dilation,

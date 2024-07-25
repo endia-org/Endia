@@ -157,6 +157,9 @@ struct AvgPool2d:
         padding: Tuple[Int, Int] = (0, 0),
         dilation: Tuple[Int, Int] = (1, 1),
     ) raises -> Array:
+        if arg0.is_complex():
+            raise "Complex numbers are not supported for avg_pool2d!"
+
         var arr_shape = setup_array_shape(
             List(
                 arg0.array_shape(),

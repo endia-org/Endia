@@ -167,6 +167,9 @@ struct Conv1d:
         dilation: Int,
         groups: Int,
     ) raises -> Array:
+        if arg0.is_complex() or kernel.is_complex() or bias.is_complex():
+            raise "Complex numbers are not supported for conv1d!"
+
         var arr_shape = setup_array_shape(
             List(
                 arg0.array_shape(),

@@ -192,6 +192,9 @@ struct MaxPool3d:
         padding: Tuple[Int, Int, Int] = (0, 0, 0),
         dilation: Tuple[Int, Int, Int] = (1, 1, 1),
     ) raises -> Array:
+        if arg0.is_complex():
+            raise "Complex numbers are not supported for max_pool3d!"
+
         var arr_shape = setup_array_shape(
             List(
                 arg0.array_shape(),
@@ -237,4 +240,17 @@ fn max_pool3d(
     padding: Tuple[Int, Int, Int] = (0, 0, 0),
     dilation: Tuple[Int, Int, Int] = (1, 1, 1),
 ) raises -> Array:
+    """ 
+    Applies a 3D max pooling operation over an input tensor.
+
+    Args:
+        arg0: The input tensor.
+        kernel_size: The size of the pooling kernel.
+        stride: The stride of the pooling operation.
+        padding: The padding to apply to the input tensor.
+        dilation: The dilation to apply to the input tensor.
+
+    Returns:
+        The result of the 3D max pooling operation.
+    """
     return MaxPool3d.fwd(arg0, kernel_size, stride, padding, dilation)

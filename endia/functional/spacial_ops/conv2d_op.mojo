@@ -213,6 +213,9 @@ struct Conv2d:
         dilation: Tuple[Int, Int] = (1, 1),
         groups: Int = 1,
     ) raises -> Array:
+        if arg0.is_complex() or kernel.is_complex() or bias.is_complex():
+            raise "Complex numbers are not supported for conv2d!"
+
         var arr_shape = setup_array_shape(
             List(
                 arg0.array_shape(),

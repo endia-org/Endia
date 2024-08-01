@@ -1,10 +1,14 @@
-<div align="center">
+<!-- <div align="center">
   <img src="./assets/titleimage.png" alt="Title Image" />
+</div> -->
+
+<div align="center">
+  <img src="./assets/endia_stack_concept.png" alt="Endia Stack concept Image"/>
 </div>
 
 ###
 
-**Endia** is a dynamic Array library for Scientific Computing, similar to PyTorch, Numpy and JAX. It offers:
+**Endia** is a dynamic Array library for Scientific Computing, similar to PyTorch, Numpy and JAX, but made in 7k lines of pure Mojo. It offers:
 
 - **Automatic differentiation**: Compute derivatives of arbitrary order.
 - **Complex number support:** Use Endia for advanced scientific applications.
@@ -48,6 +52,8 @@
 
     Required dependencies: `torch`, `numpy`, `graphviz`. These will be installed automatically by the setup script.
 
+
+
 ## A tiny example
 
 In this guide, we'll demonstrate how to compute the **value**, **gradient**, and the **Hessian** (i.e. the second-order derivative) of a simple function. First by using Endia's Pytorch-like API and then by using a more Jax-like functional API. In both examples, we initially define a function **foo** that takes an array and returns the sum of the squares of its elements.
@@ -66,23 +72,25 @@ When using Endia's imperative (PyTorch-like) interface, we compute the gradient 
 ```python
 import endia as nd 
 
+
 # Define the function
 def foo(x: nd.Array) -> nd.Array:
     return nd.sum(x ** 2)
 
+
 # Initialize variable - requires_grad=True needed!
-x = nd.array('[1.0, 2.0, 3.0]', requires_grad=True)
+x = arange(1.0, 4.0, requires_grad=True) # [1.0, 2.0, 3.0]
 
 # Compute result, first and second order derivatives
 y = foo(x)
 y.backward(create_graph=True)            
 dy_dx = x.grad()
-d2y_dx2 = nd.grad(outs=dy_dx, inputs=x)[0]
+d2y_dx2 = nd.grad(outs=nd.sum(dy_dx), inputs=x)[0]
 
 # Print results
 print(y)        # 14.0
 print(dy_dx)    # [2.0, 4.0, 6.0]
-print(dy2_dx2)  # [[2.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 2.0]]
+print(dy2_dx2)  # [2.0, 2.0, 2.0]
 ```
 
 ### The **JAX** way
@@ -94,31 +102,25 @@ print(dy2_dx2)  # [[2.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 2.0]]
   </a>
 </p>
 
-When using Endia's functional (JAX-like) interface, the computational graph is handled implicitly. By calling the `grad` function on foo, we create a `Callable` which computes the gradient. This `Callable` can be passed to the `grad` function again to compute higher-order derivatives.
+When using Endia's functional (JAX-like) interface, the computational graph is handled implicitly. By calling the `grad` or `jacobian` function on foo, we create a `Callable` which computes the full Jacobian matrix. This `Callable` can be passed to the `grad` or `jacobian` function again to compute higher-order derivatives.
 
 ```python
-import endia as nd 
+from endia import grad, jacobian, sum, arange, Array
 
-# Define the function
-def foo(x: nd.Array) -> nd.Array:
-    return nd.sum(x ** 2)
 
-# Create callables for the jacobian and hessian
-foo_jac = nd.grad(foo)
-foo_hes = nd.grad(foo_jac)
+def foo(x: Array) -> Array:
+    return sum(x**2)
 
-# Initialize variable - no requires_grad=True needed
-x = nd.array('[1.0, 2.0, 3.0]')
 
-# Compute result and derivatives
-y = foo(x)
-dy_dx = foo_jac(x)[nd.Array]
-dy2_dx2 = foo_hes(x)[nd.Array]
+# create Callables for the first and second order derivatives
+foo_jac = grad(foo)
+foo_hes = jacobian(foo_jac)
 
-# Print results
-print(y)        # 14.0
-print(dy_dx)    # [2.0, 4.0, 6.0]
-print(dy2_dx2)  # [[2.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 2.0]]
+x = arange(1.0, 4.0)      # [1.0, 2.0, 3.0]
+
+print(foo(x))             # 14.0
+print(foo_jac(x)[Array])  # [2.0, 4.0, 6.0]
+print(foo_hes(x)[Array])  # [[2.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 2.0]]
 ```
 
 *And there is so much more! Endia can handle complex valued functions, can perform both forward and reverse-mode automatic differentiation, it even has a builtin JIT compiler to make things go brrr. Explore the full **list of features** in the [documentation](https://endia.org).*
@@ -140,16 +142,16 @@ If you use Endia in your research or project, please cite it as follows:
 ```bibtex
 @software{Fehrenbach_Endia_2024,
   author = {Fehrenbach, Tillmann},
-  license = {Apache-2.0 with LLVM-exception},
+  license = {Apache-2.0 with LLVM Exceptions},
   doi = {10.5281/zenodo.12810766},
   month = jul,
   title = {{Endia}},
   url = {https://github.com/endia-org/Endia},
-  version = {24.4.1},
+  version = {24.4.3},
   year = {2024}
 }
 ```
 
 ## License
 
-Endia is licensed under the [Apache-2.0 license](https://github.com/endia-org/Endia?tab=Apache-2.0-1-ov-file).
+Endia is licensed under the [Apache-2.0 license with LLVM Excpetions](https://github.com/endia-org/Endia/blob/main/LICENSE).

@@ -759,6 +759,9 @@ struct Array(CollectionElement, Stringable):
             return self
         return permute(self, List(-1, -2))
 
+    fn reshape(self, shape: List[Int]) raises -> Array:
+        return reshape(self, shape)
+
     fn __getitem__(self, *slices: Slice) raises -> Array:
         var slices_list = List[Slice]()
         for i in range(len(slices)):

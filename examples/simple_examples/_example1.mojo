@@ -24,7 +24,8 @@ def example1():
 
     print("\nImperative grad computation:")
     # Initialize variable - requires_grad=True needed!
-    x = 1 + endia.arange(shape=List(2, 3, 4), requires_grad=True)
+    # x = 1 + endia.arange(shape=List(2, 3, 4), requires_grad=True)
+    x = endia.array("[1.0, 2.0, 3.0]", requires_grad=True)
 
     # Compute result, first aendia secoendia order derivatives
     y = foo(x)

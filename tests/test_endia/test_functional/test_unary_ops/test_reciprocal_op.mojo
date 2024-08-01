@@ -17,7 +17,7 @@ from python import Python
 
 def run_test_reciprocal(msg: String = "reciprocal"):
     torch = Python.import_module("torch")
-    arr = nd.arange(List(2, 30, 40))
+    arr = nd.arange(0, 2 * 30 * 40).reshape(List(2, 30, 40))
     arr_torch = nd.utils.to_torch(arr)
 
     res = nd.reciprocal(arr)
@@ -31,7 +31,7 @@ def run_test_reciprocal(msg: String = "reciprocal"):
 
 def run_test_reciprocal_grad(msg: String = "reciprocal_grad"):
     torch = Python.import_module("torch")
-    arr = nd.arange(List(2, 30, 40), requires_grad=True)
+    arr = nd.arange(0, 2 * 30 * 40, requires_grad=True).reshape(List(2, 30, 40))
     arr_torch = nd.utils.to_torch(arr)
 
     res = nd.sum(nd.reciprocal(arr))

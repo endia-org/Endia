@@ -11,24 +11,24 @@
 # limitations under the License.
 # ===----------------------------------------------------------------------=== #
 
-import endia as torch
+import endia
 
 
-def foo(args: List[torch.Array]) -> torch.Array:
+def foo(args: List[endia.Array]) -> endia.Array:
     a = args[0]
     b = args[1]
     c = args[2]
-    return torch.sum(torch.relu(a @ b + c))
+    return endia.sum(endia.relu(a @ b + c))
 
 
 def test_foo_jit():
-    foo_jit = torch.jit(torch.value_and_grad(foo))
+    foo_jit = endia.jit(endia.value_and_grad(foo))
 
-    a = torch.arange(List(3, 4))
-    b = torch.arange(List(4, 5))
-    c = torch.arange(List(3, 5))
+    a = endia.arange(0, 3 * 4).reshape(List(3, 4))
+    b = endia.arange(0, 4 * 5).reshape(List(4, 5))
+    c = endia.arange(0, 3 * 5).reshape(List(3, 5))
 
-    var res = foo_jit(List(a, b, c))[List[List[torch.Array]]]
+    var res = foo_jit(List(a, b, c))[List[List[endia.Array]]]
     # print(res[0][0])
     fwd_res = res[0][0]
     a_grad = res[1][0]

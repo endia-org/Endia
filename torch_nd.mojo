@@ -1,8 +1,5 @@
 from endia import Array
-
-# from endia.autograd.functional import grad
-# from endia.autograd.functional import jacobian
-import endia
+import endia.autograd.functional as F
 
 
 # Define the function
@@ -12,12 +9,12 @@ def foo(x: Array) -> Array:
 
 def main():
     # initialize input
-    x = 1 + endia.arange(shape=List(3), requires_grad=True)
+    x = endia.arange(1.0, 4.0, requires_grad=True)  # [1.0, 2.0, 3.0]
 
-    # Compute result, first aendia secoendia order derivatives
+    # Compute result, first and second order derivatives
     y = foo(x)
-    dy_dx = endia.autograd.functional.grad(outs=y, inputs=x)[0]
-    d2y_dx2 = endia.autograd.functional.hessian(foo, x)
+    dy_dx = F.grad(outs=y, inputs=x)[0]
+    d2y_dx2 = F.hessian(foo, x)
 
     # Print results
     print(y)  # 14.0

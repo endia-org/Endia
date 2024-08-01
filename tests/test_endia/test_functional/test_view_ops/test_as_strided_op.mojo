@@ -41,7 +41,7 @@ def run_test_as_strided(msg: String = "as_strided"):
 
 def run_test_as_strided_grad(msg: String = "as_strided_grad"):
     torch = Python.import_module("torch")
-    arr = nd.arange(List(30, 30, 3), requires_grad=True)
+    arr = nd.arange(0, 30 * 30 * 2, requires_grad=True).reshape(List(30, 30, 2))
     arr_torch = nd.utils.to_torch(arr)
 
     res = nd.sum(

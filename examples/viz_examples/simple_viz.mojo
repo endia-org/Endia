@@ -15,9 +15,9 @@ import endia as nd
 
 
 def viz_example1():
-    a = nd.arange(List(2, 3), requires_grad=True)
-    b = nd.arange(List(3, 4), requires_grad=True)
-    c = nd.arange(List(2, 2, 4), requires_grad=True)
+    a = nd.arange(0, 2 * 3, requires_grad=True).reshape(List(2, 3))
+    b = nd.arange(0, 3 * 4, requires_grad=True).reshape(List(3, 4))
+    c = nd.arange(0, 2 * 2 * 4, requires_grad=True).reshape(List(2, 2, 4))
 
     res = nd.sum(a @ b + c)
 

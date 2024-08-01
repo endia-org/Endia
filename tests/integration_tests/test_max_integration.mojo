@@ -17,8 +17,8 @@ from endia import *
 def test_max_graph():
     # Define the computation graph
     var a = randu(List(2, 3, 4), requires_grad=True)
-    var b = arange(List(4, 5), requires_grad=True)
-    var c = arange(List(3, 5), requires_grad=True)
+    var b = randu(List(4, 5), requires_grad=True)
+    var c = randu(List(3, 5), requires_grad=True)
     # var res = squeeze(unsqueeze(sin(a @ b + c), List(0,2)))
     res = ge_zero(a)
     # res = (
@@ -62,8 +62,8 @@ def test_max_integration():
     foo_jit = jit(foo)
 
     a = randn(List(2, 3, 4))
-    b = arange(List(4, 5))
-    c = arange(List(3, 5))
+    b = randu(List(4, 5))
+    c = randu(List(3, 5))
 
     for i in range(1):
         res = foo_jit(List(a, b, c))[Array]

@@ -42,22 +42,20 @@ fn arange_(inout arg: Array) raises:
             arg.store(i, i)
 
 
-fn arange(shape: List[Int], requires_grad: Bool = False) raises -> Array:
-    var res = Array(shape, requires_grad)
-    arange_(res)
-    return res
-
-
-fn arange_like(arg: Array) raises -> Array:
-    return arange(arg.shape(), arg.requires_grad())
-
-
-fn arange_complex(
-    shape: List[Int], requires_grad: Bool = False
+fn arange(
+    start: SIMD[dtype, 1] = 0,
+    end: SIMD[dtype, 1] = 1,
+    step: SIMD[dtype, 1] = 1,
+    requires_grad: Bool = False,
 ) raises -> Array:
-    var real = arange(shape, requires_grad)
-    var imag = arange(shape, requires_grad)
-    return complex(real, imag, requires_grad)
+    var size = int((end - start) / step)
+    var res = Array(List(size), requires_grad)
+    var data = res.data()
+    var value = start
+    for i in range(size):
+        data[i] = value
+        value += step
+    return res
 
 
 fn zeros_(inout arg: Array) raises:

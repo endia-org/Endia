@@ -34,7 +34,7 @@ def run_test_expand(msg: String = "expand"):
 
 def run_test_expand_grad(msg: String = "expand_grad"):
     torch = Python.import_module("torch")
-    arr = nd.arange(List(2, 30, 1), requires_grad=True)
+    arr = nd.arange(0, 2 * 30 * 1, requires_grad=True).reshape(List(2, 30, 1))
     arr_torch = nd.utils.to_torch(arr)
 
     res = nd.sum(nd.sin(nd.expand(arr, List(2, 30, 40))))

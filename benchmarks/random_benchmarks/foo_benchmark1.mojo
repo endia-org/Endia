@@ -33,9 +33,9 @@ def benchmark_foo_grad(
 ):
     # args initialization
     requires_grad = True
-    a = nd.arange(List(300, 400), requires_grad)
-    b = nd.arange(List(2, 400, 500), requires_grad)
-    c = nd.arange(List(2, 300, 500), requires_grad)
+    a = nd.arange(0, 300 * 400, requires_grad).reshape(List(300, 400))
+    b = nd.arange(0, 2 * 400 * 500, requires_grad).reshape(List(2, 400, 500))
+    c = nd.arange(0, 2 * 300 * 500, requires_grad).reshape(List(2, 300, 500))
     args = List(a, b, c)
 
     # warm up

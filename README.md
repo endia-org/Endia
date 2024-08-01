@@ -81,12 +81,12 @@ x = nd.array('[1.0, 2.0, 3.0]', requires_grad=True)
 y = foo(x)
 y.backward(create_graph=True)            
 dy_dx = x.grad()
-d2y_dx2 = nd.grad(outs=nd.sum(dy_dx), inputs=x)[0]
+d2y_dx2 = nd.grad(outs=dy_dx, inputs=x)[0]
 
 # Print results
-print(y)        # out: [14.0]
-print(dy_dx)    # out: [2.0, 4.0, 6.0]
-print(d2y_dx2)  # out: [2.0, 2.0, 2.0]
+print(y)        # 14.0
+print(dy_dx)    # [2.0, 4.0, 6.0]
+print(dy2_dx2)  # [[2.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 2.0]]
 ```
 
 ### The **JAX** way
@@ -120,9 +120,9 @@ dy_dx = foo_jac(x)[nd.Array]
 dy2_dx2 = foo_hes(x)[nd.Array]
 
 # Print results
-print(y)        # out: [14.0]
-print(dy_dx)    # out: [2.0, 4.0, 6.0]
-print(dy2_dx2)  # out: [2.0, 2.0, 2.0]
+print(y)        # 14.0
+print(dy_dx)    # [2.0, 4.0, 6.0]
+print(dy2_dx2)  # [[2.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 2.0]]
 ```
 
 *And there is so much more! Endia can handle complex valued functions, can perform both forward and reverse-mode automatic differentiation, it even has a builtin JIT compiler to make things go brrr. Explore the full **list of features** in the [documentation](https://endia.org).*

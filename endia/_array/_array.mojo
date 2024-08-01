@@ -664,12 +664,6 @@ struct Array(CollectionElement, Stringable):
             return Array(self.shape())
         return Array(self.node[].grads[0])
 
-    #    fn __getattr__(self, name: StringLiteral) raises -> Self:
-    #        if name == "grad":
-    #             return self.grad()
-    #        else:
-    #            raise "Error: No attribute found"
-
     fn set_name(inout self, name: String):
         self.node[].name = name
 
@@ -695,24 +689,28 @@ struct Array(CollectionElement, Stringable):
     fn __str__(self) -> String:
         var storage_offset = ""
         var out: String = ""
-        out += storage_offset + "Array("
+        # out += storage_offset + "Array("
         var idx = 0
         var dim = 0
-        var indent = "       "
-        build_out_string(self, out, idx, dim, indent)
-        out += ", shape=("
+        var indent = " "
         var ndim = self.node[].shape[].ndim
-        var shape = self.node[].shape[].shape
-        var stride = self.node[].shape[].stride
-        for i in range(ndim):
-            out += str(shape[i])
-            out += ", " if i < ndim - 1 else ""
-        out += "), stride: ("
-        for i in range(ndim):
-            out += str(stride[i])
-            out += "x" if i < ndim - 1 else ""
-        out += "), storage_offset: " + str(self.node[].shape[].storage_offset)
-        out += ", dtype=" + str(dtype) + ")"
+        if ndim == 1 and self.node[].shape[].shape[0] == 1:
+            out = self.load(0)
+        else:
+            build_out_string(self, out, idx, dim, indent)
+        # out += ", shape=("
+        # var ndim = self.node[].shape[].ndim
+        # var shape = self.node[].shape[].shape
+        # var stride = self.node[].shape[].stride
+        # for i in range(ndim):
+        #     out += str(shape[i])
+        #     out += ", " if i < ndim - 1 else ""
+        # out += "), stride: ("
+        # for i in range(ndim):
+        #     out += str(stride[i])
+        #     out += "x" if i < ndim - 1 else ""
+        # out += "), storage_offset: " + str(self.node[].shape[].storage_offset)
+        # out += ", dtype=" + str(dtype) + ")"
         return out
 
     fn execute_fwds(

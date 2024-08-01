@@ -48,6 +48,55 @@ fn grad(
     return Callable(f, argnums, 1, False, False)
 
 
+fn jacobian(
+    f: Callable,
+    argnums: List[Int] = List(-1),
+) raises -> Callable:
+    """
+    Take in a Callable and return a Callable that computes the derivative of the out of the
+    function/callable wrt. all args.
+    """
+    return grad(f, argnums)
+
+
+fn jacobian(
+    f: fn (List[Array]) raises -> Array, argnums: List[Int] = List(-1)
+) raises -> Callable:
+    return grad(f, argnums)
+
+
+fn jacobian(
+    f: fn (Array) raises -> Array, argnums: List[Int] = List(-1)
+) raises -> Callable:
+    return grad(f, argnums)
+
+
+fn hessian(
+    f: Callable,
+    argnums: List[Int] = List(-1),
+) raises -> Callable:
+    """
+    Take in a Callable and return a Callable that computes the derivative of the out of the
+    function/callable wrt. all args.
+    """
+    var f_grad = grad(f, argnums)
+    return grad(f_grad, argnums)
+
+
+fn hessian(
+    f: fn (List[Array]) raises -> Array, argnums: List[Int] = List(-1)
+) raises -> Callable:
+    var f_grad = grad(f, argnums)
+    return grad(f_grad, argnums)
+
+
+fn hessian(
+    f: fn (Array) raises -> Array, argnums: List[Int] = List(-1)
+) raises -> Callable:
+    var f_grad = grad(f, argnums)
+    return grad(f_grad, argnums)
+
+
 fn value_and_grad(
     arg: Variant[Callable, fn (List[Array]) raises -> Array],
     argnums: List[Int] = List(-1),
@@ -73,16 +122,12 @@ fn value_and_grad(
         return Callable(_f, argnums, 1, False, True)
 
 
-###########################################################################
-# The follwoing code is only in this file because function overloadings
-# (grad) are seeminly not supported for functions living in different files.
-# Will move this code to imperative.mojo as soon as possible.
-###########################################################################
 fn backward(arg: Array, create_graph: Bool) raises:
-    var out = arg
+    jacrev(arg, create_graph)
 
-    # if out.ndim() != 1 or out.shape()[out.ndim()-1] != 1:
-    #     raise "grad only supports scalar outputs"
+
+fn jacrev(arg: Array, create_graph: Bool) raises:
+    var out = arg
 
     reset_node_id_recursive(out)
     var trace = List[Array]()
@@ -154,3 +199,46 @@ fn grad(
         final_outs.append(gradient)
 
     return final_outs
+
+
+# the pytroch way - just for completeness here:
+fn jacobian(f: Callable, args: List[Array]) raises -> List[Array]:
+    """
+    Take in a Callable and return a Callable that computes the derivative of the out of the
+    function/callable wrt. all args.
+    """
+    var f_jac = grad(f, List(-1))
+    return f_jac(args)[List[Array]]
+
+
+fn jacobian(
+    f: fn (List[Array]) raises -> Array, args: List[Array]
+) raises -> List[Array]:
+    var f_jac = grad(f, List(-1))
+    return f_jac(args)[List[Array]]
+
+
+fn jacobian(f: fn (Array) raises -> Array, arg: Array) raises -> Array:
+    var f_jac = grad(f, List(-1))
+    return f_jac(arg)[Array]
+
+
+fn hessian(f: Callable, args: List[Array]) raises -> List[Array]:
+    """
+    Take in a Callable and return a Callable that computes the derivative of the out of the
+    function/callable wrt. all args.
+    """
+    var f_jes = hessian(f, List(-1))
+    return f_jes(args)[List[Array]]
+
+
+fn hessian(
+    f: fn (List[Array]) raises -> Array, args: List[Array]
+) raises -> List[Array]:
+    var f_jes = hessian(f, List(-1))
+    return f_jes(args)[List[Array]]
+
+
+fn hessian(f: fn (Array) raises -> Array, arg: Array) raises -> Array:
+    var f_jes = hessian(f, List(-1))
+    return f_jes(arg)[Array]

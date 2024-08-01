@@ -27,21 +27,17 @@
 
 2. **Clone the repository**: Choose one of the following options to clone the repository:
 
-    - **Stable Version (main-branch):** This is the most stable version of the project.
 
-      ```bash
-      git clone https://github.com/endia-org/Endia.git
-      cd Endia
-      git checkout main
-      ```
+    ```bash
+    git clone https://github.com/endia-org/Endia.git
+    cd Endia
+    ```
 
-    - **Development Version (nightly-branch):** This version contains the latest features and updates.
+    If you aim to use the nightly (development) version, switch to the `nightly` branch:
 
-      ```bash
-      git clone https://github.com/endia-org/Endia.git
-      cd Endia
-      git checkout nightly
-      ```
+    ```bash
+    git checkout nightly
+    ```
 
 3. **Set Up Environment**:
 

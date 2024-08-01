@@ -7,7 +7,7 @@ def foo(x: Array) -> Array:
     return sum(x**2)
 
 
-def main():
+def example_torch_like():
     x = arange(1.0, 4.0, requires_grad=True)
 
     y = foo(x)

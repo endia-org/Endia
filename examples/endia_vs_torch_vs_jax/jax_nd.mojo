@@ -6,7 +6,7 @@ def foo(x: Array) -> Array:
     return sum(x**2)
 
 
-def main():
+def example_jax_like():
     # create Callables
     foo_jac = grad(foo)
     foo_hes = jacobian(foo_jac)

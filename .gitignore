@@ -2,7 +2,3 @@
 main.mojo
 setup_headers.py
 test.py
-jax_nd.mojo 
-jax_nd.py
-torch_nd.mojo 
-torch_nd.py

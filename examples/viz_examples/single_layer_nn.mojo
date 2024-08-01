@@ -14,6 +14,8 @@ def single_layer_viz_example():
     hidden = nd.relu(input @ weight1 + bias1)
     pred = hidden @ weight2 + bias2 
 
+
+
     # visualize
     nd.utils.visualize_graph(pred, "./single_layer_nn")
 

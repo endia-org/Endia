@@ -103,8 +103,8 @@ fn eye_(inout arg: Array) raises:
         for i in range(arg.size()):
             arg.store_complex(i, 1, 0)
     else:
-        for i in range(arg.size()):
-            arg.store(i, 1)
+        for i in range(arg.shape()[1]):
+            arg.store(i + i * arg.shape()[1], 1)
 
 
 fn eye(n: Int, requires_grad: Bool = False) raises -> Array:

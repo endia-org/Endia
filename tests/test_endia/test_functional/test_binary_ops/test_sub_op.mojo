@@ -41,7 +41,7 @@ def run_test_sub_grad(msg: String = "sub_grad"):
     res = nd.sum(nd.sub(arg0, arg1))
     res_torch = torch.sum(torch.sub(arg0_torch, arg1_torch))
 
-    res.backward(retain_graph=True)
+    res.backward(create_graph=True)
     res_torch.backward()
 
     grad0 = arg0.grad()

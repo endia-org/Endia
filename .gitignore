@@ -1,3 +1,4 @@
 .vscode/
 main.mojo
 setup_headers.py
+test.py

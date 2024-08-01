@@ -28,13 +28,13 @@ def example1():
 
     # Compute result, first and second order derivatives
     y = foo(x)
-    y.backward(retain_graph=True)
+    y.backward(create_graph=True)
     dy_dx = x.grad()
-    d2y_dx2 = nd.grad(outs=dy_dx, inputs=x)[nd.Array]
+    d2y_dx2 = nd.grad(outs=nd.sum(dy_dx), inputs=x)[0]
 
     # Print results
-    print(y)  # out: [14.0]
-    print(dy_dx)  # out: [2.0, 4.0, 6.0]
+    print(y)        # out: [14.0]
+    print(dy_dx)    # out: [2.0, 4.0, 6.0]
     print(d2y_dx2)  # out: [2.0, 2.0, 2.0]
 
     print("\nFunctional grad computation:")

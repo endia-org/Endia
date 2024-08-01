@@ -137,8 +137,8 @@ struct Callable(CollectionElement):
             next_outs.clear()
 
             for arr in tmp_outs:
-                arr[].backward(
-                    retain_graph=True if (
+                (arr[]).backward(
+                    create_graph=True if (
                         order < self.order_of_differentiation - 1
                         or self.optimize_jit
                     ) else False

@@ -75,21 +75,22 @@ fn value_and_grad(
 
 ###########################################################################
 # The follwoing code is only in this file because function overloadings
-# (grad) are seeminly not supported for functions living in differnt files.
+# (grad) are seeminly not supported for functions living in different files.
 # Will move this code to imperative.mojo as soon as possible.
 ###########################################################################
-fn backward(arg: Array, retain_graph: Bool) raises:
+fn backward(arg: Array, create_graph: Bool) raises:
     var out = arg
+
+    # if out.ndim() != 1 or out.shape()[out.ndim()-1] != 1:
+    #     raise "grad only supports scalar outputs"
 
     reset_node_id_recursive(out)
     var trace = List[Array]()
     top_order_rec(out, trace)
 
-    var last_grad = ones(arg.shape())
-    # last_grad.requires_grad_(True)
+    var dims = arg.shape()[arg.ndim()-1]
+    var last_grad = eye(dims) if out.shape()[out.ndim()-1] != 1 else ones(dims)
     out.grad_(last_grad)
-
-    # var breakpoint_nodes = List[Array]()
 
     for i in range(len(trace) - 1, -1, -1):
         var curr = trace[i]
@@ -114,28 +115,10 @@ fn backward(arg: Array, retain_graph: Bool) raises:
                 if primal.has_fxgraph():
                     if primal.is_breakpoint():
                         primal_grad.postpone_as_grpah_output()
-                        # if primal.args().size > 0:
-                        #     # _ = primal.grad().item(0)
-                        #     var primal_grad = primal.grad()
-                        #     primal_grad.postpone_as_grpah_output()
-                        # else:
-                        #     breakpoint_nodes.append(primal)
 
-                if not retain_graph:
+                if not create_graph:
                     var primal_grad = primal.grad()
                     primal_grad.clear_args()
-
-    # for breakpoint_node in breakpoint_nodes:
-    #     var graph = breakpoint_node[].grad().graph()
-    #     var id_in_graph = breakpoint_node[].grad().id_in_graph()
-    #     var graph_node = graph[].trace[id_in_graph]
-    #     if not graph_node.is_computed:
-    #         print("here")
-    #         _ = breakpoint_node[].grad().item(0)
-
-    #         print("done")
-
-    # _ = out.item(0) # call this on curr to compute all postponed outeputs of the potentially corresponding fx graph, this will cimpute all outputs at once
 
     reset_node_id_recursive(out)
 
@@ -144,8 +127,8 @@ fn grad(
     outs: List[Array],
     inputs: List[Array],
     retain_grads: Bool = True,
-    retain_graph: Bool = False,
-) raises -> Variant[Array, List[Array]]:
+    create_graph: Bool = False,
+) raises -> List[Array]:
     """
     Compute the gradient of outs wrt. inputs.
     """
@@ -157,19 +140,16 @@ fn grad(
         remove_grad_rec(input)
     for i in range(len(outs)):
         var out = outs[i]
-        out.backward(retain_graph=retain_graph)
+        out.backward(create_graph=create_graph)
     var final_outs = List[Array]()
     for i in range(len(inputs)):
         var input = inputs[i]
         var gradient = input.grad()
-        if not retain_graph:
+        if not create_graph:
             gradient.clear_args()
             gradient.remove_grad()
         if not retain_grads:
             input.remove_grad()
         final_outs.append(gradient)
 
-    if len(final_outs) == 1:
-        return final_outs[0]
-    else:
-        return final_outs
+    return final_outs

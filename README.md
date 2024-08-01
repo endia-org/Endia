@@ -65,7 +65,7 @@ In this guide, we'll demonstrate how to compute the **value**, **gradient**, and
   </a>
 </p>
 
-When using Endia's imperative (PyTorch-like) interface, we compute the gradient of a function by calling the **backward** method on the function's output. This imperative style requires explicit management of the computational graph, including setting `requires_grad=True` for the input arrays (i.e. leaf nodes) and using `retain_graph=True` in the backward method when computing higher-order derivatives.
+When using Endia's imperative (PyTorch-like) interface, we compute the gradient of a function by calling the **backward** method on the function's output. This imperative style requires explicit management of the computational graph, including setting `requires_grad=True` for the input arrays (i.e. leaf nodes) and using `create_graph=True` in the backward method when computing higher-order derivatives.
 
 ```python
 import endia as nd 
@@ -79,9 +79,9 @@ x = nd.array('[1.0, 2.0, 3.0]', requires_grad=True)
 
 # Compute result, first and second order derivatives
 y = foo(x)
-y.backward(retain_graph=True)            
+y.backward(create_graph=True)            
 dy_dx = x.grad()
-d2y_dx2 = nd.grad(outs=dy_dx, inputs=x)[nd.Array]
+d2y_dx2 = nd.grad(outs=nd.sum(dy_dx), inputs=x)[0]
 
 # Print results
 print(y)        # out: [14.0]

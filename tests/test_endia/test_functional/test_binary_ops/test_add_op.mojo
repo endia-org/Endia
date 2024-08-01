@@ -41,7 +41,7 @@ def run_test_add_grad(msg: String = "add_grad"):
     res = nd.sum(nd.add(arg0, arg1))
     res_torch = torch.sum(torch.add(arg0_torch, arg1_torch))
 
-    res.backward(retain_graph=True)
+    res.backward(create_graph=True)
     res_torch.backward()
 
     grad0 = arg0.grad()

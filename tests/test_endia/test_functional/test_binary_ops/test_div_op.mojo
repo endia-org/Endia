@@ -41,7 +41,7 @@ def run_test_div_grad(msg: String = "div_grad"):
     res = nd.sum(nd.div(arg0, arg1))
     res_torch = torch.sum(torch.div(arg0_torch, arg1_torch))
 
-    res.backward(retain_graph=True)
+    res.backward(create_graph=True)
     res_torch.backward()
 
     grad0 = arg0.grad()

@@ -664,6 +664,12 @@ struct Array(CollectionElement, Stringable):
             return Array(self.shape())
         return Array(self.node[].grads[0])
 
+#    fn __getattr__(self, name: StringLiteral) raises -> Self:
+#        if name == "grad":   
+#             return self.grad()
+#        else:
+#            raise "Error: No attribute found"
+
     fn set_name(inout self, name: String):
         self.node[].name = name
 
@@ -744,8 +750,8 @@ struct Array(CollectionElement, Stringable):
         var graph_id = self.id_in_graph()
         return graph[].trace[graph_id].array_in_graph
 
-    fn backward(self, retain_graph: Bool = False) raises:
-        backward(self, retain_graph)
+    fn backward(self, create_graph: Bool = False) raises:
+        backward(self, create_graph)
 
     fn zero_grad(inout self):
         zero_grad_rec(self)

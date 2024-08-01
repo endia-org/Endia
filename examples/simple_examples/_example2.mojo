@@ -26,7 +26,9 @@ def example2():
     x = nd.Array("[[1.0,2.0,3.0],[1.0,2.0,3.0]]", requires_grad=True)
     y = nd.Array("[[1.0,2.0,3.0],[1.0,2.0,3.0]]", requires_grad=True)
 
-    grads = nd.grad(outs=nd.sum(foo(List(x, y))), inputs=List(x, y), create_graph=True)
+    grads = nd.grad(
+        outs=nd.sum(foo(List(x, y))), inputs=List(x, y), create_graph=True
+    )
     x_grad = grads[0]
     y_grad = grads[1]
     print("grads:")

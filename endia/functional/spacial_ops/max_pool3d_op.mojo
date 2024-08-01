@@ -240,7 +240,7 @@ fn max_pool3d(
     padding: Tuple[Int, Int, Int] = (0, 0, 0),
     dilation: Tuple[Int, Int, Int] = (1, 1, 1),
 ) raises -> Array:
-    """ 
+    """
     Applies a 3D max pooling operation over an input tensor.
 
     Args:

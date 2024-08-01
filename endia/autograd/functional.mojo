@@ -88,13 +88,14 @@ fn backward(arg: Array, create_graph: Bool) raises:
     var trace = List[Array]()
     top_order_rec(out, trace)
 
-    var dims = arg.shape()[arg.ndim()-1]
-    var last_grad = eye(dims) if out.shape()[out.ndim()-1] != 1 else ones(dims)
+    var dims = arg.shape()[arg.ndim() - 1]
+    var last_grad = reshape(eye(out.size()), out.shape() + out.shape()) if (
+        out.ndim() != 1 or dims != 1
+    ) else ones(dims)
     out.grad_(last_grad)
 
     for i in range(len(trace) - 1, -1, -1):
         var curr = trace[i]
-        # print("computing backward:", curr.name())
         var primals = curr.args()
 
         if primals.size == 0:

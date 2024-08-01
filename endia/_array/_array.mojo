@@ -664,11 +664,11 @@ struct Array(CollectionElement, Stringable):
             return Array(self.shape())
         return Array(self.node[].grads[0])
 
-#    fn __getattr__(self, name: StringLiteral) raises -> Self:
-#        if name == "grad":   
-#             return self.grad()
-#        else:
-#            raise "Error: No attribute found"
+    #    fn __getattr__(self, name: StringLiteral) raises -> Self:
+    #        if name == "grad":
+    #             return self.grad()
+    #        else:
+    #            raise "Error: No attribute found"
 
     fn set_name(inout self, name: String):
         self.node[].name = name

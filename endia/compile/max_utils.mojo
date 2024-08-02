@@ -204,11 +204,12 @@ def build_graph(
             elif array[].name() == "less_equal":
                 symbol_trace.append(ops.greater_equal(arg2, arg1))
 
-            
-            # spatial ops 
+            # spatial ops
             # conv ops
             elif array[].name() == "conv1d":
-                var params = array_shape_to_list(array[].array_shape().args()[2])
+                var params = array_shape_to_list(
+                    array[].array_shape().args()[2]
+                )
                 var stride = params[0]
                 var padding = params[1]
                 var dilation = params[2]
@@ -221,14 +222,21 @@ def build_graph(
                             ops.unsqueeze(arg2, -2),
                             stride=(1, stride),
                             dilation=(1, dilation),
-                            padding=(padding, padding, 0, 0),  # (left, right, top, bottom)
-                            groups=groups
+                            padding=(
+                                padding,
+                                padding,
+                                0,
+                                0,
+                            ),  # (left, right, top, bottom)
+                            groups=groups,
                         ),
-                        -2
+                        -2,
                     )
                 )
             elif array[].name() == "conv2d":
-                var params = array_shape_to_list(array[].array_shape().args()[2])
+                var params = array_shape_to_list(
+                    array[].array_shape().args()[2]
+                )
                 var stride_height = params[0]
                 var stride_width = params[1]
                 var padding_height = params[2]
@@ -243,12 +251,19 @@ def build_graph(
                         arg2,
                         stride=(stride_height, stride_width),
                         dilation=(dilation_height, dilation_width),
-                        padding=(padding_width, padding_width, padding_height, padding_height),  # (left, right, top, bottom)
-                        groups=groups
+                        padding=(
+                            padding_width,
+                            padding_width,
+                            padding_height,
+                            padding_height,
+                        ),  # (left, right, top, bottom)
+                        groups=groups,
                     )
                 )
             elif array[].name() == "conv3d":
-                var params = array_shape_to_list(array[].array_shape().args()[2])
+                var params = array_shape_to_list(
+                    array[].array_shape().args()[2]
+                )
                 var stride_depth = params[0]
                 var stride_height = params[1]
                 var stride_width = params[2]
@@ -265,15 +280,28 @@ def build_graph(
                         arg1,
                         arg2,
                         stride=(stride_depth, stride_height, stride_width),
-                        dilation=(dilation_depth, dilation_height, dilation_width),
-                        padding=(padding_width, padding_width, padding_height, padding_height, padding_depth, padding_depth),  # (left, right, top, bottom, front, back)
-                        groups=groups
+                        dilation=(
+                            dilation_depth,
+                            dilation_height,
+                            dilation_width,
+                        ),
+                        padding=(
+                            padding_width,
+                            padding_width,
+                            padding_height,
+                            padding_height,
+                            padding_depth,
+                            padding_depth,
+                        ),  # (left, right, top, bottom, front, back)
+                        groups=groups,
                     )
                 )
 
             # pooling ops
             elif array[].name() == "maxpool1d":
-                var params = array_shape_to_list(array[].array_shape().args()[1])
+                var params = array_shape_to_list(
+                    array[].array_shape().args()[1]
+                )
                 var kernel_size = params[0]
                 var stride = params[1]
                 var padding = params[2]
@@ -286,13 +314,20 @@ def build_graph(
                             filter_shape=(1, kernel_size),
                             stride=(1, stride),
                             dilation=(1, dilation),
-                            padding=(padding, padding, 0, 0)  # (left, right, top, bottom)
+                            padding=(
+                                padding,
+                                padding,
+                                0,
+                                0,
+                            ),  # (left, right, top, bottom)
                         ),
-                        -2
+                        -2,
                     )
                 )
             elif array[].name() == "maxpool2d":
-                var params = array_shape_to_list(array[].array_shape().args()[1])
+                var params = array_shape_to_list(
+                    array[].array_shape().args()[1]
+                )
                 var kernel_height = params[0]
                 var kernel_width = params[1]
                 var stride_height = params[2]
@@ -308,7 +343,12 @@ def build_graph(
                         filter_shape=(kernel_height, kernel_width),
                         stride=(stride_height, stride_width),
                         dilation=(dilation_height, dilation_width),
-                        padding=(padding_width, padding_width, padding_height, padding_height)  # (left, right, top, bottom)
+                        padding=(
+                            padding_width,
+                            padding_width,
+                            padding_height,
+                            padding_height,
+                        ),  # (left, right, top, bottom)
                     )
                 )
             elif array[].name() == "maxpool3d":
@@ -316,12 +356,14 @@ def build_graph(
 
             # avgpool ops
             elif array[].name() == "avgpool1d":
-                var params = array_shape_to_list(array[].array_shape().args()[1])
+                var params = array_shape_to_list(
+                    array[].array_shape().args()[1]
+                )
                 var kernel_size = params[0]
                 var stride = params[1]
                 var padding = params[2]
                 var dilation = params[3]
-                var count_boundary = True # not an option in Endia yet!
+                var count_boundary = True  # not an option in Endia yet!
 
                 symbol_trace.append(
                     ops.squeeze(
@@ -330,15 +372,22 @@ def build_graph(
                             filter_shape=(1, kernel_size),
                             stride=(1, stride),
                             dilation=(1, dilation),
-                            padding=(padding, padding, 0, 0),  # (left, right, top, bottom)
-                            count_boundary=count_boundary
+                            padding=(
+                                padding,
+                                padding,
+                                0,
+                                0,
+                            ),  # (left, right, top, bottom)
+                            count_boundary=count_boundary,
                         ),
-                        -2
+                        -2,
                     )
                 )
 
             elif array[].name() == "avgpool2d":
-                var params = array_shape_to_list(array[].array_shape().args()[1])
+                var params = array_shape_to_list(
+                    array[].array_shape().args()[1]
+                )
                 var kernel_height = params[0]
                 var kernel_width = params[1]
                 var stride_height = params[2]
@@ -347,7 +396,7 @@ def build_graph(
                 var padding_width = params[5]
                 var dilation_height = params[6]
                 var dilation_width = params[7]
-                var count_boundary = True # not an option in Endia yet!
+                var count_boundary = True  # not an option in Endia yet!
 
                 symbol_trace.append(
                     ops.avg_pool(
@@ -355,13 +404,18 @@ def build_graph(
                         filter_shape=(kernel_height, kernel_width),
                         stride=(stride_height, stride_width),
                         dilation=(dilation_height, dilation_width),
-                        padding=(padding_width, padding_width, padding_height, padding_height),  # (left, right, top, bottom)
-                        count_boundary=count_boundary
+                        padding=(
+                            padding_width,
+                            padding_width,
+                            padding_height,
+                            padding_height,
+                        ),  # (left, right, top, bottom)
+                        count_boundary=count_boundary,
                     )
                 )
             elif array[].name() == "avgpool3d":
                 raise "avgpool3d not implemented in MAX"
-            
+
             # binary ops error handling
             else:
                 print("Unknown binary op:", array[].name())

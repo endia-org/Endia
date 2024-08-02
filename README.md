@@ -66,27 +66,28 @@ In this guide, we'll demonstrate how to compute the **value**, **gradient**, and
 When using Endia's imperative (PyTorch-like) interface, we compute the gradient of a function by calling the **backward** method on the function's output. This imperative style requires explicit management of the computational graph, including setting `requires_grad=True` for the input arrays (i.e. leaf nodes) and using `create_graph=True` in the backward method when computing higher-order derivatives.
 
 ```python
-import endia as nd 
+from endia import Tensor, sum, arange
+import endia.autograd.functional as F
 
 
 # Define the function
-def foo(x: nd.Array) -> nd.Array:
-    return nd.sum(x ** 2)
+def foo(x: Tensor) -> Tensor:
+    return sum(x ** 2)
 
+def main():
+    # Initialize variable - requires_grad=True needed!
+    x = arange(1.0, 4.0, requires_grad=True) # [1.0, 2.0, 3.0]
 
-# Initialize variable - requires_grad=True needed!
-x = arange(1.0, 4.0, requires_grad=True) # [1.0, 2.0, 3.0]
+    # Compute result, first and second order derivatives
+    y = foo(x)
+    y.backward(create_graph=True)            
+    dy_dx = x.grad()
+    d2y_dx2 = F.grad(outs=sum(dy_dx), inputs=x)[0]
 
-# Compute result, first and second order derivatives
-y = foo(x)
-y.backward(create_graph=True)            
-dy_dx = x.grad()
-d2y_dx2 = nd.grad(outs=nd.sum(dy_dx), inputs=x)[0]
-
-# Print results
-print(y)        # 14.0
-print(dy_dx)    # [2.0, 4.0, 6.0]
-print(dy2_dx2)  # [2.0, 2.0, 2.0]
+    # Print results
+    print(y)        # 14.0
+    print(dy_dx)    # [2.0, 4.0, 6.0]
+    print(d2y_dx2)  # [2.0, 2.0, 2.0]
 ```
 
 ### The **JAX** way
@@ -101,22 +102,24 @@ print(dy2_dx2)  # [2.0, 2.0, 2.0]
 When using Endia's functional (JAX-like) interface, the computational graph is handled implicitly. By calling the `grad` or `jacobian` function on foo, we create a `Callable` which computes the full Jacobian matrix. This `Callable` can be passed to the `grad` or `jacobian` function again to compute higher-order derivatives.
 
 ```python
-from endia import grad, jacobian, sum, arange, Array
+from endia import grad, jacobian
+from endia.numpy import sum, arange, ndarray
 
 
-def foo(x: Array) -> Array:
+def foo(x: ndarray) -> ndarray:
     return sum(x**2)
 
 
-# create Callables for the first and second order derivatives
-foo_jac = grad(foo)
-foo_hes = jacobian(foo_jac)
+def main():
+    # create Callables for the first and second order derivatives
+    foo_jac = grad(foo)
+    foo_hes = jacobian(foo_jac)
 
-x = arange(1.0, 4.0)      # [1.0, 2.0, 3.0]
+    x = arange(1.0, 4.0)       # [1.0, 2.0, 3.0]
 
-print(foo(x))             # 14.0
-print(foo_jac(x)[Array])  # [2.0, 4.0, 6.0]
-print(foo_hes(x)[Array])  # [[2.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 2.0]]
+    print(foo(x))              # 14.0
+    print(foo_jac(x)[ndarray]) # [2.0, 4.0, 6.0]
+    print(foo_hes(x)[ndarray]) # [[2.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 2.0]]
 ```
 
 *And there is so much more! Endia can handle complex valued functions, can perform both forward and reverse-mode automatic differentiation, it even has a builtin JIT compiler to make things go brrr. Explore the full **list of features** in the [documentation](https://endia.org).*

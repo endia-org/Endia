@@ -124,11 +124,13 @@ def main():
 
 *And there is so much more! Endia can handle complex valued functions, can perform both forward and reverse-mode automatic differentiation, it even has a builtin JIT compiler to make things go brrr. Explore the full **list of features** in the [documentation](https://endia.org).*
 
-## Our Mission
+## Why another ML framework?
 
 - 🧠 **Advance AI & Scientific Computing:** Push boundaries with clear and understandable algorithms
 - 🚀 **Mojo-Powered Clarity:** High-performance open-source code that remains readable and pythonic through and through
 - 📐 **Explainability:** Prioritize clarity and educational value over exhaustive features
+
+*"Nothing in life is to be feared, it is only to be understood. Now is the time to understand more, so that we may fear less."* - Marie Curie
 
 ## Contributing
 

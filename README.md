@@ -1,14 +1,10 @@
-<!-- <div align="center">
-  <img src="./assets/titleimage.png" alt="Title Image" />
-</div> -->
-
 <div align="center">
-  <img src="./assets/endia_stack_concept.png" alt="Endia Stack concept Image"/>
+  <img src="./assets/endia_stack_concept.png" alt="Endia Stack concept Image" style="max-width: 800px;"/>
 </div>
 
 ###
 
-**Endia** is a dynamic Array library for Scientific Computing, similar to PyTorch, Numpy and JAX, but made in 7k lines of pure Mojo. It offers:
+**Endia** is a dynamic Array library for Scientific Computing, similar to PyTorch, Numpy and JAX. It offers:
 
 - **Automatic differentiation**: Compute derivatives of arbitrary order.
 - **Complex number support:** Use Endia for advanced scientific applications.
@@ -154,4 +150,4 @@ If you use Endia in your research or project, please cite it as follows:
 
 ## License
 
-Endia is licensed under the [Apache-2.0 license with LLVM Excpetions](https://github.com/endia-org/Endia/blob/main/LICENSE).
+Endia is licensed under the [Apache-2.0 license with LLVM Exeptions](https://github.com/endia-org/Endia/blob/main/LICENSE).

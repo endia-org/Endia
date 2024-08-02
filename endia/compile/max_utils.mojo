@@ -203,6 +203,166 @@ def build_graph(
                 symbol_trace.append(ops.greater(arg2, arg1))
             elif array[].name() == "less_equal":
                 symbol_trace.append(ops.greater_equal(arg2, arg1))
+
+            
+            # spatial ops 
+            # conv ops
+            elif array[].name() == "conv1d":
+                var params = array_shape_to_list(array[].array_shape().args()[2])
+                var stride = params[0]
+                var padding = params[1]
+                var dilation = params[2]
+                var groups = params[3]
+
+                symbol_trace.append(
+                    ops.squeeze(
+                        ops.conv2d(
+                            ops.unsqueeze(arg1, -2),
+                            ops.unsqueeze(arg2, -2),
+                            stride=(1, stride),
+                            dilation=(1, dilation),
+                            padding=(padding, padding, 0, 0),  # (left, right, top, bottom)
+                            groups=groups
+                        ),
+                        -2
+                    )
+                )
+            elif array[].name() == "conv2d":
+                var params = array_shape_to_list(array[].array_shape().args()[2])
+                var stride_height = params[0]
+                var stride_width = params[1]
+                var padding_height = params[2]
+                var padding_width = params[3]
+                var dilation_height = params[4]
+                var dilation_width = params[5]
+                var groups = params[6]
+
+                symbol_trace.append(
+                    ops.conv2d(
+                        arg1,
+                        arg2,
+                        stride=(stride_height, stride_width),
+                        dilation=(dilation_height, dilation_width),
+                        padding=(padding_width, padding_width, padding_height, padding_height),  # (left, right, top, bottom)
+                        groups=groups
+                    )
+                )
+            elif array[].name() == "conv3d":
+                var params = array_shape_to_list(array[].array_shape().args()[2])
+                var stride_depth = params[0]
+                var stride_height = params[1]
+                var stride_width = params[2]
+                var padding_depth = params[3]
+                var padding_height = params[4]
+                var padding_width = params[5]
+                var dilation_depth = params[6]
+                var dilation_height = params[7]
+                var dilation_width = params[8]
+                var groups = params[9]
+
+                symbol_trace.append(
+                    ops.conv3d(
+                        arg1,
+                        arg2,
+                        stride=(stride_depth, stride_height, stride_width),
+                        dilation=(dilation_depth, dilation_height, dilation_width),
+                        padding=(padding_width, padding_width, padding_height, padding_height, padding_depth, padding_depth),  # (left, right, top, bottom, front, back)
+                        groups=groups
+                    )
+                )
+
+            # pooling ops
+            elif array[].name() == "maxpool1d":
+                var params = array_shape_to_list(array[].array_shape().args()[1])
+                var kernel_size = params[0]
+                var stride = params[1]
+                var padding = params[2]
+                var dilation = params[3]
+
+                symbol_trace.append(
+                    ops.squeeze(
+                        ops.max_pool(
+                            ops.unsqueeze(arg1, -2),
+                            filter_shape=(1, kernel_size),
+                            stride=(1, stride),
+                            dilation=(1, dilation),
+                            padding=(padding, padding, 0, 0)  # (left, right, top, bottom)
+                        ),
+                        -2
+                    )
+                )
+            elif array[].name() == "maxpool2d":
+                var params = array_shape_to_list(array[].array_shape().args()[1])
+                var kernel_height = params[0]
+                var kernel_width = params[1]
+                var stride_height = params[2]
+                var stride_width = params[3]
+                var padding_height = params[4]
+                var padding_width = params[5]
+                var dilation_height = params[6]
+                var dilation_width = params[7]
+
+                symbol_trace.append(
+                    ops.max_pool(
+                        arg1,
+                        filter_shape=(kernel_height, kernel_width),
+                        stride=(stride_height, stride_width),
+                        dilation=(dilation_height, dilation_width),
+                        padding=(padding_width, padding_width, padding_height, padding_height)  # (left, right, top, bottom)
+                    )
+                )
+            elif array[].name() == "maxpool3d":
+                raise "maxpool3d not implemented in MAX"
+
+            # avgpool ops
+            elif array[].name() == "avgpool1d":
+                var params = array_shape_to_list(array[].array_shape().args()[1])
+                var kernel_size = params[0]
+                var stride = params[1]
+                var padding = params[2]
+                var dilation = params[3]
+                var count_boundary = True # not an option in Endia yet!
+
+                symbol_trace.append(
+                    ops.squeeze(
+                        ops.avg_pool(
+                            ops.unsqueeze(arg1, -2),
+                            filter_shape=(1, kernel_size),
+                            stride=(1, stride),
+                            dilation=(1, dilation),
+                            padding=(padding, padding, 0, 0),  # (left, right, top, bottom)
+                            count_boundary=count_boundary
+                        ),
+                        -2
+                    )
+                )
+
+            elif array[].name() == "avgpool2d":
+                var params = array_shape_to_list(array[].array_shape().args()[1])
+                var kernel_height = params[0]
+                var kernel_width = params[1]
+                var stride_height = params[2]
+                var stride_width = params[3]
+                var padding_height = params[4]
+                var padding_width = params[5]
+                var dilation_height = params[6]
+                var dilation_width = params[7]
+                var count_boundary = True # not an option in Endia yet!
+
+                symbol_trace.append(
+                    ops.avg_pool(
+                        arg1,
+                        filter_shape=(kernel_height, kernel_width),
+                        stride=(stride_height, stride_width),
+                        dilation=(dilation_height, dilation_width),
+                        padding=(padding_width, padding_width, padding_height, padding_height),  # (left, right, top, bottom)
+                        count_boundary=count_boundary
+                    )
+                )
+            elif array[].name() == "avgpool3d":
+                raise "avgpool3d not implemented in MAX"
+            
+            # binary ops error handling
             else:
                 print("Unknown binary op:", array[].name())
         else:

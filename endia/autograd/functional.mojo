@@ -97,10 +97,9 @@ fn grad(
     return final_outs
 
 
-
-
 fn grad(f: Callable, argnums: List[Int] = List(-1)) raises -> Callable:
-    """Computes the gradient of a Callable function with respect to specified arguments."""
+    """Computes the gradient of a Callable function with respect to specified arguments.
+    """
     var existing_argnums = f.argnums
     existing_argnums.append(argnums)
     return Callable(
@@ -111,43 +110,76 @@ fn grad(f: Callable, argnums: List[Int] = List(-1)) raises -> Callable:
         False,
     )
 
-fn grad(f: fn (List[Array]) raises -> Array, argnums: List[Int] = List(-1)) raises -> Callable:
-    """Computes the gradient of a function that takes a list of Arrays and returns an Array."""
+
+fn grad(
+    f: fn (List[Array]) raises -> Array, argnums: List[Int] = List(-1)
+) raises -> Callable:
+    """Computes the gradient of a function that takes a list of Arrays and returns an Array.
+    """
     return Callable(f, argnums, 1, False, False)
 
-fn grad(f: fn (Array) raises -> Array, argnums: List[Int] = List(-1)) raises -> Callable:
-    """Computes the gradient of a function that takes a single Array and returns an Array."""
+
+fn grad(
+    f: fn (Array) raises -> Array, argnums: List[Int] = List(-1)
+) raises -> Callable:
+    """Computes the gradient of a function that takes a single Array and returns an Array.
+    """
     return Callable(f, argnums, 1, False, False)
+
 
 fn jacobian(f: Callable, argnums: List[Int] = List(-1)) raises -> Callable:
-    """Computes the Jacobian of a Callable function with respect to specified arguments."""
+    """Computes the Jacobian of a Callable function with respect to specified arguments.
+    """
     return grad(f, argnums)
 
-fn jacobian(f: fn (List[Array]) raises -> Array, argnums: List[Int] = List(-1)) raises -> Callable:
-    """Computes the Jacobian of a function that takes a list of Arrays and returns an Array."""
+
+fn jacobian(
+    f: fn (List[Array]) raises -> Array, argnums: List[Int] = List(-1)
+) raises -> Callable:
+    """Computes the Jacobian of a function that takes a list of Arrays and returns an Array.
+    """
     return grad(f, argnums)
 
-fn jacobian(f: fn (Array) raises -> Array, argnums: List[Int] = List(-1)) raises -> Callable:
-    """Computes the Jacobian of a function that takes a single Array and returns an Array."""
+
+fn jacobian(
+    f: fn (Array) raises -> Array, argnums: List[Int] = List(-1)
+) raises -> Callable:
+    """Computes the Jacobian of a function that takes a single Array and returns an Array.
+    """
     return grad(f, argnums)
+
 
 fn hessian(f: Callable, argnums: List[Int] = List(-1)) raises -> Callable:
-    """Computes the Hessian of a Callable function with respect to specified arguments."""
+    """Computes the Hessian of a Callable function with respect to specified arguments.
+    """
     var f_grad = grad(f, argnums)
     return grad(f_grad, argnums)
 
-fn hessian(f: fn (List[Array]) raises -> Array, argnums: List[Int] = List(-1)) raises -> Callable:
-    """Computes the Hessian of a function that takes a list of Arrays and returns an Array."""
+
+fn hessian(
+    f: fn (List[Array]) raises -> Array, argnums: List[Int] = List(-1)
+) raises -> Callable:
+    """Computes the Hessian of a function that takes a list of Arrays and returns an Array.
+    """
     var f_grad = grad(f, argnums)
     return grad(f_grad, argnums)
 
-fn hessian(f: fn (Array) raises -> Array, argnums: List[Int] = List(-1)) raises -> Callable:
-    """Computes the Hessian of a function that takes a single Array and returns an Array."""
+
+fn hessian(
+    f: fn (Array) raises -> Array, argnums: List[Int] = List(-1)
+) raises -> Callable:
+    """Computes the Hessian of a function that takes a single Array and returns an Array.
+    """
     var f_grad = grad(f, argnums)
     return grad(f_grad, argnums)
 
-fn value_and_grad(arg: Variant[Callable, fn (List[Array]) raises -> Array], argnums: List[Int] = List(-1)) raises -> Callable:
-    """Computes both the value and gradient of a function or Callable with respect to specified arguments."""
+
+fn value_and_grad(
+    arg: Variant[Callable, fn (List[Array]) raises -> Array],
+    argnums: List[Int] = List(-1),
+) raises -> Callable:
+    """Computes both the value and gradient of a function or Callable with respect to specified arguments.
+    """
     var a = arg
     if arg.isa[Callable]():
         var _a = a.unsafe_take[Callable]()
@@ -166,33 +198,46 @@ fn value_and_grad(arg: Variant[Callable, fn (List[Array]) raises -> Array], argn
 
 
 fn jacobian(f: Callable, args: List[Array]) raises -> List[Array]:
-    """Computes the Jacobian of a Callable function with respect to given arguments."""
+    """Computes the Jacobian of a Callable function with respect to given arguments.
+    """
     var f_jac = grad(f, List(-1))
     return f_jac(args)[List[Array]]
 
-fn jacobian(f: fn (List[Array]) raises -> Array, args: List[Array]) raises -> List[Array]:
-    """Computes the Jacobian of a function that takes a list of Arrays with respect to given arguments."""
+
+fn jacobian(
+    f: fn (List[Array]) raises -> Array, args: List[Array]
+) raises -> List[Array]:
+    """Computes the Jacobian of a function that takes a list of Arrays with respect to given arguments.
+    """
     var f_jac = grad(f, List(-1))
     return f_jac(args)[List[Array]]
+
 
 fn jacobian(f: fn (Array) raises -> Array, arg: Array) raises -> Array:
-    """Computes the Jacobian of a function that takes a single Array with respect to the given argument."""
+    """Computes the Jacobian of a function that takes a single Array with respect to the given argument.
+    """
     var f_jac = grad(f, List(-1))
     return f_jac(arg)[Array]
 
+
 fn hessian(f: Callable, args: List[Array]) raises -> List[Array]:
-    """Computes the Hessian of a Callable function with respect to given arguments."""
+    """Computes the Hessian of a Callable function with respect to given arguments.
+    """
     var f_jes = hessian(f, List(-1))
     return f_jes(args)[List[Array]]
 
-fn hessian(f: fn (List[Array]) raises -> Array, args: List[Array]) raises -> List[Array]:
-    """Computes the Hessian of a function that takes a list of Arrays with respect to given arguments."""
+
+fn hessian(
+    f: fn (List[Array]) raises -> Array, args: List[Array]
+) raises -> List[Array]:
+    """Computes the Hessian of a function that takes a list of Arrays with respect to given arguments.
+    """
     var f_jes = hessian(f, List(-1))
     return f_jes(args)[List[Array]]
+
 
 fn hessian(f: fn (Array) raises -> Array, arg: Array) raises -> Array:
-    """Computes the Hessian of a function that takes a single Array with respect to the given argument."""
+    """Computes the Hessian of a function that takes a single Array with respect to the given argument.
+    """
     var f_jes = hessian(f, List(-1))
     return f_jes(arg)[Array]
-
-

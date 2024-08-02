@@ -953,3 +953,7 @@ struct Array(CollectionElement, Stringable):
     fn __ne__(self, other: SIMD[dtype, 1]) raises -> Array:
         var other_array = full(self.shape()[self.ndim() - 1], other)
         return not_equal(self, other_array)
+
+
+alias Tensor = Array
+alias ndarray = Array

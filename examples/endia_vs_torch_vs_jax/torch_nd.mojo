@@ -1,9 +1,9 @@
-from endia import Array, sum, arange
+from endia import Tensor, sum, arange
 from endia.autograd import grad
 import endia.autograd.functional as F
 
 
-def foo(x: Array) -> Array:
+def foo(x: Tensor) -> Tensor:
     return sum(x**2)
 
 

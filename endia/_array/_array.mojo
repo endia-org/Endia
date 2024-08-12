@@ -34,6 +34,7 @@ from random import seed, random_ui64
 import math
 from python import Python, PythonObject
 from collections import Optional
+from utils._format import Formattable, Formatter
 
 
 fn default_fwd(inout curr: Array, args: List[Array]) raises -> None:
@@ -176,7 +177,7 @@ struct Node(CollectionElement):
 #                                                       Array
 ###############################################################################################################
 @value
-struct Array(CollectionElement, Stringable):
+struct Array(CollectionElement, Stringable, Formattable):
     """
     Array is the primary data structure in the autograd engine, providing a user-friendly interface for working with arrays.
     It serves as a wrapper around the Node struct, which encapsulates the array's data, shape, gradients, and other metadata.
@@ -717,6 +718,9 @@ struct Array(CollectionElement, Stringable):
         # out += "), storage_offset: " + str(self.node[].shape[].storage_offset)
         # out += ", dtype=" + str(dtype) + ")"
         return out
+
+    fn format_to(self, inout writer: Formatter):
+        writer.write[String](str(self))
 
     fn execute_fwds(
         inout self,

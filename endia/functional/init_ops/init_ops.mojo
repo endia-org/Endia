@@ -22,44 +22,60 @@ from endia.functional._utils import compute_nd_index, compute_storage_offset
 ########################################################################
 
 
-fn array(*dims: Int, requires_grad: Bool = False) raises -> Array:
-    var shape = List[Int]()
-    for dim in dims:
-        shape.append(dim)
-    return Array(shape, requires_grad)
+# fn array(*dims: Int, requires_grad: Bool = False) raises -> Array:
+#     var shape = List[Int]()
+#     for dim in dims:
+#         shape.append(dim)
+#     return Array(shape, requires_grad)
+
+
+fn array(dims: List[Int], requires_grad: Bool = False) raises -> Array:
+    return Array(dims, requires_grad)
 
 
 fn array(arr_str: StringLiteral, requires_grad: Bool = False) raises -> Array:
     return Array(String(arr_str), requires_grad)
 
 
-fn tensor(*dims: Int, requires_grad: Bool = False) raises -> Array:
-    var shape = List[Int]()
-    for dim in dims:
-        shape.append(dim)
-    return Array(shape, requires_grad)
+# fn tensor(*dims: Int, requires_grad: Bool = False) raises -> Array:
+#     var shape = List[Int]()
+#     for dim in dims:
+#         shape.append(dim)
+#     return Array(shape, requires_grad)
+
+
+fn tensor(dims: List[Int], requires_grad: Bool = False) raises -> Array:
+    return Array(dims, requires_grad)
 
 
 fn tensor(arr_str: StringLiteral, requires_grad: Bool = False) raises -> Array:
     return Array(String(arr_str), requires_grad)
 
 
-fn ndarray(*dims: Int, requires_grad: Bool = False) raises -> Array:
-    var shape = List[Int]()
-    for dim in dims:
-        shape.append(dim)
-    return Array(shape, requires_grad)
+# fn ndarray(*dims: Int, requires_grad: Bool = False) raises -> Array:
+#     var shape = List[Int]()
+#     for dim in dims:
+#         shape.append(dim)
+#     return Array(shape, requires_grad)
+
+
+fn ndarray(dims: List[Int], requires_grad: Bool = False) raises -> Array:
+    return Array(dims, requires_grad)
 
 
 fn ndarray(arr_str: StringLiteral, requires_grad: Bool = False) raises -> Array:
     return Array(String(arr_str), requires_grad)
 
 
-fn Tensor(*dims: Int, requires_grad: Bool = False) raises -> Array:
-    var shape = List[Int]()
-    for dim in dims:
-        shape.append(dim)
-    return Array(shape, requires_grad)
+# fn Tensor(*dims: Int, requires_grad: Bool = False) raises -> Array:
+#     var shape = List[Int]()
+#     for dim in dims:
+#         shape.append(dim)
+#     return Array(shape, requires_grad)
+
+
+fn Tensor(dims: List[Int], requires_grad: Bool = False) raises -> Array:
+    return Array(dims, requires_grad)
 
 
 fn Tensor(arr_str: StringLiteral, requires_grad: Bool = False) raises -> Array:

@@ -31,6 +31,17 @@ fi
 modular_version=$(modular -v | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+')
 echo "Modular version $modular_version"
 
-
 # Install Python libraries if not already installed
-pip install -r requirements.txt
+pip install -r requirements_nightly.txt
+
+# Create a temporary main file to run tests
+echo "from tests.run_tests import run_tests
+
+def main():
+    run_tests()" > temp_main.mojo
+
+# Run the temporary main file
+mojo temp_main.mojo
+
+# Remove the temporary main file
+rm temp_main.mojo

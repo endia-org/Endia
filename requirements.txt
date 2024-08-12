@@ -1,3 +1,2 @@
-torch>=2.3.1
 numpy>=2.0.0
 graphviz>=0.20.3

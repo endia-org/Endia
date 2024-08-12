@@ -345,9 +345,10 @@ fn slices_to_array_shape(arg: List[Slice]) -> ArrayShape:
     """
     var data = List[Int]()
     for i in range(len(arg)):
-        data.append(arg[i].start)
-        data.append(arg[i].end)
-        data.append(arg[i].step)
+        var arg = arg[i]
+        data.append(arg.start.take())
+        data.append(arg.end.take())
+        data.append(arg.step)
     return ArrayShape(data)
 
 

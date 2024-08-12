@@ -27,6 +27,7 @@ from endia.functional._utils import (
     setup_shape_and_data,
 )
 
+# from math import max, min
 from endia.functional import pad
 from ._utils import DifferentiableViewOp
 
@@ -57,24 +58,25 @@ struct ArraySlice(DifferentiableViewOp):
                 0, arg.shape_node[].shape[i], 1
             )
             slice.start = (
-                max(0, slice.start)
+                max(0, slice.start.take())
                 % (arg.shape_node[].shape[i] + 1) if slice.step
                 > 0 else min(
                     arg.shape_node[].shape[i],
-                    slice.end % (arg.shape_node[].shape[i] + 1),
+                    slice.end.take() % (arg.shape_node[].shape[i] + 1),
                 )
                 - 1
             )
             slice.end = (
-                min(arg.shape_node[].shape[i], slice.end)
+                min(arg.shape_node[].shape[i], slice.end.take())
                 % (arg.shape_node[].shape[i] + 1) if slice.step
-                > 0 else max(0, slice.start) - 1
+                > 0 else max(0, slice.start.take()) - 1
             )
             sliced_shape.append(
-                (slice.end - slice.start + slice.step - 1) // slice.step
+                (slice.end.take() - slice.start.take() + slice.step - 1)
+                // slice.step
             )
             sliced_stride.append(arg.shape_node[].stride[i] * slice.step)
-            storage_offset += slice.start * arg.shape_node[].stride[i]
+            storage_offset += slice.start.take() * arg.shape_node[].stride[i]
 
         curr.setup(sliced_shape, sliced_stride, storage_offset)
 

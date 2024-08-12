@@ -59,7 +59,7 @@ def mean(arg0: Array, axes: List[Int], keepdims: Bool = False) -> Array:
     var num_elements_arg0 = arg0.size()
     var res = reduce_add(arg0, axes)
     var num_elements_res = res.size()
-    var divisor = num_elements_arg0 / num_elements_res
+    var divisor = (num_elements_arg0 / num_elements_res).cast[dtype]()
     if keepdims:
         return res / divisor
     return squeeze(res / divisor)

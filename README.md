@@ -33,7 +33,7 @@
     cd Endia
     ```
 
-    If you aim to use the nightly (development) version, switch to the `nightly` branch:
+    If you aim to use the nightly (development) version, switch to the `nightly` branch (which requires the Nightly version of MAX/Mojo):
 
     ```bash
     git checkout nightly

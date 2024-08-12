@@ -14,6 +14,6 @@ def example_torch_like():
     dy_dx = grad(outs=y, inputs=x)[0]
     d2y_dx2 = F.hessian(foo, x)
 
-    print(y)
-    print(dy_dx)
-    print(d2y_dx2)
+    print(str(y))
+    print(str(dy_dx))
+    print(str(d2y_dx2))

@@ -14,7 +14,6 @@
 import endia as nd
 import endia.nn as nn
 import endia.optim as optim
-
 from time import now
 
 
@@ -40,10 +39,10 @@ def benchmark_mlp_imp():
         mlp.params(), lr=0.001, beta1=0.9, beta2=0.999, eps=1e-8
     )
 
-    fwd_time = Float64(0)
-    bwd_time = Float64(0)
-    opt_time = Float64(0)
-    end_time = Float64(0)
+    fwd_time = SIMD[dtype, 1](0)
+    bwd_time = SIMD[dtype, 1](0)
+    opt_time = SIMD[dtype, 1](0)
+    end_time = SIMD[dtype, 1](0)
 
     for i in range(1, num_iters + 1):
         start = now()
@@ -77,10 +76,10 @@ def benchmark_mlp_imp():
 
         end = now()
 
-        fwd_time += (end_fwd - start_fwd) / 1000000000
-        bwd_time += (end_bwd - start_bwd) / 1000000000
-        opt_time += (end_opt - start_opt) / 1000000000
-        end_time += (end - start) / 1000000000
+        fwd_time += (end_fwd - start_fwd) / SIMD[dtype, 1](1000000000)
+        bwd_time += (end_bwd - start_bwd) / SIMD[dtype, 1](1000000000)
+        opt_time += (end_opt - start_opt) / SIMD[dtype, 1](1000000000)
+        end_time += (end - start) / SIMD[dtype, 1](1000000000)
 
         if i % every == 0:
             print("- Iter: ", i, " Loss: ", avg_loss / every)

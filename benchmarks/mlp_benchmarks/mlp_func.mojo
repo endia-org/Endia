@@ -63,10 +63,10 @@ def benchmark_mlp_func():
 
     # define the training loop
     batch_size = 128
-    lr = 0.001
-    beta1 = 0.9
-    beta2 = 0.999
-    eps = 1e-8
+    lr = SIMD[dtype, 1](0.001)
+    beta1 = SIMD[dtype, 1](0.9)
+    beta2 = SIMD[dtype, 1](0.999)
+    eps = SIMD[dtype, 1](1e-8)
     num_iters = 2000
     every = 500
     avg_loss = SIMD[dtype, 1](0)
@@ -86,18 +86,18 @@ def benchmark_mlp_func():
     value_and_grad_fwd = nd.value_and_grad(fwd)
 
     # setup time variables
-    start = Float64(0)
-    end = Float64(0)
-    time_all = Float64(0)
-    fwd_start = Float64(0)
-    fwd_end = Float64(0)
-    time_fwd = Float64(0)
-    grad_start = Float64(0)
-    grad_end = Float64(0)
-    time_grad = Float64(0)
-    optim_start = Float64(0)
-    optim_end = Float64(0)
-    time_optim = Float64(0)
+    start = SIMD[dtype, 1](0)
+    end = SIMD[dtype, 1](0)
+    time_all = SIMD[dtype, 1](0)
+    fwd_start = SIMD[dtype, 1](0)
+    fwd_end = SIMD[dtype, 1](0)
+    time_fwd = SIMD[dtype, 1](0)
+    grad_start = SIMD[dtype, 1](0)
+    grad_end = SIMD[dtype, 1](0)
+    time_grad = SIMD[dtype, 1](0)
+    optim_start = SIMD[dtype, 1](0)
+    optim_end = SIMD[dtype, 1](0)
+    time_optim = SIMD[dtype, 1](0)
 
     # training loop
     for t in range(1, num_iters + 1):
@@ -120,10 +120,13 @@ def benchmark_mlp_func():
         optim_start = now()
         for i in range(2, len(args_grads)):
             # implement adam with above variables as in the step function above
-            m[i] = beta1 * m[i] + (1 - beta1) * args_grads[i]
-            v[i] = beta2 * v[i] + (1 - beta2) * args_grads[i] * args_grads[i]
-            m_hat = m[i] / (1 - beta1**t)
-            v_hat = v[i] / (1 - beta2**t)
+            m[i] = beta1 * m[i] + (1 - beta1).cast[dtype]() * args_grads[i]
+            v[i] = (
+                beta2 * v[i]
+                + (1 - beta2).cast[dtype]() * args_grads[i] * args_grads[i]
+            )
+            m_hat = m[i] / (1 - beta1**t).cast[dtype]()
+            v_hat = v[i] / (1 - beta2**t).cast[dtype]()
             args[i] -= lr * m_hat / (nd.sqrt(v_hat) + eps)
 
         optim_end = now()

@@ -14,6 +14,7 @@
 from math import isnan, isinf
 from endia import Array
 from endia.functional import *
+from python import PythonObject
 
 
 @always_inline

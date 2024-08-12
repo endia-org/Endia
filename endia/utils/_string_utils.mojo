@@ -18,24 +18,24 @@ from algorithm import vectorize, parallelize
 from time import now
 from random import seed, random_ui64
 import math
-from python import Python
+from python import Python, PythonObject
 from math import isnan, isinf
 
 
-fn float_to_string[dtype: DType](in_num: SIMD[dtype, 1]) -> String:
+fn float_to_str(in_num: SIMD[dtype, 1]) -> String:
     if isinf(in_num):
         return "inf"
 
     if isnan(in_num):
         return "nan"
 
-    if (
-        dtype == DType.uint32
-        or dtype == DType.uint64
-        or dtype == DType.int32
-        or dtype == DType.int64
-    ):
-        return String(int(in_num))
+    # if (
+    #     dtype == DType.uint32
+    #     or dtype == DType.uint64
+    #     or dtype == DType.int32
+    #     or dtype == DType.int64
+    # ):
+    #     return str(int(in_num))
 
     # Determine the sign of the number
     var sign: String = ""
@@ -44,7 +44,7 @@ fn float_to_string[dtype: DType](in_num: SIMD[dtype, 1]) -> String:
         sign = "-"
         num = -num
 
-    var str_num = String(num)
+    var str_num = str(num)
     if num >= 100 and num < 999:
         if num % int(num) == 0:
             return sign + str_num[:4]
@@ -93,17 +93,17 @@ fn format_scientific[dtype: DType](in_num: SIMD[dtype, 1]) -> String:
     var num_int = int(num * 10000)
     var result: String = ""
     result += sign
-    result += String(num_int // 10000)
+    result += str(num_int // 10000)
     result += "."
 
     # Append the decimal digits to the result string
-    var decimal_digits = String(num_int % 10000)
+    var decimal_digits = str(num_int % 10000)
     if len(decimal_digits) < 4:
-        var padding = String("0") * (4 - len(decimal_digits))
+        var padding = str("0") * (4 - len(decimal_digits))
         decimal_digits = padding + decimal_digits
     result += decimal_digits[:3]
     result += "e"
-    result += String(exponent)
+    result += str(exponent)
 
     return result
 
@@ -253,9 +253,9 @@ fn build_out_string(
             if i < row_size - 1:
                 out += ",\n" + indent
         else:
-            out += float_to_string(arg.load(idx))
+            out += float_to_str(arg.load(idx))
             if arg.is_complex():
-                out += " + " + float_to_string(arg.load_imag(idx)) + "j"
+                out += " + " + float_to_str(arg.load_imag(idx)) + "j"
             idx += 1
             if i < row_size - 1:
                 out += ", "

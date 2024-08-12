@@ -77,8 +77,8 @@ fn compute_indeces_for_matmul(
 
 
 fn execute_copy_raw(
-    source_data: DTypePointer[DType.float32],
-    dest_data: DTypePointer[DType.float32],
+    source_data: UnsafePointer[Scalar[dtype]],
+    dest_data: UnsafePointer[Scalar[dtype]],
     val_shape: ArrayShape,
     is_complex: Bool,
 ) raises:
@@ -278,7 +278,7 @@ fn setup_shape_and_data(inout curr: Array) raises:
     var array_shape = curr.array_shape()
     compute_shape(array_shape, curr.requires_grad() or curr.has_fxgraph())
     var true_size = array_shape.size() if not curr.is_complex() else 2 * array_shape.size()
-    curr.data_(DTypePointer[dtype].alloc(true_size))
+    curr.data_(UnsafePointer[Scalar[dtype]].alloc(true_size))
     memset_zero(curr.data(), true_size)
     if not curr.requires_grad():
         array_shape.shape_node[].args.clear()

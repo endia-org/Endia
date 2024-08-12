@@ -18,7 +18,7 @@ from algorithm import vectorize, parallelize
 from time import now
 from random import seed, random_ui64
 import math
-from python import Python
+from python import Python, PythonObject
 
 
 fn compute_stride(shape: List[Int]) -> List[Int]:
@@ -268,7 +268,8 @@ fn compute_shape(inout curr: ArrayShape, store_args: Bool = False) raises:
         return
     # print("compute shape")
     for arg in curr.args():
-        compute_shape(arg[], store_args)
+        var arg_shape = arg[]
+        compute_shape(arg_shape, store_args)
     var fwd = curr.fwd()
     fwd(curr, curr.args())
     curr.is_computed_(True)

@@ -49,7 +49,9 @@ struct Less(ComparisonOp):
     ]:
         var real = SIMD[dtype, nelts[dtype]() * 2 // 2](0)
         for i in range(nelts[dtype]() * 2 // 2):
-            real[i] = arg0_real[i] < arg1_real[i]
+            real[i] = SIMD[dtype, 1](1) if (
+                arg0_real[i] < arg1_real[i]
+            ) else SIMD[dtype, 1](0)
         return (real, SIMD[dtype, nelts[dtype]() * 2 // 2](0))
 
     @staticmethod

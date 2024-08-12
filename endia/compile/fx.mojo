@@ -20,6 +20,7 @@ from endia.functional._utils import (
     setup_shape_and_data,
     execute_copy_raw,
 )
+from collections import Dict
 from max.engine import Model
 from .max_utils import build_model, execute_model
 
@@ -563,6 +564,7 @@ fn top_order_subgraph_rec(inout curr: Array, inout trace: List[Array]) raises:
             and not curr.is_breakpoint()
             and not curr.is_graph_node_computed()
         ):
-            top_order_rec(arg[], trace)
+            var arg_deref = arg[]
+            top_order_rec(arg_deref, trace)
     curr.id_(len(trace))
     trace.append(curr)

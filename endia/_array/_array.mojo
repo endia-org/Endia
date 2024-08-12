@@ -15,7 +15,7 @@ from endia.utils.aliases import dtype, nelts
 from endia.utils import (
     ArrayShape,
     ShapeNode,
-    float_to_string,
+    # float_to_string,
     extract_array,
     zero_grad_rec,
     reset_node_id_recursive,
@@ -27,12 +27,13 @@ from endia.compile import FxGraph
 from endia.functional import *
 from endia.functional._utils import execute_copy_raw
 
-from memory.arc import Arc
+from memory import Arc, memset_zero
 from algorithm import vectorize, parallelize
 from time import now
 from random import seed, random_ui64
 import math
-from python import Python
+from python import Python, PythonObject
+from collections import Optional
 
 
 fn default_fwd(inout curr: Array, args: List[Array]) raises -> None:
@@ -63,7 +64,7 @@ struct Node(CollectionElement):
     var id: Int
     var name: String
     var shape: Arc[ShapeNode]
-    var data: DTypePointer[dtype]
+    var data: UnsafePointer[Scalar[dtype]]
     var is_view: Bool
     var base: List[Arc[Self]]
     var args: List[Arc[Self]]
@@ -119,7 +120,7 @@ struct Node(CollectionElement):
         self.name = "arg"
         self.shape = array_shape.shape_node
         var true_size = array_shape.size() if not is_complex else 2 * array_shape.size()
-        self.data = DTypePointer[dtype].alloc(true_size)
+        self.data = UnsafePointer[Scalar[dtype]].alloc(true_size)
         memset_zero(self.data, true_size)
         self.is_view = False
         self.base = List[Arc[Node]]()
@@ -296,7 +297,7 @@ struct Array(CollectionElement, Stringable):
         var graph_opt = self.node[].graph
         return graph_opt.unsafe_take()
 
-    fn data_(inout self, owned data_ptr: DTypePointer[dtype]):
+    fn data_(inout self, owned data_ptr: UnsafePointer[Scalar[dtype]]):
         self.node[].data.free()
         self.node[].data = data_ptr
 
@@ -468,6 +469,10 @@ struct Array(CollectionElement, Stringable):
     fn requires_grad_(inout self, requires_grad: Bool):
         self.node[].requires_grad = requires_grad
 
+    fn _requires_grad(self, requires_grad: Bool) -> Self:
+        self.node[].requires_grad = requires_grad
+        return self
+
     fn has_real(self) -> Bool:
         return self.node[].has_real
 
@@ -487,7 +492,7 @@ struct Array(CollectionElement, Stringable):
         self.has_real_(True)
         self.has_imag_(is_complex)
 
-    fn data(self) -> DTypePointer[dtype]:
+    fn data(self) -> UnsafePointer[Scalar[dtype]]:
         if self.is_view():
             return self.base().node[].data
         return self.node[].data
@@ -695,7 +700,7 @@ struct Array(CollectionElement, Stringable):
         var indent = " "
         var ndim = self.node[].shape[].ndim
         if ndim == 1 and self.node[].shape[].shape[0] == 1:
-            out = self.load(0)
+            out = str(self.load(0))
         else:
             build_out_string(self, out, idx, dim, indent)
         # out += ", shape=("

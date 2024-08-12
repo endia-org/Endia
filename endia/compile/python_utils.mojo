@@ -13,15 +13,28 @@
 
 # from extensibility import Tensor, empty_tensor
 from max.tensor import Tensor
+from memory import memcpy
 import python
 from endia import Array
+from python import PythonObject
+from endia.utils.aliases import dtype, nelts
+
+
+# from sys.intrinsics import (
+#     _mlirtype_is_eq,
+#     _type_is_eq,
+#     gather,
+#     scatter,
+#     strided_load,
+#     strided_store,
+# )
 
 
 @always_inline
 fn memcpy_to_numpy(array: PythonObject, tensor: Array) raises:
-    var dst = DTypePointer[dtype](
-        address=int(array.__array_interface__["data"][0])
-    )
+    var dst = array.__array_interface__["data"][0].unsafe_get_as_pointer[
+        dtype
+    ]()
     var src = tensor.data()
     var length = tensor.size()
     memcpy(dst, src, length)
@@ -38,13 +51,13 @@ fn shape_to_python_list(shape: List[Int]) raises -> PythonObject:
 @always_inline
 fn get_np_dtype[dtype: DType](np: PythonObject) raises -> PythonObject:
     @parameter
-    if dtype.is_float32():
+    if dtype.__is__(DType.float32):
         return np.float32
-    elif dtype.is_int32():
+    elif dtype.__is__(DType.float64):
         return np.int32
-    elif dtype.is_int64():
+    elif dtype.__is__(DType.int32):
         return np.int64
-    elif dtype.is_uint8():
+    elif dtype.__is__(DType.int64):
         return np.uint8
 
     raise "Unknown datatype"

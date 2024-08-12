@@ -13,6 +13,6 @@ def example_jax_like():
 
     x = arange(1.0, 4.0)
 
-    print(foo(x))
-    print(foo_jac(x)[ndarray])
-    print(foo_hes(x)[ndarray])
+    print(str(foo(x)))
+    print(str(foo_jac(x)[ndarray]))
+    print(str(foo_hes(x)[ndarray]))

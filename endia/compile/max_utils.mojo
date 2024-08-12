@@ -19,7 +19,7 @@ from compile import *
 from max.engine import InferenceSession, Model, TensorMap, EngineNumpyView
 from max.graph import Graph, TensorType, ops, Symbol, Dim, Type
 from max.tensor import Tensor, TensorShape, TensorSpec
-from python import Python
+from python import Python, PythonObject
 from .python_utils import array_to_numpy, tensor_to_array
 
 

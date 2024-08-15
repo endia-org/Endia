@@ -777,18 +777,35 @@ struct Array(CollectionElement, Stringable, Formattable):
             slices_list.append(slices[i])
         return array_slice(self, slices_list)
 
-    fn __setitem__(inout self, *slices: Slice, value: Array) raises:
+    fn __setitem__(
+        inout self, *slices: Slice, value: Variant[SIMD[dtype, 1], Self]
+    ) raises:
         var slices_list = List[Slice]()
         for i in range(len(slices)):
             slices_list.append(slices[i])
         var subarray = array_slice(self, slices_list)
         var subarray_shape = subarray.shape()
-        var value_shape = value.shape()
-        for i in range(len(subarray_shape)):
-            if subarray_shape[i] != value_shape[i]:
-                raise "Error: Shapes do not match"
-        for i in range(subarray.size()):
-            subarray.store(i, value.load(i))
+        if value.isa[Self]():
+            var value = value[Self][]
+            var value_shape = value.shape()
+            for i in range(len(subarray_shape)):
+                if subarray_shape[i] != value_shape[i]:
+                    raise "Error: Shapes do not match"
+            for i in range(subarray.size()):
+                subarray.store(i, value.load(i))
+        elif value.isa[SIMD[dtype, 1]]():
+            for i in range(subarray.size()):
+                subarray.store(i, value[SIMD[dtype, 1]])
+        else:
+            raise "Error: Invalid value type"
+
+    # fn __setitem__(inout self, *slices: Slice, value: SIMD[dtype, 1]) raises:
+    #     var slices_list = List[Slice]()
+    #     for i in range(len(slices)):
+    #         slices_list.append(slices[i])
+    #     var subarray = array_slice(self, slices_list)
+    #     for i in range(subarray.size()):
+    #         subarray.store(i, value)
 
     fn __add__(self, other: Array) raises -> Array:
         return add(self, other)

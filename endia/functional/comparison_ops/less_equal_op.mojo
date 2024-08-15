@@ -19,21 +19,26 @@ from endia.functional._utils import (
     setup_shape_and_data,
 )
 from ._utils import ComparisonOp, comparison_op_array
-from endia.functional.binary_ops._utils import execute_binary_op
+from endia.functional.binary_ops._utils import (
+    execute_binary_op,
+    binary_op_array,
+)
 
 ####--------------------------------------------------------------------------------------------------------------------####
-#### LessEqualition
+#### LessEqual Operation
 ####--------------------------------------------------------------------------------------------------------------------####
 
 
 struct LessEqual(ComparisonOp):
     @staticmethod
     fn fwd(arg0: Array, arg1: Array) raises -> Array:
-        return comparison_op_array(
+        return binary_op_array(
             arg0,
             arg1,
             "less_equal",
             LessEqual.__call__,
+            default_jvp,
+            default_vjp,
             LessEqual.comparing_simd_op,
         )
 

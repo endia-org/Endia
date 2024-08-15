@@ -52,7 +52,7 @@ def setup_params(
 
 
 def benchmark_mlp_jit_with_MAX():
-    print("\nRunning MLP benchmark with JIT compilation:")
+    print("\nRunning MLP benchmark with MAX JIT compilation:")
 
     # define the forward function
     def fwd(args: List[nd.Array]) -> nd.Array:

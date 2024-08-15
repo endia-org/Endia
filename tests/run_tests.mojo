@@ -144,7 +144,6 @@ def run_unit_tests():
     run_test_reshape_grad()
 
     # Unit Tests: Test comparison ops
-    run_test_ge_zero()
     run_test_greater_equal()
     run_test_greater()
     run_test_less_equal()

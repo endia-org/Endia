@@ -934,47 +934,109 @@ struct Array(CollectionElement, Stringable, Formattable):
     fn __ipow__(inout self, other: SIMD[dtype, 1]) raises:
         self = self.__pow__(other)
 
-    fn __ge__(self, other: Array) raises -> Array:
-        return greater_equal(self, other)
+    # fn __eq__(self, other: Array) raises -> Array:
+    #     return equal(self, other)
 
-    fn __ge__(self, other: SIMD[dtype, 1]) raises -> Array:
+    # fn __eq__(self, other: SIMD[dtype, 1]) raises -> Array:
+    #     var other_array = full(self.shape()[self.ndim() - 1], other)
+    #     return equal(self, other_array)
+
+    # fn __ne__(self, other: Array) raises -> Array:
+    #     return not_equal(self, other)
+
+    # fn __ne__(self, other: SIMD[dtype, 1]) raises -> Array:
+    #     var other_array = full(self.shape()[self.ndim() - 1], other)
+    #     return not_equal(self, other_array)
+
+    # fn __ge__(self, other: Array) raises -> Array:
+    #     return greater_equal(self, other)
+
+    # fn __ge__(self, other: SIMD[dtype, 1]) raises -> Array:
+    #     var other_array = full(self.shape()[self.ndim() - 1], other)
+    #     return greater_equal(self, other_array)
+
+    # fn __gt__(self, other: Array) raises -> Array:
+    #     return greater(self, other)
+
+    # fn __gt__(self, other: SIMD[dtype, 1]) raises -> Array:
+    #     var other_array = full(self.shape()[self.ndim() - 1], other)
+    #     return greater(self, other_array)
+
+    # fn __le__(self, other: Array) raises -> Array:
+    #     return less_equal(self, other)
+
+    # fn __le__(self, other: SIMD[dtype, 1]) raises -> Array:
+    #     var other_array = full(self.shape()[self.ndim() - 1], other)
+    #     return less_equal(self, other_array)
+
+    # fn __lt__(self, other: Array) raises -> Array:
+    #     return less(self, other)
+
+    # fn __lt__(self, other: SIMD[dtype, 1]) raises -> Array:
+    #     var other_array = full(self.shape()[self.ndim() - 1], other)
+    #     return less(self, other_array)
+
+    fn __eq__(self, other: Array) raises -> Bool:
+        var shape = self.shape()
+        var other_shape = other.shape()
+        for i in range(len(shape)):
+            if shape[i] != other_shape[i]:
+                return False
+        var eq_compared = equal(self, other)
+        if prod(eq_compared).load(0) == 1:
+            return True
+        return False
+
+    fn __eq__(self, other: SIMD[dtype, 1]) raises -> Bool:
         var other_array = full(self.shape()[self.ndim() - 1], other)
-        return greater_equal(self, other_array)
+        return self.__eq__(other_array)
 
-    fn __gt__(self, other: Array) raises -> Array:
-        return greater(self, other)
+    fn __ne__(self, other: Array) raises -> Bool:
+        return not self.__eq__(other)
 
-    fn __gt__(self, other: SIMD[dtype, 1]) raises -> Array:
+    fn __ne__(self, other: SIMD[dtype, 1]) raises -> Bool:
         var other_array = full(self.shape()[self.ndim() - 1], other)
-        return greater(self, other_array)
+        return self.__ne__(other_array)
 
-    fn __le__(self, other: Array) raises -> Array:
-        return less_equal(self, other)
+    fn __ge__(self, other: Array) raises -> Bool:
+        var ge_compared = greater_equal(self, other)
+        if prod(ge_compared).load(0) == 1:
+            return True
+        return False
 
-    fn __le__(self, other: SIMD[dtype, 1]) raises -> Array:
+    fn __ge__(self, other: SIMD[dtype, 1]) raises -> Bool:
         var other_array = full(self.shape()[self.ndim() - 1], other)
-        return less_equal(self, other_array)
+        return self.__ge__(other_array)
 
-    fn __lt__(self, other: Array) raises -> Array:
-        return less(self, other)
+    fn __gt__(self, other: Array) raises -> Bool:
+        var gt_compared = greater(self, other)
+        if prod(gt_compared).load(0) == 1:
+            return True
+        return False
 
-    fn __lt__(self, other: SIMD[dtype, 1]) raises -> Array:
+    fn __gt__(self, other: SIMD[dtype, 1]) raises -> Bool:
         var other_array = full(self.shape()[self.ndim() - 1], other)
-        return less(self, other_array)
+        return self.__gt__(other_array)
 
-    fn __eq__(self, other: Array) raises -> Array:
-        return equal(self, other)
+    fn __le__(self, other: Array) raises -> Bool:
+        var le_compared = less_equal(self, other)
+        if prod(le_compared).load(0) == 1:
+            return True
+        return False
 
-    fn __eq__(self, other: SIMD[dtype, 1]) raises -> Array:
+    fn __le__(self, other: SIMD[dtype, 1]) raises -> Bool:
         var other_array = full(self.shape()[self.ndim() - 1], other)
-        return equal(self, other_array)
+        return self.__le__(other_array)
 
-    fn __ne__(self, other: Array) raises -> Array:
-        return not_equal(self, other)
+    fn __lt__(self, other: Array) raises -> Bool:
+        var lt_compared = less(self, other)
+        if prod(lt_compared).load(0) == 1:
+            return True
+        return False
 
-    fn __ne__(self, other: SIMD[dtype, 1]) raises -> Array:
+    fn __lt__(self, other: SIMD[dtype, 1]) raises -> Bool:
         var other_array = full(self.shape()[self.ndim() - 1], other)
-        return not_equal(self, other_array)
+        return self.__lt__(other_array)
 
 
 alias Tensor = Array

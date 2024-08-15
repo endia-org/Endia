@@ -36,7 +36,7 @@ from endia.functional import squeeze
 ####-----------------------------------------------------------------------------------------------------------------####
 
 
-struct ReduceAdd(DifferentiableReduceOp):
+struct ReduceMul(DifferentiableReduceOp):
     @staticmethod
     fn compute_shape(inout curr: ArrayShape, args: List[ArrayShape]) raises:
         """
@@ -79,6 +79,7 @@ struct ReduceAdd(DifferentiableReduceOp):
         """
         setup_shape_and_data(curr)
         var arg = contiguous(args[0])
+        ones_(curr)
         var arg_shape = arg.shape()
         var arg_stride = arg.stride()
         var target_shape = curr.shape()
@@ -122,7 +123,7 @@ struct ReduceAdd(DifferentiableReduceOp):
                             curr_data.store[width=width](
                                 target_idx,
                                 curr_data.load[width=width](target_idx)
-                                + arg_data.load[width=width](base_idx),
+                                * arg_data.load[width=width](base_idx),
                             )
 
                         vectorize[reduce_v, nelts[dtype]()](cols)
@@ -136,7 +137,7 @@ struct ReduceAdd(DifferentiableReduceOp):
                             curr_data.store(
                                 target_idx,
                                 curr_data.load(target_idx)
-                                + arg_data.load(base_idx),
+                                * arg_data.load(base_idx),
                             )
         else:
             # if the rank is one and we still want to reduce along the single axis
@@ -146,17 +147,17 @@ struct ReduceAdd(DifferentiableReduceOp):
                     curr_data.store(
                         0,
                         curr_data.load(0)
-                        + arg_data.load[width = nelts[dtype]()](i).reduce_add(),
+                        * arg_data.load[width = nelts[dtype]()](i).reduce_mul(),
                     )
                 for i in range(end, arg.size()):
-                    curr_data.store(0, curr_data.load(0) + arg_data.load(i))
+                    curr_data.store(0, curr_data.load(0) * arg_data.load(i))
             # other wise, if we we have rank one but not´reduction, we simply copy the values
             else:
                 var end = arg.size() - arg.size() % nelts[dtype]()
                 for i in range(0, end, nelts[dtype]()):
                     curr_data.store[width = nelts[dtype]()](
                         i,
-                        arg_data.load[width = nelts[dtype]()](i).reduce_add(),
+                        arg_data.load[width = nelts[dtype]()](i).reduce_mul(),
                     )
                 for i in range(end, arg.size()):
                     curr_data.store(i, arg_data.load(i))
@@ -202,7 +203,7 @@ struct ReduceAdd(DifferentiableReduceOp):
         #### Examples:
         ```python
         a = Array([[1, 2], [3, 4]])
-        result = reduce_add(a, List(0))
+        result = reduce_mul(a, List(0))
         print(result)
         ```
 
@@ -213,22 +214,22 @@ struct ReduceAdd(DifferentiableReduceOp):
         """
         var arr_shape = setup_array_shape(
             List(arg0.array_shape(), list_to_array_shape(axis)),
-            "reduce_add",
-            ReduceAdd.compute_shape,
+            "reduce_mul",
+            ReduceMul.compute_shape,
         )
 
         return op_array(
             arr_shape,
             List(arg0),
             NA,
-            "reduce_add",
-            ReduceAdd.__call__,
-            ReduceAdd.jvp,
-            ReduceAdd.vjp,
+            "reduce_mul",
+            ReduceMul.__call__,
+            ReduceMul.jvp,
+            ReduceMul.vjp,
         )
 
 
-fn reduce_add(arg0: Array, axis: List[Int]) raises -> Array:
+fn reduce_mul(arg0: Array, axis: List[Int]) raises -> Array:
     """
     Reduces the input array along the specified axis by summing the elements.
 
@@ -242,7 +243,7 @@ fn reduce_add(arg0: Array, axis: List[Int]) raises -> Array:
     #### Examples:
     ```python
     a = Array([[1, 2], [3, 4]])
-    result = reduce_add(a, List(0))
+    result = reduce_mul(a, List(0))
     print(result)
     ```
 
@@ -251,4 +252,4 @@ fn reduce_add(arg0: Array, axis: List[Int]) raises -> Array:
     - Automatic differentiation (forward and reverse modes).
     - Complex valued arguments.
     """
-    return ReduceAdd.fwd(arg0, axis)
+    return ReduceMul.fwd(arg0, axis)

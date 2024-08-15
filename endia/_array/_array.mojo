@@ -777,6 +777,19 @@ struct Array(CollectionElement, Stringable, Formattable):
             slices_list.append(slices[i])
         return array_slice(self, slices_list)
 
+    fn __setitem__(inout self, *slices: Slice, value: Array) raises:
+        var slices_list = List[Slice]()
+        for i in range(len(slices)):
+            slices_list.append(slices[i])
+        var subarray = array_slice(self, slices_list)
+        var subarray_shape = subarray.shape()
+        var value_shape = value.shape()
+        for i in range(len(subarray_shape)):
+            if subarray_shape[i] != value_shape[i]:
+                raise "Error: Shapes do not match"
+        for i in range(subarray.size()):
+            subarray.store(i, value.load(i))
+
     fn __add__(self, other: Array) raises -> Array:
         return add(self, other)
 

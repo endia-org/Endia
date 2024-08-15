@@ -700,7 +700,11 @@ struct Array(CollectionElement, Stringable, Formattable):
         var dim = 0
         var indent = " "
         var ndim = self.node[].shape[].ndim
-        if ndim == 1 and self.node[].shape[].shape[0] == 1:
+        if (
+            ndim == 1
+            and self.node[].shape[].shape[0] == 1
+            and not self.is_complex()
+        ):
             out = str(self.load(0))
         else:
             build_out_string(self, out, idx, dim, indent)
@@ -791,8 +795,17 @@ struct Array(CollectionElement, Stringable, Formattable):
             for i in range(len(subarray_shape)):
                 if subarray_shape[i] != value_shape[i]:
                     raise "Error: Shapes do not match"
-            for i in range(subarray.size()):
-                subarray.store(i, value.load(i))
+            if self.is_complex() and value.is_complex():
+                for i in range(subarray.size()):
+                    var d = value.load_complex(i)
+                    var real = d[0]
+                    var imag = d[1]
+                    subarray.store_complex(i, real, imag)
+            else:
+                for i in range(subarray.size()):
+                    subarray.store(i, value.load(i))
+            # for i in range(subarray.size()):
+            #     subarray.store(i, value.load(i))
         elif value.isa[SIMD[dtype, 1]]():
             for i in range(subarray.size()):
                 subarray.store(i, value[SIMD[dtype, 1]])

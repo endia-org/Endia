@@ -51,7 +51,7 @@ struct ArraySlice(DifferentiableViewOp):
         var slices = array_shape_to_slices(args[1])
         var sliced_shape = List[Int]()
         var sliced_stride = List[Int]()
-        var storage_offset = 0
+        var storage_offset = args[0].storage_offset()
 
         for i in range(arg.shape_node[].ndim):
             var slice = slices[i] if i < len(slices) else Slice(
@@ -134,7 +134,6 @@ struct ArraySlice(DifferentiableViewOp):
         var arr_shape = setup_array_shape(
             List(arg0.array_shape(), slices_to_array_shape(slices)),
             "slice_shape",
-            # sliced_shape,
             ArraySlice.compute_shape,
         )
 

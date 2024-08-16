@@ -160,19 +160,25 @@ fn copy(arg: Array) raises -> Array:
     return res
 
 
-fn contiguous(arg: Array) raises -> Array:
+fn is_contiguous(arg: ArrayShape, is_complex: Bool) raises -> Bool:
     var arg_stride = arg.stride()
     var expected_stride = compute_stride(arg.shape())
-    if arg.is_complex():
+    if is_complex:
         for i in range(len(expected_stride)):
             expected_stride[i] *= 2
-    var is_contiguous = True
+    var is_contiguous = arg.storage_offset() == 0
     for i in range(len(arg_stride)):
         if arg_stride[i] != expected_stride[i]:
             is_contiguous = False
             break
-    var res = arg if is_contiguous else copy(arg)
-    return res
+    return is_contiguous
+
+
+fn contiguous(arg: Array) raises -> Array:
+    if is_contiguous(arg.array_shape(), arg.is_complex()):
+        return arg
+    else:
+        return copy(arg)
 
 
 fn op_array(

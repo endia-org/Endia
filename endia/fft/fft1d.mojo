@@ -12,13 +12,13 @@
 # ===----------------------------------------------------------------------=== #
 
 
-import endia as nd 
+import endia as nd
 from endia.utils.aliases import dtype
 
 alias pi = 3.14159265358979323846264
 
+
 def fft1d(x: nd.Array) -> nd.Array:
-    
     # Convert to complex if the input is real
     if not x.is_complex():
         x = nd.complex(x, nd.zeros_like(x))
@@ -39,7 +39,7 @@ def fft1d(x: nd.Array) -> nd.Array:
 
     # Combine results
     combined = nd.Array(List(n), is_complex=True)
-    combined[:n//2] = even + twiddle_factors * odd
-    combined[n//2:] = even - twiddle_factors * odd
+    combined[: n // 2] = even + twiddle_factors * odd
+    combined[n // 2 :] = even - twiddle_factors * odd
 
     return combined

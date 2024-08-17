@@ -165,8 +165,6 @@ fn execute_copy_raw(
 #     var rank = dst.ndim()
 
 
-
-
 fn copy(arg: Array) raises -> Array:
     var res = Array(arg.shape(), False, arg.is_complex())
     execute_copy_raw(
@@ -229,14 +227,14 @@ fn op_array(
     """
     This operation will setup an array i.e. a node in the background with all its necessary data and
     the functions (forward/jvp/vjp etc.) that act on its direct parent nodes. If any of the parent nodes/args
-    point to JIT graph on which caches all the operations, we also always use this graph for the current newly created
+    point to JIT graph on which cachs all the operations, we also always use this graph for the current newly created
     array. The JIT FxGraph is always passed as a reference to the node, so that we can always access the graph.
     """
-    var res_arr = Array(array_shape)
+    var res_arr = Array(array_shape, is_view=is_view)
     res_arr.set_fwd(callable)
     res_arr.kwargs_(kwargs)
     res_arr.set_name(name)
-    res_arr.is_view_(is_view)
+    # res_arr.is_view_(is_view)
 
     var requires_grad = False
     var is_complex = False

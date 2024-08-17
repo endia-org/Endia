@@ -40,20 +40,7 @@ struct Reshape(DifferentiableViewOp):
             curr: The ArrayShape to store the result of the computation.
             args: The ArrayShape to reshape, and the shape, stride and storage offset of the target ArrayShape encoded in a  single ArrayShape.
         """
-        # var arg = args[0]
         var target = args[1]
-
-        # var arg_shape = arg.shape()
-        # var arg_stride = arg.stride()
-        # var arg_offset = arg.storage_offset()
-
-        # var new_stride = List[Int]()
-        # var new_offset = arg_offset
-
-        # var index_in_target_stride = target.ndim() - 1
-
-        # for i in range(arg.ndim() - 1, -1, -1):
-
         curr.setup(target.shape())
 
     @staticmethod

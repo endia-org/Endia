@@ -11,8 +11,8 @@
 # limitations under the License.
 # ===----------------------------------------------------------------------=== #
 
-import endia as nd 
-from .fft2d import fft2d    
+import endia as nd
+from .fft2d import fft2d
 
 
 def fft3d(x: nd.Array) -> nd.Array:
@@ -26,12 +26,18 @@ def fft3d(x: nd.Array) -> nd.Array:
         x = nd.complex(x, nd.zeros_like(x))
 
     for i in range(rows):
-        x[i:i+1, :, :] = fft2d(x[i:i+1, :, :].reshape(List(cols, depth))).reshape(List(1, cols, depth))
+        x[i : i + 1, :, :] = fft2d(
+            x[i : i + 1, :, :].reshape(List(cols, depth))
+        ).reshape(List(1, cols, depth))
 
     for j in range(cols):
-        x[:, j:j+1, :] = fft2d(x[:, j:j+1:, :].reshape(List(rows, depth))).reshape(List(rows, 1, depth))
+        x[:, j : j + 1, :] = fft2d(
+            x[:, j : j + 1 :, :].reshape(List(rows, depth))
+        ).reshape(List(rows, 1, depth))
 
     for k in range(depth):
-        x[:, :, k:k+1] = fft2d(x[:, :, k:k+1].reshape(List(rows, cols))).reshape(List(rows, cols, 1))
+        x[:, :, k : k + 1] = fft2d(
+            x[:, :, k : k + 1].reshape(List(rows, cols))
+        ).reshape(List(rows, cols, 1))
 
     return x

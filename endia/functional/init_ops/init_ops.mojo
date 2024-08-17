@@ -90,6 +90,7 @@ fn arange_(inout arg: Array) raises:
         for i in range(arg.size()):
             arg.store(i, i)
 
+
 fn linspace(
     start: SIMD[dtype, 1] = 0,
     end: SIMD[dtype, 1] = 1,
@@ -104,7 +105,6 @@ fn linspace(
         data[i] = value
         value += step
     return res
-    
 
 
 fn arange(
@@ -426,6 +426,8 @@ fn complex(
         if real.shape()[i] != imag.shape()[i]:
             raise "Error: real and imag parts must have the same shape"
     var res = Array(real.shape(), requires_grad, True)
+
+    # TODO: use __setitem__(with slicing) instead of manual for loop
     for i in range(res.size()):
         res.store_complex(i, real.load(i), imag.load(i))
     return res

@@ -11,8 +11,8 @@
 # limitations under the License.
 # ===----------------------------------------------------------------------=== #
 
-import endia as nd 
-from .fft1d import fft1d    
+import endia as nd
+from .fft1d import fft1d
 
 
 def fft2d(x: nd.Array) -> nd.Array:
@@ -25,8 +25,12 @@ def fft2d(x: nd.Array) -> nd.Array:
         x = nd.complex(x, nd.zeros_like(x))
 
     for i in range(rows):
-        x[i:i+1, :] = fft1d(x[i:i+1, :].reshape(List(cols))).reshape(List(1, cols))
+        x[i : i + 1, :] = fft1d(x[i : i + 1, :].reshape(List(cols))).reshape(
+            List(1, cols)
+        )
 
     for j in range(cols):
-        x[:, j:j+1] = fft1d(x[:, j:j+1].reshape(List(rows))).reshape(List(rows,1))
+        x[:, j : j + 1] = fft1d(x[:, j : j + 1].reshape(List(rows))).reshape(
+            List(rows, 1)
+        )
     return x

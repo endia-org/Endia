@@ -113,7 +113,7 @@ fn execute_copy_raw(
                 if stride[rank - 1] == 1:
 
                     @parameter
-                    fn copy_v[simd_width: Int](j: Int):
+                    fn copy_v_complex[simd_width: Int](j: Int):
                         var j_idx = i_idx + j * stride[rank - 1]
                         dest_data.store[width = 2 * simd_width](
                             flat_idx * 2,
@@ -121,7 +121,7 @@ fn execute_copy_raw(
                         )
                         flat_idx += simd_width
 
-                    vectorize[copy_v, nelts[dtype]()](cols)
+                    vectorize[copy_v_complex, nelts[dtype]()](cols)
                 else:
                     for j in range(cols):
                         var j_idx = i_idx + j * stride[rank - 1]
@@ -137,19 +137,34 @@ fn execute_copy_raw(
                 if stride[rank - 1] == 1:
 
                     @parameter
-                    fn copy_v_complex[simd_width: Int](j: Int):
+                    fn copy_v[simd_width: Int](j: Int):
                         var j_idx = i_idx + j * stride[rank - 1]
                         dest_data.store[width=simd_width](
                             flat_idx, source_data.load[width=simd_width](j_idx)
                         )
                         flat_idx += simd_width
 
-                    vectorize[copy_v_complex, nelts[dtype]()](cols)
+                    vectorize[copy_v, nelts[dtype]()](cols)
                 else:
                     for j in range(cols):
                         var j_idx = i_idx + j * stride[rank - 1]
                         dest_data.store(flat_idx, source_data.load(j_idx))
                         flat_idx += 1
+
+
+# fn exeucute_copy(dst: Array, src: Array) raises:
+#     # copy from one strided array to another, this is more specific than the general copy function which copies the entire array
+#     var dst_shape = dst.shape()
+#     var dst_stride = dst.stride()
+#     var dst_offset = dst.storage_offset()
+
+#     var src_shape = src.shape()
+#     var src_stride = src.stride()
+#     var src_offset = src.storage_offset()
+
+#     var rank = dst.ndim()
+
+
 
 
 fn copy(arg: Array) raises -> Array:

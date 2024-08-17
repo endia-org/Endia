@@ -795,30 +795,111 @@ struct Array(CollectionElement, Stringable, Formattable):
             for i in range(len(subarray_shape)):
                 if subarray_shape[i] != value_shape[i]:
                     raise "Error: Shapes do not match"
-            if self.is_complex() and value.is_complex():
-                for i in range(subarray.size()):
-                    var d = value.load_complex(i)
-                    var real = d[0]
-                    var imag = d[1]
-                    subarray.store_complex(i, real, imag)
+            # if self.is_complex() and value.is_complex():
+            #     for i in range(subarray.size()):
+            #         var d = value.load_complex(i)
+            #         var real = d[0]
+            #         var imag = d[1]
+            #         subarray.store_complex(i, real, imag)
+            # else:
+            var dst = subarray
+            var src = value
+            var dst_rank = subarray.ndim()
+            var src_rank = value.ndim()
+            var dst_shape = List[Int]()
+            var src_shape = List[Int]()
+            var dst_stride = List[Int]()
+            var src_stride = List[Int]()
+            var dst_storage_offset = dst.storage_offset()
+            var src_storage_offset = src.storage_offset()
+
+            if dst_rank == 1 and src_rank == 1:
+                dst_shape.append(1)
+                dst_stride.append(0)
+                dst_shape.append(dst.shape()[0])
+                dst_stride.append(dst.stride()[0])
+                src_shape.append(1)
+                src_stride.append(0)
+                src_shape.append(src.shape()[0])
+                src_stride.append(src.stride()[0])
             else:
-                for i in range(subarray.size()):
-                    subarray.store(i, value.load(i))
-            # for i in range(subarray.size()):
-            #     subarray.store(i, value.load(i))
+                dst_shape = dst.shape()
+                dst_stride = dst.stride()
+                src_shape = src.shape()
+                src_stride = src.stride()
+
+            var rank = len(dst_shape)
+            var rows = dst_shape[rank - 2]
+            var cols = dst_shape[rank - 1]
+            var size = 1
+            for i in range(rank):
+                size *= dst_shape[i]
+            var dest_data = dst.data()
+            var source_data = src.data()
+
+            for k in range(0, size, rows * cols):
+                var dst_nd_idx = compute_nd_index(k, dst_shape)
+                var dst_base_idx = compute_storage_offset(
+                    dst_nd_idx, dst_stride, dst_storage_offset
+                )
+                var src_nd_idx = compute_nd_index(k, src_shape)
+                var src_base_idx = compute_storage_offset(
+                    src_nd_idx, src_stride, src_storage_offset
+                )
+
+                for i in range(rows):
+                    var dst_i_idx = dst_base_idx + i * dst_stride[rank - 2]
+                    var src_i_idx = src_base_idx + i * src_stride[src_rank - 2]
+
+                    if dst.is_complex() and src.is_complex():
+
+                        if dst_stride[rank - 1] == 1 and src_stride[src_rank - 1] == 1:
+                            alias simd_width = nelts[dtype]() * 2 // 2
+                            
+                            @parameter
+                            fn copy_v_complex[simd_width: Int](j: Int):
+                                var dst_j_idx = 2 * (dst_i_idx + j * dst_stride[rank - 1])
+                                var src_j_idx = 2 * (src_i_idx + j * src_stride[rank - 1])
+                                dest_data.store[width=2*simd_width](dst_j_idx, source_data.load[width=2*simd_width](src_j_idx))
+
+                            vectorize[copy_v_complex, 2 * nelts[dtype]()](cols)
+
+                        else:
+                            for j in range(cols):
+                                var dst_j_idx = 2 * (dst_i_idx + j * dst_stride[rank - 1])
+                                var src_j_idx = 2 * (src_i_idx + j * src_stride[rank - 1])
+                                dest_data.store[width=2](dst_j_idx, source_data.load[width=2](src_j_idx))
+
+                    else:
+                        if dst_stride[rank - 1] == 1 and src_stride[src_rank - 1] == 1:
+                            alias simd_width = nelts[dtype]() * 2 // 2
+
+                            @parameter
+                            fn copy_v[simd_width: Int](j: Int):
+                                var dst_j_idx = dst_i_idx + j * dst_stride[rank - 1]
+                                var src_j_idx = src_i_idx + j * src_stride[src_rank - 1]
+                                dest_data.store[width=simd_width](dst_j_idx, source_data.load[width=simd_width](src_j_idx))
+
+                            vectorize[copy_v, nelts[dtype]()](cols)
+
+                        else:
+                            for j in range(cols):
+                                var dst_j_idx = dst_i_idx + j * dst_stride[rank - 1]
+                                var src_j_idx = src_i_idx + j * src_stride[rank - 1]
+                                dest_data.store(dst_j_idx, source_data.load(src_j_idx))
+
+
+            
+            _ = value
+            
+
         elif value.isa[SIMD[dtype, 1]]():
             for i in range(subarray.size()):
                 subarray.store(i, value[SIMD[dtype, 1]])
+                
         else:
             raise "Error: Invalid value type"
 
-    # fn __setitem__(inout self, *slices: Slice, value: SIMD[dtype, 1]) raises:
-    #     var slices_list = List[Slice]()
-    #     for i in range(len(slices)):
-    #         slices_list.append(slices[i])
-    #     var subarray = array_slice(self, slices_list)
-    #     for i in range(subarray.size()):
-    #         subarray.store(i, value)
 
     fn __add__(self, other: Array) raises -> Array:
         return add(self, other)

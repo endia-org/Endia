@@ -90,6 +90,22 @@ fn arange_(inout arg: Array) raises:
         for i in range(arg.size()):
             arg.store(i, i)
 
+fn linspace(
+    start: SIMD[dtype, 1] = 0,
+    end: SIMD[dtype, 1] = 1,
+    num: Int = 50,
+    requires_grad: Bool = False,
+) raises -> Array:
+    var res = Array(List(num), requires_grad)
+    var data = res.data()
+    var step = (end - start) / (num - 1)
+    var value = start
+    for i in range(num):
+        data[i] = value
+        value += step
+    return res
+    
+
 
 fn arange(
     start: SIMD[dtype, 1] = 0,

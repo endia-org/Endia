@@ -1,6 +1,5 @@
 .vscode/
 main.mojo
 setup_headers.py
-test.py
 testl.mojo
 testl.py

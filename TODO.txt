@@ -1,5 +1,0 @@
-Why is FFT slow in Endia?
-
-
-- Main contributor: Teh __setitem__ operation is doing expensive indexing, that needs to be vectorized.
-- Also the fft1d does use a ton of slcing itself and this could be all done iteratively i think.

@@ -166,6 +166,7 @@ fn execute_copy_raw(
 
 
 fn copy(arg: Array) raises -> Array:
+    # print("Copy", arg.name())
     var res = Array(arg.shape(), False, arg.is_complex())
     execute_copy_raw(
         arg.data(), res.data(), arg.array_shape(), arg.is_complex()
@@ -176,9 +177,9 @@ fn copy(arg: Array) raises -> Array:
 fn is_contiguous(arg: ArrayShape, is_complex: Bool) raises -> Bool:
     var arg_stride = arg.stride()
     var expected_stride = compute_stride(arg.shape())
-    if is_complex:
-        for i in range(len(expected_stride)):
-            expected_stride[i] *= 2
+    # if is_complex:
+    #     for i in range(len(expected_stride)):
+    #         expected_stride[i] *= 2
     var is_contiguous = arg.storage_offset() == 0
     for i in range(len(arg_stride)):
         if arg_stride[i] != expected_stride[i]:

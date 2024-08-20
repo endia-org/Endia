@@ -24,6 +24,7 @@ from collections import Optional
 from algorithm import parallelize
 from memory import memcpy
 from time import now
+from sys import num_physical_cores
 
 alias pi = Float64(3.141592653589793)  # Maximum useful precision for Float64
 
@@ -70,72 +71,10 @@ fn bit_reversal(
                         reordered_arr_data.store(i + j, to_store[j])
 
 
-def fft_sequential(x: nd.Array) -> nd.Array:
-    if x.ndim() != 1:
-        raise "Input must be 1-dimensional"
-
-    if not x.is_complex():
-        x = nd.complex(x, nd.zeros_like(x))
-
-    n = x.size()  # n is the number of complex elements in x
-
-    var data_orig = x.data()  # data has actual capacity 2*n since each complex element has 2 scalars
-    var data = UnsafePointer[Scalar[DType.float64]].alloc(2 * n)
-    for i in range(2 * n):
-        data.store(i, data_orig.load(i).cast[DType.float64]())
-
-    # Bit-reversal permutation
-    var reordered_arr_data = UnsafePointer[Scalar[DType.uint32]].alloc(n)
-    bit_reversal(n, reordered_arr_data)
-
-    # permute x according to the bit-reversal permutation
-    for i in range(n):
-        var j = int(reordered_arr_data.load(i))
-        if i < j:
-            var tmp = data.load[width=2](2 * i)
-            data.store[width=2](2 * i, data.load[width=2](2 * j))
-            data.store[width=2](2 * j, tmp)
-
-    reordered_arr_data.free()
-
-    var m = 2
-    while m <= n:
-        var u = SIMD[DType.float64, 2](1.0, 0.0)
-        # Calculate w_real and w_imag for the complex exponential
-        var angle = -2 * pi / m
-        var w_real = math.cos(angle)
-        var w_imag = math.sin(angle)
-
-        for k in range(0, m // 2):
-            for j in range(k, n, m):
-                var j_2 = 2 * j
-                var j_2_plus_m = j_2 + m
-
-                var z = data.load[width=2](j_2)
-                var d = data.load[width=2](j_2_plus_m)
-                var t = SIMD[DType.float64, 2](
-                    u[0] * d[0] - u[1] * d[1], u[0] * d[1] + u[1] * d[0]
-                )
-                data.store[width=2](j_2_plus_m, z - t)
-                data.store[width=2](j_2, z + t)
-
-            # Update u for the next iteration
-            u = SIMD[DType.float64, 2](
-                u[0] * w_real - u[1] * w_imag, u[0] * w_imag + u[1] * w_real
-            )
-
-        m *= 2
-
-    for i in range(2 * n):
-        data_orig.store(i, data.load(i).cast[DType.float32]())
-    data.free()
-
-    return x
-
-
-def fft(x: nd.Array) -> nd.Array:
-    if x.size() < 2**14:
-        return fft_sequential(x)
+def fft_c(x: nd.Array) -> nd.Array:
+    # q: check if x.size() is a power of two
+    if (x.size() & (x.size() - 1)) != 0:
+        raise "Input size must be a power of two"
 
     if not x.is_complex():
         x = nd.complex(x, nd.zeros_like(x))
@@ -144,7 +83,10 @@ def fft(x: nd.Array) -> nd.Array:
     if n <= 1:
         return x
 
-    var num_workers = 8
+    x = nd.contiguous(x.reshape(x.size()))
+
+    var parallelize_threshold = 2**14
+    var num_workers = num_physical_cores() if x.size() >= parallelize_threshold else 1
     var workload = n // num_workers
     var h = int(math.log2(Float32(n // workload)))
 
@@ -330,7 +272,7 @@ def fft_benchmark():
                 total_torch = 0
 
             start = now()
-            _ = fft(x)
+            _ = fft_c(x)
             total += now() - start
 
             start = now()
@@ -352,10 +294,8 @@ def fft_test():
 
     var x = nd.complex(nd.randn(n), nd.randn(n))
     var x_torch = nd.utils.to_torch(x)
-    # print("Input:", x)
-    # print("Input Torch:", x_torch)
 
-    var y = fft(x)
+    var y = fft_c(x)
     var y_torch = torch.fft.fft(x_torch)
     real_torch = y_torch.real
     imag_torch = y_torch.imag

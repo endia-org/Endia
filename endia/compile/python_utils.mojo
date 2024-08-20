@@ -20,16 +20,6 @@ from python import PythonObject
 from endia.utils.aliases import dtype, nelts
 
 
-# from sys.intrinsics import (
-#     _mlirtype_is_eq,
-#     _type_is_eq,
-#     gather,
-#     scatter,
-#     strided_load,
-#     strided_store,
-# )
-
-
 @always_inline
 fn memcpy_to_numpy(array: PythonObject, tensor: Array) raises:
     var dst = array.__array_interface__["data"][0].unsafe_get_as_pointer[

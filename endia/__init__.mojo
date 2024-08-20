@@ -15,3 +15,4 @@ from ._array import *
 from .functional import *
 from .compile import *
 from .autograd import *
+from .fft import *

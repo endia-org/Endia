@@ -16,5 +16,5 @@ from endia import Array
 from .utils import fft_c
 
 
-def fft1d(x: Array, dim: Int = -1, norm: String = "backward") -> Array:
+def fft(x: Array, dim: Int = -1, norm: String = "backward") -> Array:
     return fftn(x, dim, norm)

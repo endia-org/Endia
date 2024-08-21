@@ -13,6 +13,6 @@
 
 
 from .utils import fft_c
-from ._fft1d import fft1d
-from ._fft2d import fft2d
+from ._fft import fft
+from ._fft2 import fft2
 from ._fftn import fftn

@@ -20,24 +20,24 @@ import math
 import endia as nd
 import time
 from python import Python
-from endia.fft import fft1d
+from endia.signal import fftn
 
 
-def fft1d_test():
-    var n = 2**12  # power of two
-    print("\nInput Size: ", n)
+def fftn_test():
+    var depth = 2**3
+    var width = 2**5
+    var height = 2**7
+
+    print("\nDepth:", depth, " - Width:", width, " - Height:", height)
+
     var torch = Python.import_module("torch")
 
-    var shape = List(2, 2, n)
+    var shape = List(2, 2, depth, width, height)
     var x = nd.complex(nd.randn(shape), nd.randn(shape))
     var x_torch = nd.utils.to_torch(x)
 
-    # print("Input:")
-    # print(x)
-    # print(x_torch)
-
-    var y = fft1d(x)
-    var y_torch = torch.fft.fft(x_torch)
+    var y = fftn(x)
+    var y_torch = torch.fft.fftn(x_torch)
 
     # print("Output:")
     # print(y)
@@ -47,11 +47,11 @@ def fft1d_test():
     var epsilon = Float32(1e-10)
 
     # fit the shape to easily iteratoe over the data
-    y = y.reshape(x.size())
+    y = nd.contiguous(y.reshape(x.size()))
     real_torch = y_torch.real.reshape(x.size())
     imag_torch = y_torch.imag.reshape(x.size())
     var data = y.data()
-    for i in range(n):
+    for i in range(x.size()):
         real = data.load(2 * i)
         imag = data.load(2 * i + 1)
         var real_torch_val = real_torch[i].to_float64().cast[DType.float32]()
@@ -63,5 +63,5 @@ def fft1d_test():
             abs(real - real_torch_val) + abs(imag - imag_torch_val)
         ) / magnitude
 
-    diff /= n
+    diff /= x.size()
     print("Mean relative difference:", diff)

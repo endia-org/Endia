@@ -1,24 +1,19 @@
 import endia as nd
 
 
-def fft3d_benchmark():
+def fft_benchmark():
     var torch = Python.import_module("torch")
 
-    for n in range(5, 16):
-        var depth = 4  # 2 ** (n - 5)
-        var width = 16  # 2 ** (n - 5)
-        var height = 2**n
-        var size = depth * width * height
-
-        print("Depth:", depth, " - Width:", width, " - Height:", height)
-
-        var x = nd.complex(
-            nd.arange(0, size).reshape(List(depth, width, height)),
-            nd.arange(0, size).reshape(List(depth, width, height)),
+    for n in range(4, 23):
+        size = 2**n
+        print("Size: 2**", end="")
+        print(n, "=", size)
+        x = nd.complex(
+            nd.unsqueeze(nd.arange(0, size), List(0)),
+            nd.unsqueeze(nd.arange(0, size), List(0)),
         )
-        var x_torch = torch.complex(
-            torch.arange(0, size).float().reshape(depth, width, height),
-            torch.arange(0, size).float().reshape(depth, width, height),
+        x_torch = torch.complex(
+            torch.arange(0, size).float(), torch.arange(0, size).float()
         )
 
         num_iterations = 20
@@ -32,11 +27,11 @@ def fft3d_benchmark():
                 total_torch = 0
 
             start = now()
-            _ = nd.fft.fftn(x)
+            _ = nd.signal.fft(x)
             total += now() - start
 
             start = now()
-            _ = torch.fft.fftn(x_torch)
+            _ = torch.fft.fft(x_torch)
             total_torch += now() - start
 
         my_time = total / (1000000000 * num_iterations)

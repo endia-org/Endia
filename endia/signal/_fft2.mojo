@@ -15,7 +15,7 @@ from endia import Array, complex, zeros_like, permute, contiguous
 from .utils import fft_c
 
 
-def fft2d(
+def fft2(
     x: Array, dims: List[Int] = List(-2, -1), norm: String = "backward"
 ) -> Array:
     if len(dims) != 2:

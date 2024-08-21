@@ -20,10 +20,10 @@ import math
 import endia as nd
 import time
 from python import Python
-from endia.fft import fft2d
+from endia.signal import fft2
 
 
-def fft2d_test():
+def fft2_test():
     var widht = 2**2
     var height = 2**14
 
@@ -35,7 +35,7 @@ def fft2d_test():
     var x = nd.complex(nd.randn(shape), nd.randn(shape))
     var x_torch = nd.utils.to_torch(x)
 
-    var y = fft2d(x)
+    var y = fft2(x)
     var y_torch = torch.fft.fft2(x_torch)
 
     # print("Output:")

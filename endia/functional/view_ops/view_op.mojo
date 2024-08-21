@@ -61,7 +61,7 @@ struct Reshape(DifferentiableViewOp):
 
         var arg = args[0]
 
-        if is_contiguous(arg.array_shape(), arg.is_complex()):
+        if is_contiguous(arg.array_shape()):
             curr.is_view_(True)
             curr.base_(arg.base())
             var curr_array_shape = curr.array_shape()

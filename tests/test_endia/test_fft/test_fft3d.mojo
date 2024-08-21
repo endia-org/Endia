@@ -28,14 +28,15 @@ def fft3d_test():
     print("Input Size: ", n)
     var torch = Python.import_module("torch")
 
-    var x = nd.unsqueeze(nd.complex(nd.randn(n), nd.randn(n)), List(0, 1))
+    var shape = List(n, n, n)
+    var x = nd.complex(nd.randn(shape), nd.randn(shape))
     var x_torch = nd.utils.to_torch(x)
 
     print("Input:")
     print(x)
     print(x_torch)
 
-    var y = fft_c(x)
+    var y = fft3d(x)
     print(str(y.array_shape()))
     var y_torch = torch.fft.fft(x_torch)
 
@@ -47,9 +48,9 @@ def fft3d_test():
     var epsilon = Float32(1e-8)
 
     # fit the shape to easily iteratoe over the data
-    y = y.reshape(n)
-    real_torch = y_torch.real.reshape(n)
-    imag_torch = y_torch.imag.reshape(n)
+    y = y.reshape(x.size())
+    real_torch = y_torch.real.reshape(x.size())
+    imag_torch = y_torch.imag.reshape(x.size())
     var data = y.data()
     for i in range(n):
         real = data.load(2 * i)

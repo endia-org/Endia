@@ -174,13 +174,12 @@ fn copy(arg: Array) raises -> Array:
     return res
 
 
-fn is_contiguous(arg: ArrayShape, is_complex: Bool) raises -> Bool:
+fn is_contiguous(arg: ArrayShape) raises -> Bool:
     var arg_stride = arg.stride()
     var expected_stride = compute_stride(arg.shape())
-    # if is_complex:
-    #     for i in range(len(expected_stride)):
-    #         expected_stride[i] *= 2
-    var is_contiguous = arg.storage_offset() == 0
+    var is_contiguous = (arg.storage_offset() == 0)
+    if not is_contiguous:
+        return False
     for i in range(len(arg_stride)):
         if arg_stride[i] != expected_stride[i]:
             is_contiguous = False
@@ -189,7 +188,7 @@ fn is_contiguous(arg: ArrayShape, is_complex: Bool) raises -> Bool:
 
 
 fn contiguous(arg: Array) raises -> Array:
-    if is_contiguous(arg.array_shape(), arg.is_complex()):
+    if is_contiguous(arg.array_shape()):
         return arg
     else:
         return copy(arg)

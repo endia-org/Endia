@@ -24,20 +24,16 @@ from endia.fft import fft_c, fft1d, fft2d, fft3d
 
 
 def fft2d_test():
-    var n = 2**12  # power of two
+    var n = 2**8  # power of two
     print("Input Size: ", n)
     var torch = Python.import_module("torch")
 
-    var x = nd.unsqueeze(nd.complex(nd.randn(n), nd.randn(n)), List(0, 1))
+    var shape = List(n, n)
+    var x = nd.complex(nd.randn(shape), nd.randn(shape))
     var x_torch = nd.utils.to_torch(x)
 
-    print("Input:")
-    print(x)
-    print(x_torch)
-
-    var y = fft_c(x)
-    print(str(y.array_shape()))
-    var y_torch = torch.fft.fft(x_torch)
+    var y = fft2d(x)
+    var y_torch = torch.fft.fft2(x_torch)
 
     print("Output:")
     print(y)
@@ -47,9 +43,9 @@ def fft2d_test():
     var epsilon = Float32(1e-8)
 
     # fit the shape to easily iteratoe over the data
-    y = y.reshape(n)
-    real_torch = y_torch.real.reshape(n)
-    imag_torch = y_torch.imag.reshape(n)
+    y = y.reshape(x.size())
+    real_torch = y_torch.real.reshape(x.size())
+    imag_torch = y_torch.imag.reshape(x.size())
     var data = y.data()
     for i in range(n):
         real = data.load(2 * i)

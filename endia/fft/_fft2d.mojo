@@ -11,7 +11,7 @@
 # limitations under the License.
 # ===----------------------------------------------------------------------=== #
 
-from endia import Array, complex, zeros_like
+from endia import Array, complex, zeros_like, permute, contiguous
 from .utils import fft_c
 
 
@@ -23,10 +23,6 @@ def fft2d(x: Array) -> Array:
     if not x.is_complex():
         x = complex(x, zeros_like(x))
 
-    for i in range(rows):
-        x[i : i + 1, :] = fft_c(x[i : i + 1, :])
-
-    for j in range(cols):
-        x[:, j : j + 1] = fft_c(x[:, j : j + 1])
-
-    return x
+    x = fft_c(x, divisions=rows)
+    x = fft_c(x.T(), divisions=cols)
+    return x.T()

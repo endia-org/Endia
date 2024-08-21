@@ -20,6 +20,7 @@ import math
 import endia as nd
 import time
 from python import Python, PythonObject
+from endia.functional._utils import is_contiguous
 from collections import Optional
 from algorithm import parallelize
 from memory import memcpy
@@ -71,25 +72,27 @@ fn bit_reversal(
                         reordered_arr_data.store(i + j, to_store[j])
 
 
-def fft_c(x: nd.Array) -> nd.Array:
-    # q: check if x.size() is a power of two
-    if (x.size() & (x.size() - 1)) != 0:
+def fft_c(x: nd.Array, divisions: Int = 1) -> nd.Array:
+    if (x.shape()[-1] & (x.shape()[-1] - 1)) != 0:
         raise "Input size must be a power of two"
 
     if not x.is_complex():
         x = nd.complex(x, nd.zeros_like(x))
 
     var original_shape = x.shape()
-    x = nd.contiguous(x.reshape(x.size()))
+    x = x.reshape(x.size())
+    x = nd.contiguous(x)
     n = x.shape()[0]
 
     if n <= 1:
-        return x
+        return x.reshape(original_shape)
 
     var parallelize_threshold = 2**14
-    var num_workers = num_physical_cores() if x.size() >= parallelize_threshold else 1
-    var workload = n // num_workers
-    var h = int(math.log2(Float32(n // workload)))
+    var num_workers = (
+        num_physical_cores() if x.size() >= parallelize_threshold else 1
+    ) if divisions == 1 else divisions
+    var workload = (n // num_workers) if (divisions == 1) else (n // divisions)
+    var h = (int(math.log2(Float32(n // workload)))) if divisions == 1 else 0
 
     # Bit-reversal permutation
     var reordered_arr_data = UnsafePointer[Scalar[DType.uint32]].alloc(workload)
@@ -177,9 +180,12 @@ def fft_c(x: nd.Array) -> nd.Array:
         memcpy(res_data.offset(2 * i * workload), data, 2 * n)
         data.free()
 
-    parallelize[do_work](num_workers, num_workers)
+    parallelize[do_work](
+        num_workers if divisions == 1 else divisions, num_workers
+    )
 
     _ = workload
+    _ = divisions
     reordered_arr_data.free()
 
     var temp = UnsafePointer[Scalar[DType.float64]].alloc(n * 2)
@@ -246,8 +252,10 @@ def fft_c(x: nd.Array) -> nd.Array:
         data_orig.store(i, res_data.load(i).cast[DType.float32]())
 
     res_data.free()
+    var res = contiguous(result.reshape(original_shape))
+    _ = x
 
-    return result.reshape(original_shape)
+    return res
 
 
 #####---------------------------------------------------------####

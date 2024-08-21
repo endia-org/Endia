@@ -32,7 +32,7 @@ def fft3d_benchmark():
                 total_torch = 0
 
             start = now()
-            _ = nd.fft.fft3d(x)
+            _ = nd.fft.fftn(x)
             total += now() - start
 
             start = now()

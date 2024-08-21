@@ -15,14 +15,9 @@ from endia import Array, complex, zeros_like, permute, contiguous
 from .utils import fft_c
 
 
-def fft2d(x: Array) -> Array:
-    shape = x.shape()
-    rows = shape[0]
-    cols = shape[1]
-
-    if not x.is_complex():
-        x = complex(x, zeros_like(x))
-
-    x = fft_c(x, divisions=rows)
-    x = fft_c(x.T(), divisions=cols)
-    return x.T()
+def fft2d(
+    x: Array, dims: List[Int] = List(-2, -1), norm: String = "backward"
+) -> Array:
+    if len(dims) != 2:
+        raise "fft2d: Invalid number of dimensions"
+    return fftn(x, dims, norm)

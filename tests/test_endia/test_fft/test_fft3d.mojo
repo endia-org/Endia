@@ -19,8 +19,8 @@
 import math
 import endia as nd
 import time
-from python import Python, PythonObject
-from endia.fft import fft3d
+from python import Python
+from endia.fft import fftn
 
 
 def fft3d_test():
@@ -28,20 +28,20 @@ def fft3d_test():
     var width = 2**5
     var height = 2**7
 
-    print("Depth:", depth, " - Width:", width, " - Height:", height)
+    print("\nDepth:", depth, " - Width:", width, " - Height:", height)
 
     var torch = Python.import_module("torch")
 
-    var shape = List(depth, width, height)
+    var shape = List(2, 2, depth, width, height)
     var x = nd.complex(nd.randn(shape), nd.randn(shape))
     var x_torch = nd.utils.to_torch(x)
 
-    var y = fft3d(x)
+    var y = fftn(x)
     var y_torch = torch.fft.fftn(x_torch)
 
-    print("Output:")
-    print(y)
-    print(y_torch)
+    # print("Output:")
+    # print(y)
+    # print(y_torch)
 
     var diff = Float32(0)
     var epsilon = Float32(1e-10)

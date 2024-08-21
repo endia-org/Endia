@@ -19,28 +19,28 @@
 import math
 import endia as nd
 import time
-from python import Python, PythonObject
-from endia.fft import fft_c, fft1d, fft2d, fft3d
+from python import Python
+from endia.fft import fft2d
 
 
 def fft2d_test():
     var widht = 2**2
     var height = 2**14
 
-    print("Input Width:", widht, " - Height:", height)
+    print("\nInput Width:", widht, " - Height:", height)
 
     var torch = Python.import_module("torch")
 
-    var shape = List(widht, height)
+    var shape = List(4, 4, widht, height)
     var x = nd.complex(nd.randn(shape), nd.randn(shape))
     var x_torch = nd.utils.to_torch(x)
 
     var y = fft2d(x)
     var y_torch = torch.fft.fft2(x_torch)
 
-    print("Output:")
-    print(y)
-    print(y_torch)
+    # print("Output:")
+    # print(y)
+    # print(y_torch)
 
     var diff = Float32(0)
     var epsilon = Float32(1e-10)

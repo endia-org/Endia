@@ -24,11 +24,14 @@ from endia.fft import fft_c, fft1d, fft2d, fft3d
 
 
 def fft2d_test():
-    var n = 2**8  # power of two
-    print("Input Size: ", n)
+    var widht = 2**2
+    var height = 2**14
+
+    print("Input Width:", widht, " - Height:", height)
+
     var torch = Python.import_module("torch")
 
-    var shape = List(n, n)
+    var shape = List(widht, height)
     var x = nd.complex(nd.randn(shape), nd.randn(shape))
     var x_torch = nd.utils.to_torch(x)
 
@@ -47,7 +50,7 @@ def fft2d_test():
     real_torch = y_torch.real.reshape(x.size())
     imag_torch = y_torch.imag.reshape(x.size())
     var data = y.data()
-    for i in range(n):
+    for i in range(x.size()):
         real = data.load(2 * i)
         imag = data.load(2 * i + 1)
         var real_torch_val = real_torch[i].to_float64().cast[DType.float32]()
@@ -59,5 +62,5 @@ def fft2d_test():
             abs(real - real_torch_val) + abs(imag - imag_torch_val)
         ) / magnitude
 
-    diff /= n
+    diff /= x.size()
     print("Mean relative difference:", diff)

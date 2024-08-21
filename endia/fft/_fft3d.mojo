@@ -24,22 +24,12 @@ def fft3d(x: Array) -> Array:
     if not x.is_complex():
         x = complex(x, zeros_like(x))
 
-    for i in range(rows):
-        for j in range(cols):
-            x[i : i + 1, j : j + 1, :] = fft_c(x[i : i + 1, j : j + 1, :])
-        for k in range(depth):
-            x[i : i + 1, :, k : k + 1] = fft_c(x[i : i + 1, :, k : k + 1])
-
-    for j in range(cols):
-        for i in range(rows):
-            x[i : i + 1, j : j + 1, :] = fft_c(x[i : i + 1, j : j + 1, :])
-        for k in range(depth):
-            x[:, j : j + 1, k : k + 1] = fft_c(x[:, j : j + 1, k : k + 1])
-
-    for k in range(depth):
-        for i in range(rows):
-            x[i : i + 1, :, k : k + 1] = fft_c(x[i : i + 1, :, k : k + 1])
-        for j in range(cols):
-            x[:, j : j + 1, k : k + 1] = fft_c(x[:, j : j + 1, k : k + 1])
+    # fft_c always applies a 1d fft along the last axis of the input array, the divions parameter is used to divide the input array into smaller arrays which are later concatenated
+    x = fft_c(x, divisions=depth * rows)
+    x = permute(x, List(2, 0, 1))  # x -> (cols, depth, rows)
+    x = fft_c(x, divisions=depth * cols)
+    x = permute(x, List(2, 0, 1))  # x -> (rows, cols, depth)
+    x = fft_c(x, divisions=rows * cols)
+    x = permute(x, List(2, 0, 1))  # x -> (depth, rows, cols)
 
     return x

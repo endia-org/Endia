@@ -88,49 +88,51 @@ def fft_c(x: nd.Array, divisions: Int = 1) -> nd.Array:
         return x.reshape(original_shape)
 
     var parallelize_threshold = 2**14
-    var num_workers = (
-        num_physical_cores() if x.size() >= parallelize_threshold else 1
-    ) if divisions == 1 else divisions
+    var num_workers = num_physical_cores() if x.size() >= parallelize_threshold else 1
+
     var workload = (n // num_workers) if (divisions == 1) else (n // divisions)
     var h = (int(math.log2(Float32(n // workload)))) if divisions == 1 else 0
 
     # Bit-reversal permutation
     var reordered_arr_data = UnsafePointer[Scalar[DType.uint32]].alloc(workload)
-    bit_reversal(n // num_workers, reordered_arr_data)
+    bit_reversal(workload, reordered_arr_data)
 
     var data = x.data()
     var res_data = UnsafePointer[Scalar[DType.float64]].alloc(n * 2)
     for i in range(2 * n):
         res_data.store(i, data.load(i).cast[DType.float64]())
 
-    for iteration in range(h):
-        var subarray_size = n // (2**iteration)
-        var num_subarrays = 2**iteration
-        var temp = UnsafePointer[Scalar[DType.float64]].alloc(subarray_size * 2)
+    if h > 0:
+        for iteration in range(h):
+            var subarray_size = n // (2**iteration)
+            var num_subarrays = 2**iteration
+            var temp = UnsafePointer[Scalar[DType.float64]].alloc(
+                subarray_size * 2
+            )
 
-        for subarray in range(num_subarrays):
-            var start = subarray * subarray_size
-            var end = start + subarray_size
-            var even_index = 0
-            var odd_index = subarray_size // 2
+            for subarray in range(num_subarrays):
+                var start = subarray * subarray_size
+                var end = start + subarray_size
+                var even_index = 0
+                var odd_index = subarray_size // 2
 
-            for i in range(start, end):
-                if (i - start) % 2 == 0:
-                    temp.store[width=2](
-                        2 * even_index, res_data.load[width=2](2 * i)
-                    )
-                    even_index += 1
-                else:
-                    temp.store[width=2](
-                        2 * odd_index, res_data.load[width=2](2 * i)
-                    )
-                    odd_index += 1
+                for i in range(start, end):
+                    if (i - start) % 2 == 0:
+                        temp.store[width=2](
+                            2 * even_index, res_data.load[width=2](2 * i)
+                        )
+                        even_index += 1
+                    else:
+                        temp.store[width=2](
+                            2 * odd_index, res_data.load[width=2](2 * i)
+                        )
+                        odd_index += 1
 
-            for i in range(subarray_size):
-                res_data.store(2 * (start + i), temp[2 * i])
-                res_data.store(2 * (start + i) + 1, temp[2 * i + 1])
+                for i in range(subarray_size):
+                    res_data.store(2 * (start + i), temp[2 * i])
+                    res_data.store(2 * (start + i) + 1, temp[2 * i + 1])
 
-        temp.free()
+            temp.free()
 
     @parameter
     fn do_work(i: Int) capturing:
@@ -188,62 +190,67 @@ def fft_c(x: nd.Array, divisions: Int = 1) -> nd.Array:
     _ = divisions
     reordered_arr_data.free()
 
-    var temp = UnsafePointer[Scalar[DType.float64]].alloc(n * 2)
-    var even = UnsafePointer[Scalar[DType.float64]].alloc(n)
-    var odd = UnsafePointer[Scalar[DType.float64]].alloc(n)
-    var T = UnsafePointer[Scalar[DType.float64]].alloc(n)
-    var twiddle_factors = UnsafePointer[Scalar[DType.float64]].alloc(n)
+    if h > 0:
+        var temp = UnsafePointer[Scalar[DType.float64]].alloc(n * 2)
+        var even = UnsafePointer[Scalar[DType.float64]].alloc(n)
+        var odd = UnsafePointer[Scalar[DType.float64]].alloc(n)
+        var T = UnsafePointer[Scalar[DType.float64]].alloc(n)
+        var twiddle_factors = UnsafePointer[Scalar[DType.float64]].alloc(n)
 
-    for iteration in range(h - 1, -1, -1):
-        var subarray_size = n // (2**iteration)
-        var num_subarrays = 2**iteration
-
-        for k in range(subarray_size // 2):
-            var p = (-2 * pi / subarray_size) * k
-            twiddle_factors.store[width=2](
-                2 * k, SIMD[DType.float64, 2](math.cos(p), math.sin(p))
-            )
-
-        for subarray in range(num_subarrays):
-            var start = subarray * subarray_size
-            var mid = start + subarray_size // 2
+        for iteration in range(h - 1, -1, -1):
+            var subarray_size = n // (2**iteration)
+            var num_subarrays = 2**iteration
 
             for k in range(subarray_size // 2):
-                var k_times_2 = 2 * k
-                var k_times_2_plus_1 = k_times_2 + 1
-                even.store[width=2](
-                    k_times_2, res_data.load[width=2](2 * (start + k))
-                )
-                odd.store[width=2](
-                    k_times_2, res_data.load[width=2](2 * (mid + k))
-                )
-                var twiddle_factor = twiddle_factors.load[width=2](k_times_2)
-                T.store(
-                    k_times_2,
-                    twiddle_factor[0] * odd[k_times_2]
-                    - twiddle_factor[1] * odd[k_times_2_plus_1],
-                )
-                T.store(
-                    k_times_2_plus_1,
-                    twiddle_factor[0] * odd[k_times_2_plus_1]
-                    + twiddle_factor[1] * odd[k_times_2],
-                )
-                temp.store[width=2](
-                    2 * (start + k),
-                    even.load[width=2](k_times_2) + T.load[width=2](k_times_2),
-                )
-                temp.store[width=2](
-                    2 * (mid + k),
-                    even.load[width=2](k_times_2) - T.load[width=2](k_times_2),
+                var p = (-2 * pi / subarray_size) * k
+                twiddle_factors.store[width=2](
+                    2 * k, SIMD[DType.float64, 2](math.cos(p), math.sin(p))
                 )
 
-        memcpy(res_data, temp, n * 2)
+            for subarray in range(num_subarrays):
+                var start = subarray * subarray_size
+                var mid = start + subarray_size // 2
 
-    even.free()
-    odd.free()
-    T.free()
-    twiddle_factors.free()
-    temp.free()
+                for k in range(subarray_size // 2):
+                    var k_times_2 = 2 * k
+                    var k_times_2_plus_1 = k_times_2 + 1
+                    even.store[width=2](
+                        k_times_2, res_data.load[width=2](2 * (start + k))
+                    )
+                    odd.store[width=2](
+                        k_times_2, res_data.load[width=2](2 * (mid + k))
+                    )
+                    var twiddle_factor = twiddle_factors.load[width=2](
+                        k_times_2
+                    )
+                    T.store(
+                        k_times_2,
+                        twiddle_factor[0] * odd[k_times_2]
+                        - twiddle_factor[1] * odd[k_times_2_plus_1],
+                    )
+                    T.store(
+                        k_times_2_plus_1,
+                        twiddle_factor[0] * odd[k_times_2_plus_1]
+                        + twiddle_factor[1] * odd[k_times_2],
+                    )
+                    temp.store[width=2](
+                        2 * (start + k),
+                        even.load[width=2](k_times_2)
+                        + T.load[width=2](k_times_2),
+                    )
+                    temp.store[width=2](
+                        2 * (mid + k),
+                        even.load[width=2](k_times_2)
+                        - T.load[width=2](k_times_2),
+                    )
+
+            memcpy(res_data, temp, n * 2)
+
+        even.free()
+        odd.free()
+        T.free()
+        twiddle_factors.free()
+        temp.free()
 
     var result = nd.Array(List(n), is_complex=True)
     var data_orig = result.data()
@@ -252,7 +259,7 @@ def fft_c(x: nd.Array, divisions: Int = 1) -> nd.Array:
         data_orig.store(i, res_data.load(i).cast[DType.float32]())
 
     res_data.free()
-    var res = contiguous(result.reshape(original_shape))
+    var res = result.reshape(original_shape)
     _ = x
 
     return res

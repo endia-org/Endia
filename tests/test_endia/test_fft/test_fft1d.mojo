@@ -45,7 +45,7 @@ def fft1d_test():
     print(y_torch)
 
     var diff = Float32(0)
-    var epsilon = Float32(1e-8)
+    var epsilon = Float32(1e-10)
 
     # fit the shape to easily iteratoe over the data
     y = y.reshape(x.size())

@@ -11,25 +11,24 @@
 # limitations under the License.
 # ===----------------------------------------------------------------------=== #
 
-from endia import Array, complex, zeros_like
+from endia import Array, permute
 from .utils import fft_c
 
 
 def fft3d(x: Array) -> Array:
     shape = x.shape()
-    rows = shape[0]
-    cols = shape[1]
-    depth = shape[2]
+    planes = shape[0]
+    rows = shape[1]
+    cols = shape[2]
 
     if not x.is_complex():
         x = complex(x, zeros_like(x))
 
-    # fft_c always applies a 1d fft along the last axis of the input array, the divions parameter is used to divide the input array into smaller arrays which are later concatenated
-    x = fft_c(x, divisions=depth * rows)
-    x = permute(x, List(2, 0, 1))  # x -> (cols, depth, rows)
-    x = fft_c(x, divisions=depth * cols)
-    x = permute(x, List(2, 0, 1))  # x -> (rows, cols, depth)
+    x = fft_c(x, divisions=planes * rows)
+    x = permute(x, List(0, 2, 1))  # -> depth, cols, rows
+    x = fft_c(x, divisions=planes * cols)
+    x = permute(x, List(2, 1, 0))  # -> rows, cols, depth
     x = fft_c(x, divisions=rows * cols)
-    x = permute(x, List(2, 0, 1))  # x -> (depth, rows, cols)
+    x = permute(x, List(2, 0, 1))  # -> depth, rows, cols
 
     return x

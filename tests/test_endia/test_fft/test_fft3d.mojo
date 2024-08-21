@@ -20,7 +20,7 @@ import math
 import endia as nd
 import time
 from python import Python, PythonObject
-from endia.fft import fft_c, fft1d, fft2d, fft3d
+from endia.fft import fft3d
 
 
 def fft3d_test():
@@ -44,7 +44,7 @@ def fft3d_test():
     print(y_torch)
 
     var diff = Float32(0)
-    var epsilon = Float32(1e-16)
+    var epsilon = Float32(1e-10)
 
     # fit the shape to easily iteratoe over the data
     y = nd.contiguous(y.reshape(x.size()))

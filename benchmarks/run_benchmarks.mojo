@@ -23,4 +23,5 @@ def run_benchmarks():
     # benchmark_mlp_jit_with_MAX()
 
     # fft1d_benchmark()
-    fft2d_benchmark()
+    # fft2d_benchmark()
+    fft3d_benchmark()

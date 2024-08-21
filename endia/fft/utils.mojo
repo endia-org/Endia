@@ -249,42 +249,42 @@ def fft_c(x: nd.Array) -> nd.Array:
     return result
 
 
-def fft_benchmark():
-    var torch = Python.import_module("torch")
+# def fft_benchmark():
+#     var torch = Python.import_module("torch")
 
-    for n in range(4, 23):
-        size = 2**n
-        print("Size: 2**", end="")
-        print(n, "=", size)
-        x = nd.complex(nd.arange(0, size), nd.arange(0, size))
-        x_torch = torch.complex(
-            torch.arange(0, size).float(), torch.arange(0, size).float()
-        )
+#     for n in range(4, 23):
+#         size = 2**n
+#         print("Size: 2**", end="")
+#         print(n, "=", size)
+#         x = nd.complex(nd.arange(0, size), nd.arange(0, size))
+#         x_torch = torch.complex(
+#             torch.arange(0, size).float(), torch.arange(0, size).float()
+#         )
 
-        num_iterations = 20
-        warmup = 5
-        total = Float32(0)
-        total_torch = Float32(0)
+#         num_iterations = 20
+#         warmup = 5
+#         total = Float32(0)
+#         total_torch = Float32(0)
 
-        for iteration in range(num_iterations + warmup):
-            if iteration < warmup:
-                total = 0
-                total_torch = 0
+#         for iteration in range(num_iterations + warmup):
+#             if iteration < warmup:
+#                 total = 0
+#                 total_torch = 0
 
-            start = now()
-            _ = fft_c(x)
-            total += now() - start
+#             start = now()
+#             _ = fft_c(x)
+#             total += now() - start
 
-            start = now()
-            _ = torch.fft.fft(x_torch)
-            total_torch += now() - start
+#             start = now()
+#             _ = torch.fft.fft(x_torch)
+#             total_torch += now() - start
 
-        my_time = total / (1000000000 * num_iterations)
-        torch_time = total_torch / (1000000000 * num_iterations)
-        print("Time taken:", my_time)
-        print("Time taken Torch:", torch_time)
-        print("Difference:", (torch_time - my_time) / torch_time * 100, "%")
-        print()
+#         my_time = total / (1000000000 * num_iterations)
+#         torch_time = total_torch / (1000000000 * num_iterations)
+#         print("Time taken:", my_time)
+#         print("Time taken Torch:", torch_time)
+#         print("Difference:", (torch_time - my_time) / torch_time * 100, "%")
+#         print()
 
 
 def fft_test():

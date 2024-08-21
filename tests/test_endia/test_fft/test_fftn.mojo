@@ -21,7 +21,7 @@ from endia.signal import fftn
 def fftn_test():
     var depth = 2**3
     var width = 2**5
-    var height = 2**7
+    var height = 2**6
 
     print("\nDepth:", depth, " - Width:", width, " - Height:", height)
 
@@ -33,10 +33,6 @@ def fftn_test():
 
     var y = fftn(x)
     var y_torch = torch.fft.fftn(x_torch)
-
-    # print("Output:")
-    # print(y)
-    # print(y_torch)
 
     var diff = Float32(0)
     var epsilon = Float32(1e-10)

@@ -16,6 +16,7 @@ import endia as nd
 
 
 def fftn_benchmark():
+    print("\nFFTN Benchmark ###########################################")
     var torch = Python.import_module("torch")
 
     for n in range(5, 16):

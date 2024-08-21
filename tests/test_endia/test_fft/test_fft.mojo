@@ -27,16 +27,8 @@ def fft_test():
     var x = nd.complex(nd.randn(shape), nd.randn(shape))
     var x_torch = nd.utils.to_torch(x)
 
-    # print("Input:")
-    # print(x)
-    # print(x_torch)
-
     var y = fft(x)
     var y_torch = torch.fft.fft(x_torch)
-
-    # print("Output:")
-    # print(y)
-    # print(y_torch)
 
     var diff = Float32(0)
     var epsilon = Float32(1e-10)

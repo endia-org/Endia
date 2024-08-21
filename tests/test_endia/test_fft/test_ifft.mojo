@@ -15,23 +15,20 @@ import math
 import endia as nd
 import time
 from python import Python
-from endia.signal import fft2
+from endia.signal import ifft
 
 
-def fft2_test():
-    var widht = 2**2
-    var height = 2**10
-
-    print("\nInput Width:", widht, " - Height:", height)
-
+def ifft_test():
+    var n = 2**12  # power of two
+    print("\nInput Size: ", n)
     var torch = Python.import_module("torch")
 
-    var shape = List(4, 4, widht, height)
+    var shape = List(2, 2, n)
     var x = nd.complex(nd.randn(shape), nd.randn(shape))
     var x_torch = nd.utils.to_torch(x)
 
-    var y = fft2(x)
-    var y_torch = torch.fft.fft2(x_torch)
+    var y = ifft(x)
+    var y_torch = torch.fft.ifft(x_torch)
 
     var diff = Float32(0)
     var epsilon = Float32(1e-10)
@@ -41,7 +38,7 @@ def fft2_test():
     real_torch = y_torch.real.reshape(x.size())
     imag_torch = y_torch.imag.reshape(x.size())
     var data = y.data()
-    for i in range(x.size()):
+    for i in range(n):
         real = data.load(2 * i)
         imag = data.load(2 * i + 1)
         var real_torch_val = real_torch[i].to_float64().cast[DType.float32]()
@@ -53,5 +50,5 @@ def fft2_test():
             abs(real - real_torch_val) + abs(imag - imag_torch_val)
         ) / magnitude
 
-    diff /= x.size()
+    diff /= n
     print("Mean relative difference:", diff)

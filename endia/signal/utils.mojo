@@ -72,7 +72,7 @@ fn bit_reversal(
                         reordered_arr_data.store(i + j, to_store[j])
 
 
-def fft_c(x: nd.Array, divisions: Int = 1) -> nd.Array:
+def fft_c(x: nd.Array, divisions: Int = 1, inverse: Bool = False) -> nd.Array:
     if (x.shape()[-1] & (x.shape()[-1] - 1)) != 0:
         raise "Input size must be a power of two"
 
@@ -99,8 +99,16 @@ def fft_c(x: nd.Array, divisions: Int = 1) -> nd.Array:
 
     var data = x.data()
     var res_data = UnsafePointer[Scalar[DType.float64]].alloc(n * 2)
-    for i in range(2 * n):
-        res_data.store(i, data.load(i).cast[DType.float64]())
+
+    if inverse:
+        for i in range(n):
+            res_data.store(2 * i, data.load(2 * i).cast[DType.float64]())
+            res_data.store(
+                2 * i + 1, -data.load(2 * i + 1).cast[DType.float64]()
+            )
+    else:
+        for i in range(2 * n):
+            res_data.store(i, data.load(i).cast[DType.float64]())
 
     if h > 0:
         for iteration in range(h):
@@ -255,8 +263,18 @@ def fft_c(x: nd.Array, divisions: Int = 1) -> nd.Array:
     var result = nd.Array(List(n), is_complex=True)
     var data_orig = result.data()
 
-    for i in range(2 * n):
-        data_orig.store(i, res_data.load(i).cast[DType.float32]())
+    if inverse:
+        for i in range(n):
+            data_orig.store(
+                2 * i, res_data.load(2 * i).cast[DType.float32]() / workload
+            )
+            data_orig.store(
+                2 * i + 1,
+                -res_data.load(2 * i + 1).cast[DType.float32]() / workload,
+            )
+    else:
+        for i in range(2 * n):
+            data_orig.store(i, res_data.load(i).cast[DType.float32]())
 
     res_data.free()
     var res = result.reshape(original_shape)

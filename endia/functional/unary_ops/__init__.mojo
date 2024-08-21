@@ -15,6 +15,7 @@ from .abs_op import to_abs
 from .acos_op import acos
 from .asin_op import asin
 from .atan_op import atan
+from .conj_op import conj
 from .cos_op import cos
 from .cosh_op import cosh
 from .exp_op import exp

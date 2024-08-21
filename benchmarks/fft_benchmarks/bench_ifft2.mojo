@@ -15,8 +15,8 @@
 import endia as nd
 
 
-def fft2_benchmark():
-    print("\nFFT2 Benchmark ###########################################")
+def ifft2_benchmark():
+    print("\nIFFT2 Benchmark ###########################################")
     var torch = Python.import_module("torch")
 
     for n in range(4, 12):
@@ -48,11 +48,11 @@ def fft2_benchmark():
                 total_torch = 0
 
             start = now()
-            _ = nd.signal.fft2(x)
+            _ = nd.signal.ifft2(x)
             total += now() - start
 
             start = now()
-            _ = torch.fft.fft2(x_torch)
+            _ = torch.fft.ifft2(x_torch)
             total_torch += now() - start
 
         my_time = total / (1000000000 * num_iterations)

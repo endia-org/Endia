@@ -15,3 +15,6 @@
 from .bench_fft import *
 from .bench_fft2 import *
 from .bench_fftn import *
+from .bench_ifft import *
+from .bench_ifft2 import *
+from .bench_ifftn import *

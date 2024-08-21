@@ -15,29 +15,30 @@ import math
 import endia as nd
 import time
 from python import Python
-from endia.signal import fft2
+from endia.signal import ifftn
 
 
-def fft2_test():
-    var widht = 2**2
-    var height = 2**10
+def ifftn_test():
+    var depth = 2**3
+    var width = 2**5
+    var height = 2**6
 
-    print("\nInput Width:", widht, " - Height:", height)
+    print("\nDepth:", depth, " - Width:", width, " - Height:", height)
 
     var torch = Python.import_module("torch")
 
-    var shape = List(4, 4, widht, height)
+    var shape = List(2, 2, depth, width, height)
     var x = nd.complex(nd.randn(shape), nd.randn(shape))
     var x_torch = nd.utils.to_torch(x)
 
-    var y = fft2(x)
-    var y_torch = torch.fft.fft2(x_torch)
+    var y = ifftn(x)
+    var y_torch = torch.fft.ifftn(x_torch)
 
     var diff = Float32(0)
     var epsilon = Float32(1e-10)
 
     # fit the shape to easily iteratoe over the data
-    y = y.reshape(x.size())
+    y = nd.contiguous(y.reshape(x.size()))
     real_torch = y_torch.real.reshape(x.size())
     imag_torch = y_torch.imag.reshape(x.size())
     var data = y.data()

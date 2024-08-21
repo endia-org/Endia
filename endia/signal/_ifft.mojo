@@ -11,20 +11,10 @@
 # limitations under the License.
 # ===----------------------------------------------------------------------=== #
 
-from benchmarks import *
+
+from endia import Array
+from .utils import fft_c
 
 
-def run_benchmarks():
-    # benchmark_foo_grad()
-
-    # benchmark_mlp_imp()
-    # benchmark_mlp_func()
-    # benchmark_mlp_jit()
-    # benchmark_mlp_jit_with_MAX()
-
-    fft_benchmark()
-    fft2_benchmark()
-    fftn_benchmark()
-    ifft_benchmark()
-    ifft2_benchmark()
-    ifftn_benchmark()
+def ifft(x: Array, dim: Int = -1, norm: String = "backward") -> Array:
+    return ifftn(x, dim, norm)

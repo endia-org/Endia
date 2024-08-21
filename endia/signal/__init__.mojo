@@ -16,3 +16,6 @@ from .utils import fft_c
 from ._fft import fft
 from ._fft2 import fft2
 from ._fftn import fftn
+from ._ifft import ifft
+from ._ifft2 import ifft2
+from ._ifftn import ifftn

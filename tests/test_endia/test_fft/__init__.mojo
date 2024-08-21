@@ -15,3 +15,6 @@
 from .test_fft import fft_test
 from .test_fft2 import fft2_test
 from .test_fftn import fftn_test
+from .test_ifft import ifft_test
+from .test_ifft2 import ifft2_test
+from .test_ifftn import ifftn_test

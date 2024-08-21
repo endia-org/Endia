@@ -12,7 +12,7 @@
 # ===----------------------------------------------------------------------=== #
 
 
-from .utils import fft_test
+from .utils import fft_c, fft_test
 from ._fft1d import fft1d
 from ._fft2d import fft2d
 from ._fft3d import fft3d

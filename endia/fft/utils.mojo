@@ -79,11 +79,12 @@ def fft_c(x: nd.Array) -> nd.Array:
     if not x.is_complex():
         x = nd.complex(x, nd.zeros_like(x))
 
+    var original_shape = x.shape()
+    x = nd.contiguous(x.reshape(x.size()))
     n = x.shape()[0]
+
     if n <= 1:
         return x
-
-    x = nd.contiguous(x.reshape(x.size()))
 
     var parallelize_threshold = 2**14
     var num_workers = num_physical_cores() if x.size() >= parallelize_threshold else 1
@@ -246,78 +247,7 @@ def fft_c(x: nd.Array) -> nd.Array:
 
     res_data.free()
 
-    return result
-
-
-# def fft_benchmark():
-#     var torch = Python.import_module("torch")
-
-#     for n in range(4, 23):
-#         size = 2**n
-#         print("Size: 2**", end="")
-#         print(n, "=", size)
-#         x = nd.complex(nd.arange(0, size), nd.arange(0, size))
-#         x_torch = torch.complex(
-#             torch.arange(0, size).float(), torch.arange(0, size).float()
-#         )
-
-#         num_iterations = 20
-#         warmup = 5
-#         total = Float32(0)
-#         total_torch = Float32(0)
-
-#         for iteration in range(num_iterations + warmup):
-#             if iteration < warmup:
-#                 total = 0
-#                 total_torch = 0
-
-#             start = now()
-#             _ = fft_c(x)
-#             total += now() - start
-
-#             start = now()
-#             _ = torch.fft.fft(x_torch)
-#             total_torch += now() - start
-
-#         my_time = total / (1000000000 * num_iterations)
-#         torch_time = total_torch / (1000000000 * num_iterations)
-#         print("Time taken:", my_time)
-#         print("Time taken Torch:", torch_time)
-#         print("Difference:", (torch_time - my_time) / torch_time * 100, "%")
-#         print()
-
-
-def fft_test():
-    var n = 2**20  # power of two
-    print("Input Size: ", n)
-    var torch = Python.import_module("torch")
-
-    var x = nd.complex(nd.randn(n), nd.randn(n))
-    var x_torch = nd.utils.to_torch(x)
-
-    var y = fft_c(x)
-    var y_torch = torch.fft.fft(x_torch)
-    real_torch = y_torch.real
-    imag_torch = y_torch.imag
-
-    var diff = Float32(0)
-    var epsilon = Float32(1e-8)  # Small value to avoid division by zero
-
-    var data = y.data()
-    for i in range(n):
-        real = data.load(2 * i)
-        imag = data.load(2 * i + 1)
-        var real_torch_val = real_torch[i].to_float64().cast[DType.float32]()
-        var imag_torch_val = imag_torch[i].to_float64().cast[DType.float32]()
-        var magnitude = max(
-            math.sqrt(real_torch_val**2 + imag_torch_val**2), epsilon
-        )
-        diff += (
-            abs(real - real_torch_val) + abs(imag - imag_torch_val)
-        ) / magnitude
-
-    diff /= n
-    print("Mean relative difference:", diff)
+    return result.reshape(original_shape)
 
 
 #####---------------------------------------------------------####

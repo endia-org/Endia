@@ -11,33 +11,35 @@
 # limitations under the License.
 # ===----------------------------------------------------------------------=== #
 
-import endia as nd
-from .fft2d import fft2d
+from endia import Array, complex, zeros_like
+from .utils import fft_c
 
 
-def fft3d(x: nd.Array) -> nd.Array:
-    # Apply 1D FFT to rows
+def fft3d(x: Array) -> Array:
     shape = x.shape()
     rows = shape[0]
     cols = shape[1]
     depth = shape[2]
 
     if not x.is_complex():
-        x = nd.complex(x, nd.zeros_like(x))
+        x = complex(x, zeros_like(x))
 
     for i in range(rows):
-        x[i : i + 1, :, :] = fft2d(
-            x[i : i + 1, :, :].reshape(List(cols, depth))
-        ).reshape(List(1, cols, depth))
+        for j in range(cols):
+            x[i : i + 1, j : j + 1, :] = fft_c(x[i : i + 1, j : j + 1, :])
+        for k in range(depth):
+            x[i : i + 1, :, k : k + 1] = fft_c(x[i : i + 1, :, k : k + 1])
 
     for j in range(cols):
-        x[:, j : j + 1, :] = fft2d(
-            x[:, j : j + 1 :, :].reshape(List(rows, depth))
-        ).reshape(List(rows, 1, depth))
+        for i in range(rows):
+            x[i : i + 1, j : j + 1, :] = fft_c(x[i : i + 1, j : j + 1, :])
+        for k in range(depth):
+            x[:, j : j + 1, k : k + 1] = fft_c(x[:, j : j + 1, k : k + 1])
 
     for k in range(depth):
-        x[:, :, k : k + 1] = fft2d(
-            x[:, :, k : k + 1].reshape(List(rows, cols))
-        ).reshape(List(rows, cols, 1))
+        for i in range(rows):
+            x[i : i + 1, :, k : k + 1] = fft_c(x[i : i + 1, :, k : k + 1])
+        for j in range(cols):
+            x[:, j : j + 1, k : k + 1] = fft_c(x[:, j : j + 1, k : k + 1])
 
     return x

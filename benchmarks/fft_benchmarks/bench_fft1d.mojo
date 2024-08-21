@@ -8,7 +8,10 @@ def fft1d_benchmark():
         size = 2**n
         print("Size: 2**", end="")
         print(n, "=", size)
-        x = nd.complex(nd.arange(0, size), nd.arange(0, size))
+        x = nd.complex(
+            nd.unsqueeze(nd.arange(0, size), List(0)),
+            nd.unsqueeze(nd.arange(0, size), List(0)),
+        )
         x_torch = torch.complex(
             torch.arange(0, size).float(), torch.arange(0, size).float()
         )

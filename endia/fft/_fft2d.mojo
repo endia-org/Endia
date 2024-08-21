@@ -11,26 +11,22 @@
 # limitations under the License.
 # ===----------------------------------------------------------------------=== #
 
-import endia as nd
-from .fft1d import fft1d
+from endia import Array, complex, zeros_like
+from .utils import fft_c
 
 
-def fft2d(x: nd.Array) -> nd.Array:
-    # Apply 1D FFT to rows
+def fft2d(x: Array) -> Array:
     shape = x.shape()
     rows = shape[0]
     cols = shape[1]
 
     if not x.is_complex():
-        x = nd.complex(x, nd.zeros_like(x))
+        x = complex(x, zeros_like(x))
 
     for i in range(rows):
-        x[i : i + 1, :] = fft1d(x[i : i + 1, :].reshape(List(cols))).reshape(
-            List(1, cols)
-        )
+        x[i : i + 1, :] = fft_c(x[i : i + 1, :])
 
     for j in range(cols):
-        x[:, j : j + 1] = fft1d(x[:, j : j + 1].reshape(List(rows))).reshape(
-            List(rows, 1)
-        )
+        x[:, j : j + 1] = fft_c(x[:, j : j + 1])
+
     return x

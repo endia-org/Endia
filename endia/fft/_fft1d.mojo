@@ -12,12 +12,9 @@
 # ===----------------------------------------------------------------------=== #
 
 
-import endia as nd
-from endia.utils.aliases import dtype
+from endia import Array
 from .utils import fft_c
 
-alias pi = 3.14159265358979323846264
 
-
-def fft1d(x: nd.Array) -> nd.Array:
+def fft1d(x: Array) -> Array:
     return fft_c(x)

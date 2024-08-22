@@ -15,7 +15,7 @@ import endia as nd
 from python import Python
 
 
-def run_test_reduce_min(msg: String = "reduce_arg_min"):
+def run_test_reduce_min(msg: String = "reduce_min"):
     torch = Python.import_module("torch")
     arr = nd.randu(List(2, 30, 40))
     arr_torch = nd.utils.to_torch(arr)

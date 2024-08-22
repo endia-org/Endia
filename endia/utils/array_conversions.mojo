@@ -104,13 +104,15 @@ fn is_close(
     else:
         var data = y.data()
         var diff = Float32(0)
+        var epsilon = Float32(1e-10)
         var real_torch = x_torch.reshape(x.size())
         for i in range(x.size()):
             var real = data.load(i)
             var real_torch_val = real_torch[i].to_float64().cast[
                 DType.float32
             ]()
-            diff += abs(real - real_torch_val)
+            var magnitude = max(abs(real_torch_val), epsilon)
+            diff += abs(real - real_torch_val) / magnitude
 
         diff /= x.size()
         if diff > rtol:

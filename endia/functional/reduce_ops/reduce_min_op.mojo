@@ -30,7 +30,7 @@ from endia.functional._utils import (
 from ._utils import DifferentiableReduceOp
 from endia.functional import expand
 from endia.functional import squeeze
-from utils.numerics import min_or_neg_inf
+from utils.numerics import max_or_inf
 
 ####-----------------------------------------------------------------------------------------------------------------####
 #### Reduce Ops
@@ -80,7 +80,7 @@ struct ReduceMin(DifferentiableReduceOp):
         """
         setup_shape_and_data(curr)
         var arg = contiguous(args[0])
-        fill_(curr, min_or_neg_inf[dtype]())
+        fill_(curr, max_or_inf[dtype]())
 
         var arg_shape = arg.shape()
         var arg_stride = arg.stride()

@@ -13,7 +13,7 @@
 
 
 import math
-from algorithm import parallelize
+from algorithm import parallelize, vectorize
 from memory import memcpy
 from sys import num_physical_cores
 
@@ -236,58 +236,63 @@ fn copy_complex_and_cast[
     Copy complex data from one buffer to another and cast the data to a different type. Optionally conjugate and divide by a scalar (usefule for inverse FFT).
     """
     if conjugate_and_divide:
-        for i in range(size):
-            dst.store(2 * i, src.load(2 * i).cast[dst_type]() / divisor)
-            dst.store(
-                2 * i + 1, -src.load(2 * i + 1).cast[dst_type]() / divisor
+
+        @parameter
+        fn do_copy_with_div[simd_width: Int](i: Int):
+            dst.store[width = 2 * simd_width](
+                2 * i,
+                src.load[width = 2 * simd_width](2 * i).cast[dst_type]()
+                / divisor,
             )
-    else:
+
+        vectorize[do_copy_with_div, nelts[dtype]()](size)
+
         for i in range(size):
-            dst.store[width=2](2 * i, src.load[width=2](2 * i).cast[dst_type]())
+            dst.store(2 * i + 1, -dst.load(2 * i + 1))
+    else:
+
+        @parameter
+        fn do_copy[simd_width: Int](i: Int):
+            dst.store[width = 2 * simd_width](
+                2 * i, src.load[width = 2 * simd_width](2 * i).cast[dst_type]()
+            )
+
+        vectorize[do_copy, nelts[dtype]()](size)
 
 
-fn setup_input(input: nd.Array) raises -> nd.Array:
+fn get_workload(n: Int, divisions: Int, num_workers: Int) raises -> Int:
     """
-    Checks the input and prepares it for the FFT, i.e. makes it complex if it is not and reshapes it to a one-dimensional contiguous array.
+    Calculate the workload size for each worker.
     """
-
-    # only power of two inputs are supported
-    if (input.shape()[-1] & (input.shape()[-1] - 1)) != 0:
-        raise "Input size must be a power of two"
-
-    # Setup parameters and data buffers
-    var x = input
-    var copied = False
-
-    # make x complex if it is not
-    if not input.is_complex():
-        x = nd.complex(input, nd.zeros_like(input))
-        copied = True
-
-    # make x one dimensional adn contiguous
-    x = input.reshape(x.size())
-    if not copied:
-        x = nd.copy(x)
-
-    return x
+    var workload = (n // num_workers) if (divisions == 1) else (n // divisions)
+    if (workload & (workload - 1)) != 0:
+        raise "Workload size must be a power of two"
+    return workload
 
 
 fn fft_c(
-    input: nd.Array, divisions: Int = 1, perform_inverse: Bool = False
+    inout input: nd.Array, divisions: Int = 1, perform_inverse: Bool = False
 ) raises -> nd.Array:
     """
     Perform a one-dimensional FFT/IFFT on the input data and returns a new array with the result.
     """
     # setup input array and parameters
-    var x = setup_input(input)
+    var x = nd.contiguous(input)
     var n = x.size()
+
+    # only power of two inputs are supported
+    if (n & (n - 1)) != 0:
+        raise "Input size must be a power of two"
+
     if n == 1:
         return x
+
     var parallelize_threshold = 2**14
     var num_workers = num_physical_cores() if n >= parallelize_threshold else 1
-    var workload = (n // num_workers) if (divisions == 1) else (n // divisions)
+    var workload = get_workload(n, divisions, num_workers)
     var h = (int(math.log2(Float32(n // workload)))) if divisions == 1 else 0
     var number_subtasks = num_workers if divisions == 1 else divisions
+
     var data = x.data()
     var res_data = UnsafePointer[Scalar[DType.float64]].alloc(n * 2)
     copy_complex_and_cast(res_data, data, n, perform_inverse)
@@ -296,32 +301,25 @@ fn fft_c(
     if h > 0:
         cooley_tukey_split(n, h, res_data)
 
-    # Prepare the bit-reversal permutation
+    # Perform the Cooley-Tukey FFT on the subarrays in parallel
     var reordered_arr_data = UnsafePointer[Scalar[DType.uint32]].alloc(workload)
     bit_reversal(workload, reordered_arr_data)
 
-    # define
     @parameter
     fn perform_cooley_tukey_sequencial(i: Int) capturing:
-        var data = UnsafePointer[Scalar[DType.float64]].alloc(2 * workload)
-        for j in range(2 * workload):
-            data.store(j, res_data.load(2 * i * workload + j))
-
-        cooley_tukey_with_bit_reversal(workload, data, reordered_arr_data)
-        memcpy(res_data.offset(2 * i * workload), data, 2 * workload)
-        data.free()
+        cooley_tukey_with_bit_reversal(
+            workload, res_data.offset(2 * i * workload), reordered_arr_data
+        )
 
     parallelize[perform_cooley_tukey_sequencial](number_subtasks, num_workers)
     _ = workload, divisions
     reordered_arr_data.free()
 
-    # Recombine the data of the subarrays if necessary
+    # Recombine the solutions of the subarrays
     if h > 0:
         cooley_tukey_recombine(n, h, res_data)
 
     # Cast the data back to the original type and return the result
-    var result = nd.Array(List(n), is_complex=True)
-    var data_orig = result.data()
-    copy_complex_and_cast(data_orig, res_data, n, perform_inverse, workload)
+    copy_complex_and_cast(data, res_data, n, perform_inverse, workload)
     res_data.free()
-    return result.reshape(input.shape())
+    return x

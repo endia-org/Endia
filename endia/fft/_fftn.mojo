@@ -17,7 +17,10 @@ import math
 
 
 def fftn(
-    x: Array, dims: List[Int] = List[Int](), norm: String = "backward"
+    input: Array,
+    dims: List[Int] = List[Int](),
+    norm: String = "backward",
+    out: Optional[Array] = None,
 ) -> Array:
     """Compute the n-dimensional FFT.
 
@@ -25,12 +28,16 @@ def fftn(
         x: The input array.
         dims: The dimensions along which to compute the FFT.
         norm: The normalization mode.
+        out: The output array (optional).
 
     Returns:
         The n-dimensional FFT of the input array.
     """
-    if not x.is_complex():
-        x = complex(x, zeros_like(x))
+    var x: Array
+    if not input.is_complex():
+        x = complex(input, zeros_like(input))
+    else:
+        x = copy(input)
 
     if norm == "backward":
         x = x
@@ -61,5 +68,12 @@ def fftn(
         x = swapaxes(x, dim[], ndim - 1) if dim[] != ndim - 1 else x
         x = fft_c(x, divisions=size // shape[dim[]])
         x = swapaxes(x, ndim - 1, dim[]) if dim[] != ndim - 1 else x
+
+    if out:
+        var out_ref = out.value()
+        if out_ref.shape() != x.shape():
+            raise "fftn: Invalid output shape"
+        out_ref[:] = x
+        return out_ref
 
     return x

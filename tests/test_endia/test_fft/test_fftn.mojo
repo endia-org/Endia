@@ -31,7 +31,8 @@ def fftn_test():
     var x = nd.complex(nd.randn(shape), nd.randn(shape))
     var x_torch = nd.utils.to_torch(x)
 
-    var y = fftn(x)
+    var y = nd.Array(x.shape(), is_complex=True)
+    y = fftn(x, out=y)
     var y_torch = torch.fft.fftn(x_torch)
 
     var msg = "fftn"

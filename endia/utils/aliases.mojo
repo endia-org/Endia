@@ -12,6 +12,7 @@
 # ===----------------------------------------------------------------------=== #
 
 from endia import Array
+from sys import simdwidthof
 
 alias dtype = DType.float32
 

@@ -15,7 +15,7 @@ import math
 import endia as nd
 import time
 from python import Python
-from endia.signal import ifft2
+from endia.fft import ifft2
 
 
 def ifft2_test():

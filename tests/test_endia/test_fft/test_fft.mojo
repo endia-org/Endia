@@ -15,7 +15,7 @@ import math
 import endia as nd
 import time
 from python import Python
-from endia.signal import fft
+from endia.fft import fft
 
 
 def fft_test():

@@ -42,7 +42,7 @@ def ifft_benchmark():
                 total_torch = 0
 
             start = now()
-            _ = nd.signal.ifft(x)
+            _ = nd.fft.ifft(x)
             total += now() - start
 
             start = now()

@@ -169,9 +169,20 @@ def run_integration_tests():
     run_test_foo_grad()
 
 
+def run_fft_tests():
+    # FFT Tests
+    fft_test()
+    fft2_test()
+    fftn_test()
+    ifft_test()
+    ifft2_test()
+    ifftn_test()
+
+
 def run_tests():
     """
     This is the main function that runs all the tests and benchmarks.
     """
+    run_fft_tests()
     run_unit_tests()
     # run_integration_tests()

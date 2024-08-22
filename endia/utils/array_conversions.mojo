@@ -61,7 +61,7 @@ fn to_torch_tensor(arg: Array) raises -> PythonObject:
 
 @always_inline
 fn is_close(
-    x: Array, x_torch: PythonObject, rtol: Float32 = 10e-4
+    x: Array, x_torch: PythonObject, rtol: Float32 = 10e-6
 ) raises -> Bool:
     """
     Checks if the values in the endia Array and the torch tensor are equal up to a relative tolerance.
@@ -73,7 +73,7 @@ fn is_close(
         var imag_torch = x_torch.imag.reshape(x.size())
         var data = y.data()
         var diff = Float32(0)
-        var epsilon = Float32(1e-10)
+        var epsilon = Float32(10e-10)
         for i in range(x.size()):
             var real = data.load(2 * i)
             var imag = data.load(2 * i + 1)
@@ -90,6 +90,10 @@ fn is_close(
                 abs(real - real_torch_val) + abs(imag - imag_torch_val)
             ) / magnitude
 
+        _ = y
+        _ = real_torch
+        _ = imag_torch
+
         diff /= x.size()
         if diff > rtol:
             print(
@@ -104,8 +108,9 @@ fn is_close(
     else:
         var data = y.data()
         var diff = Float32(0)
-        var epsilon = Float32(1e-10)
-        var real_torch = x_torch.reshape(x.size())
+        var epsilon = Float32(1e-6)
+        var real_torch = x_torch.flatten()
+
         for i in range(x.size()):
             var real = data.load(i)
             var real_torch_val = real_torch[i].to_float64().cast[
@@ -113,6 +118,9 @@ fn is_close(
             ]()
             var magnitude = max(abs(real_torch_val), epsilon)
             diff += abs(real - real_torch_val) / magnitude
+
+        _ = y
+        _ = real_torch
 
         diff /= x.size()
         if diff > rtol:

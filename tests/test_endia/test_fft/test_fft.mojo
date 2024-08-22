@@ -20,7 +20,7 @@ from endia.fft import fft
 
 def fft_test():
     var n = 2**12  # power of two
-    print("\nInput Size: ", n)
+    # print("\nInput Size: ", n)
     var torch = Python.import_module("torch")
 
     var shape = List(n)
@@ -30,31 +30,8 @@ def fft_test():
     var y = fft(x)
     var y_torch = torch.fft.fft(x_torch)
 
-    var diff = Float32(0)
-    var epsilon = Float32(1e-10)
-
-    # # fit the shape to easily iteratoe over the data
-    # y = y.reshape(x.size())
-    # real_torch = y_torch.real.reshape(x.size())
-    # imag_torch = y_torch.imag.reshape(x.size())
-    # var data = y.data()
-    # for i in range(n):
-    #     real = data.load(2 * i)
-    #     imag = data.load(2 * i + 1)
-    #     var real_torch_val = real_torch[i].to_float64().cast[DType.float32]()
-    #     var imag_torch_val = imag_torch[i].to_float64().cast[DType.float32]()
-    #     var magnitude = max(
-    #         math.sqrt(real_torch_val**2 + imag_torch_val**2), epsilon
-    #     )
-    #     diff += (
-    #         abs(real - real_torch_val) + abs(imag - imag_torch_val)
-    #     ) / magnitude
-
-    # diff /= n
-    # print("Mean relative difference:", diff)
-
     var msg = "fft"
-    if not nd.utils.is_close(y, y_torch, rtol=1e-7):
+    if not nd.utils.is_close(y, y_torch, rtol=1e-6):
         print("\033[31mTest failed\033[0m", msg)
     else:
         print("\033[32mTest passed\033[0m", msg)

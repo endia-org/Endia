@@ -19,6 +19,16 @@ import math
 def ifftn(
     x: Array, dims: List[Int] = List[Int](), norm: String = "backward"
 ) -> Array:
+    """Compute the n-dimensional inverse FFT.
+
+    Args:
+        x: The input array.
+        dims: The dimensions along which to compute the inverse FFT.
+        norm: The normalization mode.
+
+    Returns:
+        The n-dimensional inverse FFT of the input array.
+    """
     if not x.is_complex():
         x = complex(x, zeros_like(x))
 
@@ -49,7 +59,7 @@ def ifftn(
     # perform n-dimensional fft
     for dim in fft_dims:
         x = swapaxes(x, dim[], ndim - 1) if dim[] != ndim - 1 else x
-        x = fft_c(x, divisions=size // shape[dim[]], inverse=True)
+        x = fft_c(x, divisions=size // shape[dim[]], perform_inverse=True)
         x = swapaxes(x, ndim - 1, dim[]) if dim[] != ndim - 1 else x
 
     return x

@@ -12,20 +12,12 @@
 # ===----------------------------------------------------------------------=== #
 
 
-#####---------------------------------------------------------####
-#                    1D FFT Building Blocks
-#####---------------------------------------------------------####
-
 import math
-import endia as nd
-import time
-from python import Python, PythonObject
-from endia.functional._utils import is_contiguous
-from collections import Optional
 from algorithm import parallelize
 from memory import memcpy
-from time import now
 from sys import num_physical_cores
+
+import endia as nd
 
 alias pi = Float64(3.141592653589793)  # Maximum useful precision for Float64
 
@@ -33,6 +25,9 @@ alias pi = Float64(3.141592653589793)  # Maximum useful precision for Float64
 fn reverse_bits_simd(
     x: SIMD[DType.uint32, nd.nelts[DType.uint32]()]
 ) -> SIMD[DType.uint32, nd.nelts[DType.uint32]()]:
+    """
+    Reverse the bits of a 32-bit integer.
+    """
     var y = x
     y = ((y >> 1) & 0x55555555) | ((y & 0x55555555) << 1)
     y = ((y >> 2) & 0x33333333) | ((y & 0x33333333) << 2)
@@ -41,6 +36,7 @@ fn reverse_bits_simd(
     return (y >> 16) | (y << 16)
 
 
+@always_inline
 fn bit_reversal(
     n: Int, reordered_arr_data: UnsafePointer[Scalar[DType.uint32]]
 ):
@@ -72,312 +68,260 @@ fn bit_reversal(
                         reordered_arr_data.store(i + j, to_store[j])
 
 
-def fft_c(x: nd.Array, divisions: Int = 1, inverse: Bool = False) -> nd.Array:
-    if (x.shape()[-1] & (x.shape()[-1] - 1)) != 0:
+@always_inline
+fn cooley_tukey_split(
+    n: Int, max_depth: Int, res_data: UnsafePointer[Scalar[DType.float64]]
+):
+    """
+    Non-recursive Cooley-Tukey FFT splitting of the input data with a limited depth.
+    """
+
+    # Non-recursive Cooley-Tukey FFT splitting of the input data
+    for iteration in range(max_depth):
+        var subarray_size = n // (2**iteration)
+        var num_subarrays = 2**iteration
+        var temp = UnsafePointer[Scalar[DType.float64]].alloc(subarray_size * 2)
+
+        # Split each subarray into even and odd indices
+        for subarray in range(num_subarrays):
+            var start = subarray * subarray_size
+            var end = start + subarray_size
+            var even_index = 0
+            var odd_index = subarray_size // 2
+
+            for i in range(start, end):
+                if (i - start) % 2 == 0:
+                    temp.store[width=2](
+                        2 * even_index, res_data.load[width=2](2 * i)
+                    )
+                    even_index += 1
+                else:
+                    temp.store[width=2](
+                        2 * odd_index, res_data.load[width=2](2 * i)
+                    )
+                    odd_index += 1
+
+            for i in range(subarray_size):
+                res_data.store(2 * (start + i), temp[2 * i])
+                res_data.store(2 * (start + i) + 1, temp[2 * i + 1])
+
+        # Free the temporary buffer
+        temp.free()
+
+
+@always_inline
+fn cooley_tukey_recombine(
+    n: Int, start_depth: Int, res_data: UnsafePointer[Scalar[DType.float64]]
+):
+    """
+    Non-recursive Cooley-Tukey FFT recombination of the subsolutions. The recombination starts at a given depth.
+    """
+    # Allocate temporary buffers
+    var temp = UnsafePointer[Scalar[DType.float64]].alloc(n * 2)
+    var even = UnsafePointer[Scalar[DType.float64]].alloc(n)
+    var odd = UnsafePointer[Scalar[DType.float64]].alloc(n)
+    var T = UnsafePointer[Scalar[DType.float64]].alloc(n)
+    var twiddle_factors = UnsafePointer[Scalar[DType.float64]].alloc(n)
+
+    # Non-recursive Cooley-Tukey FFT recombination of the subsolutions
+    for iteration in range(start_depth - 1, -1, -1):
+        var subarray_size = n // (2**iteration)
+        var num_subarrays = 2**iteration
+
+        for k in range(subarray_size // 2):
+            var p = (-2 * pi / subarray_size) * k
+            twiddle_factors.store[width=2](
+                2 * k, SIMD[DType.float64, 2](math.cos(p), math.sin(p))
+            )
+
+        for subarray in range(num_subarrays):
+            var start = subarray * subarray_size
+            var mid = start + subarray_size // 2
+
+            for k in range(subarray_size // 2):
+                var k_times_2 = 2 * k
+                var k_times_2_plus_1 = k_times_2 + 1
+                even.store[width=2](
+                    k_times_2, res_data.load[width=2](2 * (start + k))
+                )
+                odd.store[width=2](
+                    k_times_2, res_data.load[width=2](2 * (mid + k))
+                )
+                var twiddle_factor = twiddle_factors.load[width=2](k_times_2)
+                T.store(
+                    k_times_2,
+                    twiddle_factor[0] * odd[k_times_2]
+                    - twiddle_factor[1] * odd[k_times_2_plus_1],
+                )
+                T.store(
+                    k_times_2_plus_1,
+                    twiddle_factor[0] * odd[k_times_2_plus_1]
+                    + twiddle_factor[1] * odd[k_times_2],
+                )
+                temp.store[width=2](
+                    2 * (start + k),
+                    even.load[width=2](k_times_2) + T.load[width=2](k_times_2),
+                )
+                temp.store[width=2](
+                    2 * (mid + k),
+                    even.load[width=2](k_times_2) - T.load[width=2](k_times_2),
+                )
+
+        memcpy(res_data, temp, n * 2)
+
+    # Free the temporary buffers
+    even.free()
+    odd.free()
+    T.free()
+    twiddle_factors.free()
+    temp.free()
+
+
+@always_inline
+fn cooley_tukey_with_bit_reversal(
+    workload: Int,
+    data: UnsafePointer[Scalar[DType.float64]],
+    reordered_arr_data: UnsafePointer[Scalar[DType.uint32]],
+):
+    """
+    Iterative fast Fourier transform using the Cooley-Tukey algorithm with bit-reversal permutation.
+    """
+    # permute x according to the bit-reversal permutation
+    for i in range(workload):
+        var j = int(reordered_arr_data.load(i))
+        if i < j:
+            var tmp = data.load[width=2](2 * i)
+            data.store[width=2](2 * i, data.load[width=2](2 * j))
+            data.store[width=2](2 * j, tmp)
+
+    # Cooley-Tukey FFT
+    var m = 2
+    while m <= workload:
+        var u = SIMD[DType.float64, 2](1.0, 0.0)
+        var angle = -2 * pi / m
+        var w_real = math.cos(angle)
+        var w_imag = math.sin(angle)
+
+        for k in range(0, m // 2):
+            for j in range(k, workload, m):
+                var j_2 = 2 * j
+                var j_2_plus_m = j_2 + m
+
+                var z = data.load[width=2](j_2)
+                var d = data.load[width=2](j_2_plus_m)
+                var t = SIMD[DType.float64, 2](
+                    u[0] * d[0] - u[1] * d[1], u[0] * d[1] + u[1] * d[0]
+                )
+                data.store[width=2](j_2_plus_m, z - t)
+                data.store[width=2](j_2, z + t)
+
+            # Update u for the next iteration
+            u = SIMD[DType.float64, 2](
+                u[0] * w_real - u[1] * w_imag, u[0] * w_imag + u[1] * w_real
+            )
+
+        m *= 2
+
+
+fn copy_complex_and_cast[
+    dst_type: DType, src_type: DType
+](
+    dst: UnsafePointer[Scalar[dst_type]],
+    src: UnsafePointer[Scalar[src_type]],
+    size: Int,
+    conjugate_and_divide: Bool = False,
+    divisor: SIMD[dst_type, 1] = 1,
+):
+    """
+    Copy complex data from one buffer to another and cast the data to a different type. Optionally conjugate and divide by a scalar (usefule for inverse FFT).
+    """
+    if conjugate_and_divide:
+        for i in range(size):
+            dst.store(2 * i, src.load(2 * i).cast[dst_type]() / divisor)
+            dst.store(
+                2 * i + 1, -src.load(2 * i + 1).cast[dst_type]() / divisor
+            )
+    else:
+        for i in range(size):
+            dst.store[width=2](2 * i, src.load[width=2](2 * i).cast[dst_type]())
+
+
+fn setup_input(input: nd.Array) raises -> nd.Array:
+    """
+    Checks the input and prepares it for the FFT, i.e. makes it complex if it is not and reshapes it to a one-dimensional contiguous array.
+    """
+
+    # only power of two inputs are supported
+    if (input.shape()[-1] & (input.shape()[-1] - 1)) != 0:
         raise "Input size must be a power of two"
 
-    if not x.is_complex():
-        x = nd.complex(x, nd.zeros_like(x))
+    # Setup parameters and data buffers
+    var x = input
+    var copied = False
 
-    var original_shape = x.shape()
-    x = x.reshape(x.size())
-    x = nd.contiguous(x)
-    n = x.shape()[0]
+    # make x complex if it is not
+    if not input.is_complex():
+        x = nd.complex(input, nd.zeros_like(input))
+        copied = True
 
-    if n <= 1:
-        return x.reshape(original_shape)
+    # make x one dimensional adn contiguous
+    x = input.reshape(x.size())
+    if not copied:
+        x = nd.copy(x)
 
+    return x
+
+
+fn fft_c(
+    input: nd.Array, divisions: Int = 1, perform_inverse: Bool = False
+) raises -> nd.Array:
+    """
+    Perform a one-dimensional FFT/IFFT on the input data and returns a new array with the result.
+    """
+    # setup input array and parameters
+    var x = setup_input(input)
+    var n = x.size()
+    if n == 1:
+        return x
     var parallelize_threshold = 2**14
-    var num_workers = num_physical_cores() if x.size() >= parallelize_threshold else 1
-
+    var num_workers = num_physical_cores() if n >= parallelize_threshold else 1
     var workload = (n // num_workers) if (divisions == 1) else (n // divisions)
     var h = (int(math.log2(Float32(n // workload)))) if divisions == 1 else 0
+    var number_subtasks = num_workers if divisions == 1 else divisions
+    var data = x.data()
+    var res_data = UnsafePointer[Scalar[DType.float64]].alloc(n * 2)
+    copy_complex_and_cast(res_data, data, n, perform_inverse)
 
-    # Bit-reversal permutation
+    # Split the data into individual subarrays to perform #workload indipendent FFTs
+    if h > 0:
+        cooley_tukey_split(n, h, res_data)
+
+    # Prepare the bit-reversal permutation
     var reordered_arr_data = UnsafePointer[Scalar[DType.uint32]].alloc(workload)
     bit_reversal(workload, reordered_arr_data)
 
-    var data = x.data()
-    var res_data = UnsafePointer[Scalar[DType.float64]].alloc(n * 2)
-
-    if inverse:
-        for i in range(n):
-            res_data.store(2 * i, data.load(2 * i).cast[DType.float64]())
-            res_data.store(
-                2 * i + 1, -data.load(2 * i + 1).cast[DType.float64]()
-            )
-    else:
-        for i in range(2 * n):
-            res_data.store(i, data.load(i).cast[DType.float64]())
-
-    if h > 0:
-        for iteration in range(h):
-            var subarray_size = n // (2**iteration)
-            var num_subarrays = 2**iteration
-            var temp = UnsafePointer[Scalar[DType.float64]].alloc(
-                subarray_size * 2
-            )
-
-            for subarray in range(num_subarrays):
-                var start = subarray * subarray_size
-                var end = start + subarray_size
-                var even_index = 0
-                var odd_index = subarray_size // 2
-
-                for i in range(start, end):
-                    if (i - start) % 2 == 0:
-                        temp.store[width=2](
-                            2 * even_index, res_data.load[width=2](2 * i)
-                        )
-                        even_index += 1
-                    else:
-                        temp.store[width=2](
-                            2 * odd_index, res_data.load[width=2](2 * i)
-                        )
-                        odd_index += 1
-
-                for i in range(subarray_size):
-                    res_data.store(2 * (start + i), temp[2 * i])
-                    res_data.store(2 * (start + i) + 1, temp[2 * i + 1])
-
-            temp.free()
-
+    # define
     @parameter
-    fn do_work(i: Int) capturing:
-        var n = workload
-
-        # tranfer data to float64 for higher precision
-        var data = UnsafePointer[Scalar[DType.float64]].alloc(2 * n)
-
-        for j in range(2 * n):
+    fn perform_cooley_tukey_sequencial(i: Int) capturing:
+        var data = UnsafePointer[Scalar[DType.float64]].alloc(2 * workload)
+        for j in range(2 * workload):
             data.store(j, res_data.load(2 * i * workload + j))
 
-        # permute x according to the bit-reversal permutation
-        for i in range(n):
-            var j = int(reordered_arr_data.load(i))
-            if i < j:
-                var tmp = data.load[width=2](2 * i)
-                data.store[width=2](2 * i, data.load[width=2](2 * j))
-                data.store[width=2](2 * j, tmp)
-
-        var m = 2
-        while m <= n:
-            var u = SIMD[DType.float64, 2](1.0, 0.0)
-            var angle = -2 * pi / m
-            var w_real = math.cos(angle)
-            var w_imag = math.sin(angle)
-
-            for k in range(0, m // 2):
-                for j in range(k, n, m):
-                    var j_2 = 2 * j
-                    var j_2_plus_m = j_2 + m
-
-                    var z = data.load[width=2](j_2)
-                    var d = data.load[width=2](j_2_plus_m)
-                    var t = SIMD[DType.float64, 2](
-                        u[0] * d[0] - u[1] * d[1], u[0] * d[1] + u[1] * d[0]
-                    )
-                    data.store[width=2](j_2_plus_m, z - t)
-                    data.store[width=2](j_2, z + t)
-
-                # Update u for the next iteration
-                u = SIMD[DType.float64, 2](
-                    u[0] * w_real - u[1] * w_imag, u[0] * w_imag + u[1] * w_real
-                )
-
-            m *= 2
-
-        memcpy(res_data.offset(2 * i * workload), data, 2 * n)
+        cooley_tukey_with_bit_reversal(workload, data, reordered_arr_data)
+        memcpy(res_data.offset(2 * i * workload), data, 2 * workload)
         data.free()
 
-    parallelize[do_work](
-        num_workers if divisions == 1 else divisions, num_workers
-    )
-
-    _ = workload
-    _ = divisions
+    parallelize[perform_cooley_tukey_sequencial](number_subtasks, num_workers)
+    _ = workload, divisions
     reordered_arr_data.free()
 
+    # Recombine the data of the subarrays if necessary
     if h > 0:
-        var temp = UnsafePointer[Scalar[DType.float64]].alloc(n * 2)
-        var even = UnsafePointer[Scalar[DType.float64]].alloc(n)
-        var odd = UnsafePointer[Scalar[DType.float64]].alloc(n)
-        var T = UnsafePointer[Scalar[DType.float64]].alloc(n)
-        var twiddle_factors = UnsafePointer[Scalar[DType.float64]].alloc(n)
+        cooley_tukey_recombine(n, h, res_data)
 
-        for iteration in range(h - 1, -1, -1):
-            var subarray_size = n // (2**iteration)
-            var num_subarrays = 2**iteration
-
-            for k in range(subarray_size // 2):
-                var p = (-2 * pi / subarray_size) * k
-                twiddle_factors.store[width=2](
-                    2 * k, SIMD[DType.float64, 2](math.cos(p), math.sin(p))
-                )
-
-            for subarray in range(num_subarrays):
-                var start = subarray * subarray_size
-                var mid = start + subarray_size // 2
-
-                for k in range(subarray_size // 2):
-                    var k_times_2 = 2 * k
-                    var k_times_2_plus_1 = k_times_2 + 1
-                    even.store[width=2](
-                        k_times_2, res_data.load[width=2](2 * (start + k))
-                    )
-                    odd.store[width=2](
-                        k_times_2, res_data.load[width=2](2 * (mid + k))
-                    )
-                    var twiddle_factor = twiddle_factors.load[width=2](
-                        k_times_2
-                    )
-                    T.store(
-                        k_times_2,
-                        twiddle_factor[0] * odd[k_times_2]
-                        - twiddle_factor[1] * odd[k_times_2_plus_1],
-                    )
-                    T.store(
-                        k_times_2_plus_1,
-                        twiddle_factor[0] * odd[k_times_2_plus_1]
-                        + twiddle_factor[1] * odd[k_times_2],
-                    )
-                    temp.store[width=2](
-                        2 * (start + k),
-                        even.load[width=2](k_times_2)
-                        + T.load[width=2](k_times_2),
-                    )
-                    temp.store[width=2](
-                        2 * (mid + k),
-                        even.load[width=2](k_times_2)
-                        - T.load[width=2](k_times_2),
-                    )
-
-            memcpy(res_data, temp, n * 2)
-
-        even.free()
-        odd.free()
-        T.free()
-        twiddle_factors.free()
-        temp.free()
-
+    # Cast the data back to the original type and return the result
     var result = nd.Array(List(n), is_complex=True)
     var data_orig = result.data()
-
-    if inverse:
-        for i in range(n):
-            data_orig.store(
-                2 * i, res_data.load(2 * i).cast[DType.float32]() / workload
-            )
-            data_orig.store(
-                2 * i + 1,
-                -res_data.load(2 * i + 1).cast[DType.float32]() / workload,
-            )
-    else:
-        for i in range(2 * n):
-            data_orig.store(i, res_data.load(i).cast[DType.float32]())
-
+    copy_complex_and_cast(data_orig, res_data, n, perform_inverse, workload)
     res_data.free()
-    var res = result.reshape(original_shape)
-    _ = x
-
-    return res
-
-
-#####---------------------------------------------------------####
-#              BENCHMARK RESULLTS so far (on Apple M3)
-#####---------------------------------------------------------####
-#
-# Size: 2**4 = 16
-# Time taken: 2.0000000233721948e-07
-# Time taken Torch: 5.5000000429572538e-06
-# Gain: 96.363632202148438 %
-
-# Size: 2**5 = 32
-# Time taken: 2.0000000233721948e-07
-# Time taken Torch: 5.8000000535685103e-06
-# Gain: 96.551719665527344 %
-
-# Size: 2**6 = 64
-# Time taken: 4.9999999873762135e-07
-# Time taken Torch: 5.7000002016138751e-06
-# Gain: 91.228065490722656 %
-
-# Size: 2**7 = 128
-# Time taken: 9.9999999747524271e-07
-# Time taken Torch: 6.0500001382024493e-06
-# Gain: 83.471076965332031 %
-
-# Size: 2**8 = 256
-# Time taken: 1.6999999843392288e-06
-# Time taken Torch: 6.6500001594249625e-06
-# Gain: 74.43609619140625 %
-
-# Size: 2**9 = 512
-# Time taken: 3.5999998999614036e-06
-# Time taken Torch: 7.7499998951680027e-06
-# Gain: 53.548385620117188 %
-
-# Size: 2**10 = 1024
-# Time taken: 7.2500001806474756e-06
-# Time taken Torch: 1.0149999980058055e-05
-# Gain: 28.571426391601562 %
-
-# Size: 2**11 = 2048
-# Time taken: 1.5100000382517464e-05
-# Time taken Torch: 1.5149999853747431e-05
-# Gain: 0.33002951741218567 %
-
-# Size: 2**12 = 4096
-# Time taken: 3.3600001188460737e-05
-# Time taken Torch: 3.1150000722846016e-05
-# Gain: -7.8651695251464844 %
-
-# Size: 2**13 = 8192
-# Time taken: 7.1900001785252243e-05
-# Time taken Torch: 7.2449998697265983e-05
-# Gain: 0.75913995504379272 %
-
-# Size: 2**14 = 16384
-# Time taken: 0.00027930000214837492
-# Time taken Torch: 0.00019720000273082405
-# Gain: -41.632858276367188 %
-
-# Size: 2**15 = 32768
-# Time taken: 0.000534099992364645
-# Time taken Torch: 0.00036584999179467559
-# Gain: -45.988796234130859 %
-
-# Size: 2**16 = 65536
-# Time taken: 0.0012974500423297286
-# Time taken Torch: 0.00075030000880360603
-# Gain: -72.924163818359375 %
-
-# Size: 2**17 = 131072
-# Time taken: 0.0034556998871266842
-# Time taken Torch: 0.0021065499167889357
-# Gain: -64.045478820800781 %
-
-# Size: 2**18 = 262144
-# Time taken: 0.0071354503743350506
-# Time taken Torch: 0.0040787500329315662
-# Gain: -74.942085266113281 %
-
-# Size: 2**19 = 524288
-# Time taken: 0.014604948461055756
-# Time taken Torch: 0.0083753997460007668
-# Gain: -74.379119873046875 %
-
-# Size: 2**20 = 1048576
-# Time taken: 0.03164985403418541
-# Time taken Torch: 0.020133750513195992
-# Gain: -57.198005676269531 %
-
-# Size: 2**21 = 2097152
-# Time taken: 0.063971899449825287
-# Time taken Torch: 0.035383101552724838
-# Gain: -80.797889709472656 %
-
-# Size: 2**22 = 4194304
-# Time taken: 0.16245074570178986
-# Time taken Torch: 0.074759058654308319
-# Gain: -117.29907989501953 %
+    return result.reshape(input.shape())

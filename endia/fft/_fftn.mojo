@@ -19,6 +19,16 @@ import math
 def fftn(
     x: Array, dims: List[Int] = List[Int](), norm: String = "backward"
 ) -> Array:
+    """Compute the n-dimensional FFT.
+
+    Args:
+        x: The input array.
+        dims: The dimensions along which to compute the FFT.
+        norm: The normalization mode.
+
+    Returns:
+        The n-dimensional FFT of the input array.
+    """
     if not x.is_complex():
         x = complex(x, zeros_like(x))
 

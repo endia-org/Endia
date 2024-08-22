@@ -17,4 +17,15 @@ from .utils import fft_c
 
 
 def fft(x: Array, dim: Int = -1, norm: String = "backward") -> Array:
+    """
+    Compute the n-dimensional FFT.
+
+    Args:
+        x: The input array.
+        dim: The dimension along which to compute the FFT.
+        norm: The normalization mode.
+
+    Returns:
+        The n-dimensional FFT of the input array.
+    """
     return fftn(x, dim, norm)

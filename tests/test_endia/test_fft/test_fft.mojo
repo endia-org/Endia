@@ -23,7 +23,7 @@ def fft_test():
     print("\nInput Size: ", n)
     var torch = Python.import_module("torch")
 
-    var shape = List(2, 2, n)
+    var shape = List(n)
     var x = nd.complex(nd.randn(shape), nd.randn(shape))
     var x_torch = nd.utils.to_torch(x)
 

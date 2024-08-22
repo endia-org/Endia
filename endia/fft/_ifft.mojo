@@ -17,4 +17,15 @@ from .utils import fft_c
 
 
 def ifft(x: Array, dim: Int = -1, norm: String = "backward") -> Array:
+    """
+    Compute the n-dimensional inverse FFT.
+
+    Args:
+        x: The input array.
+        dim: The dimension along which to compute the inverse FFT.
+        norm: The normalization mode.
+
+    Returns:
+        The n-dimensional inverse FFT of the input array.
+    """
     return ifftn(x, dim, norm)

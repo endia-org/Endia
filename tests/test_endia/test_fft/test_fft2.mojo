@@ -36,22 +36,28 @@ def fft2_test():
     var diff = Float32(0)
     var epsilon = Float32(1e-10)
 
-    # fit the shape to easily iteratoe over the data
-    y = y.reshape(x.size())
-    real_torch = y_torch.real.reshape(x.size())
-    imag_torch = y_torch.imag.reshape(x.size())
-    var data = y.data()
-    for i in range(x.size()):
-        real = data.load(2 * i)
-        imag = data.load(2 * i + 1)
-        var real_torch_val = real_torch[i].to_float64().cast[DType.float32]()
-        var imag_torch_val = imag_torch[i].to_float64().cast[DType.float32]()
-        var magnitude = max(
-            math.sqrt(real_torch_val**2 + imag_torch_val**2), epsilon
-        )
-        diff += (
-            abs(real - real_torch_val) + abs(imag - imag_torch_val)
-        ) / magnitude
+    # # fit the shape to easily iteratoe over the data
+    # y = y.reshape(x.size())
+    # real_torch = y_torch.real.reshape(x.size())
+    # imag_torch = y_torch.imag.reshape(x.size())
+    # var data = y.data()
+    # for i in range(x.size()):
+    #     real = data.load(2 * i)
+    #     imag = data.load(2 * i + 1)
+    #     var real_torch_val = real_torch[i].to_float64().cast[DType.float32]()
+    #     var imag_torch_val = imag_torch[i].to_float64().cast[DType.float32]()
+    #     var magnitude = max(
+    #         math.sqrt(real_torch_val**2 + imag_torch_val**2), epsilon
+    #     )
+    #     diff += (
+    #         abs(real - real_torch_val) + abs(imag - imag_torch_val)
+    #     ) / magnitude
 
-    diff /= x.size()
-    print("Mean relative difference:", diff)
+    # diff /= x.size()
+    # print("Mean relative difference:", diff)
+
+    var msg = "fft2"
+    if not nd.utils.is_close(y, y_torch, rtol=1e-7):
+        print("\033[31mTest failed\033[0m", msg)
+    else:
+        print("\033[32mTest passed\033[0m", msg)

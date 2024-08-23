@@ -76,9 +76,11 @@ fn compute_indeces_for_matmul(
     return List(lhs_idx_tmp, rhs_idx_tmp)
 
 
-fn execute_copy_raw(
-    source_data: UnsafePointer[Scalar[dtype]],
-    dest_data: UnsafePointer[Scalar[dtype]],
+fn execute_copy_raw[
+    src_dtype: DType, dst_dtype: DType
+](
+    source_data: UnsafePointer[Scalar[src_dtype]],
+    dest_data: UnsafePointer[Scalar[dst_dtype]],
     val_shape: ArrayShape,
     is_complex: Bool,
 ) raises:
@@ -117,7 +119,9 @@ fn execute_copy_raw(
                         var j_idx = i_idx + j * stride[rank - 1]
                         dest_data.store[width = 2 * simd_width](
                             flat_idx * 2,
-                            source_data.load[width = 2 * simd_width](j_idx * 2),
+                            source_data.load[width = 2 * simd_width](
+                                j_idx * 2
+                            ).cast[dst_dtype](),
                         )
                         flat_idx += simd_width
 
@@ -126,10 +130,12 @@ fn execute_copy_raw(
                     for j in range(cols):
                         var j_idx = i_idx + j * stride[rank - 1]
                         dest_data.store(
-                            2 * flat_idx, source_data.load(2 * j_idx)
+                            2 * flat_idx,
+                            source_data.load(2 * j_idx).cast[dst_dtype](),
                         )
                         dest_data.store(
-                            2 * flat_idx + 1, source_data.load(2 * j_idx + 1)
+                            2 * flat_idx + 1,
+                            source_data.load(2 * j_idx + 1).cast[dst_dtype](),
                         )
                         flat_idx += 1
 
@@ -140,7 +146,10 @@ fn execute_copy_raw(
                     fn copy_v[simd_width: Int](j: Int):
                         var j_idx = i_idx + j * stride[rank - 1]
                         dest_data.store[width=simd_width](
-                            flat_idx, source_data.load[width=simd_width](j_idx)
+                            flat_idx,
+                            source_data.load[width=simd_width](j_idx).cast[
+                                dst_dtype
+                            ](),
                         )
                         flat_idx += simd_width
 
@@ -148,7 +157,9 @@ fn execute_copy_raw(
                 else:
                     for j in range(cols):
                         var j_idx = i_idx + j * stride[rank - 1]
-                        dest_data.store(flat_idx, source_data.load(j_idx))
+                        dest_data.store(
+                            flat_idx, source_data.load(j_idx).cast[dst_dtype]()
+                        )
                         flat_idx += 1
 
 

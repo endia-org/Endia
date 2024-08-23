@@ -433,6 +433,16 @@ struct Array(CollectionElement, Stringable, Formattable):
         compute_shape(array_shape, self.requires_grad() or self.has_fxgraph())
         return array_shape.shape()
 
+    fn shape_(inout self, shape: List[Int]) raises:
+        var array_shape = self.array_shape()
+        compute_shape(array_shape, self.requires_grad() or self.has_fxgraph())
+        array_shape.shape_node[].shape = shape
+
+    fn stride_(inout self, stride: List[Int]) raises:
+        var array_shape = self.array_shape()
+        compute_shape(array_shape, self.requires_grad() or self.has_fxgraph())
+        array_shape.shape_node[].stride = stride
+
     fn stride(self) raises -> List[Int]:
         var array_shape = self.array_shape()
         compute_shape(array_shape, self.requires_grad() or self.has_fxgraph())
@@ -442,6 +452,10 @@ struct Array(CollectionElement, Stringable, Formattable):
         var array_shape = self.array_shape()
         compute_shape(array_shape, self.requires_grad() or self.has_fxgraph())
         return array_shape.storage_offset()
+
+    fn storage_offset_(inout self, storage_offset: Int) raises:
+        var array_shape = self.array_shape()
+        array_shape.shape_node[].storage_offset = storage_offset
 
     fn ndim(self) raises -> Int:
         var array_shape = self.array_shape()

@@ -11,13 +11,11 @@
 # limitations under the License.
 # ===----------------------------------------------------------------------=== #
 
-
+import endia as nd
 import math
 from algorithm import parallelize, vectorize
 from memory import memcpy
 from sys import num_physical_cores
-
-import endia as nd
 
 alias pi = Float64(3.141592653589793)  # Maximum useful precision for Float64
 
@@ -182,6 +180,7 @@ fn cooley_tukey_with_bit_reversal(
     workload: Int,
     data: UnsafePointer[Scalar[DType.float64]],
     reordered_arr_data: UnsafePointer[Scalar[DType.uint32]],
+    dims: List[Int] = List[Int](),
 ):
     """
     Iterative fast Fourier transform using the Cooley-Tukey algorithm with bit-reversal permutation.
@@ -270,56 +269,11 @@ fn get_workload(n: Int, divisions: Int, num_workers: Int) raises -> Int:
     return workload
 
 
-fn fft_c(
-    inout input: nd.Array, divisions: Int = 1, perform_inverse: Bool = False
-) raises -> nd.Array:
-    """
-    Perform a one-dimensional FFT/IFFT on the input data and returns a new array with the result.
-    """
-    # setup input array and parameters
-    var x = nd.contiguous(input)
-    var n = x.size()
-
-    # only power of two inputs are supported
-    if (n & (n - 1)) != 0:
-        raise "Input size must be a power of two"
-
-    if n == 1:
-        return x
-
-    var parallelize_threshold = 2**14
-    var num_workers = num_physical_cores() if n >= parallelize_threshold else 1
-    var workload = get_workload(n, divisions, num_workers)
-    var h = (int(math.log2(Float32(n // workload)))) if divisions == 1 else 0
-    var number_subtasks = num_workers if divisions == 1 else divisions
-
-    var data = x.data()
-    var res_data = UnsafePointer[Scalar[DType.float64]].alloc(n * 2)
-    copy_complex_and_cast(res_data, data, n, perform_inverse)
-
-    # Split the data into individual subarrays to perform #workload indipendent FFTs
-    if h > 0:
-        cooley_tukey_split(n, h, res_data)
-
-    # Perform the Cooley-Tukey FFT on the subarrays in parallel
-    var reordered_arr_data = UnsafePointer[Scalar[DType.uint32]].alloc(workload)
-    bit_reversal(workload, reordered_arr_data)
-
-    @parameter
-    fn perform_cooley_tukey_sequencial(i: Int) capturing:
-        cooley_tukey_with_bit_reversal(
-            workload, res_data.offset(2 * i * workload), reordered_arr_data
-        )
-
-    parallelize[perform_cooley_tukey_sequencial](number_subtasks, num_workers)
-    _ = workload, divisions
-    reordered_arr_data.free()
-
-    # Recombine the solutions of the subarrays
-    if h > 0:
-        cooley_tukey_recombine(n, h, res_data)
-
-    # Cast the data back to the original type and return the result
-    copy_complex_and_cast(data, res_data, n, perform_inverse, workload)
-    res_data.free()
-    return x
+fn list_swap(arg: List[Int], i: Int, j: Int) raises -> List[Int]:
+    if i < 0 or j < 0 or i >= arg.size or j >= arg.size:
+        raise "Invalid index"
+    var arr = arg
+    var tmp = arr[i]
+    arr[i] = arr[j]
+    arr[j] = tmp
+    return arr

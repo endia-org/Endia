@@ -19,9 +19,9 @@ from endia.fft import fftn
 
 
 def fftn_test():
-    var depth = 2**3
-    var width = 2**5
-    var height = 2**6
+    var depth = 2**1
+    var width = 2**2
+    var height = 2**3
 
     # print("\nDepth:", depth, " - Width:", width, " - Height:", height)
 

@@ -86,16 +86,19 @@ struct IFFTN(DifferentiableFftOp):
         dims: List[Int],
         norm: String,
     ) raises -> Array:
+        """Sets up the Array object for the inverse FFT operation."""
         return fft_op_array(
             arg0, "ifftn", IFFTN.__call__, IFFTN.jvp, IFFTN.vjp, dims, norm
         )
 
     @staticmethod
     fn jvp(primals: List[Array], tangents: List[Array]) raises -> Array:
+        """Computes the Jacobian-vector product for the inverse FFT function."""
         return default_jvp(primals, tangents)
 
     @staticmethod
     fn vjp(primals: List[Array], grad: Array, out: Array) raises -> List[Array]:
+        """Computes the vector-Jacobian product for the inverse FFT function."""
         var params = out.meta_data()
         var dims = get_dims_from_encoded_params(params)
         var norm = get_norm_from_encoded_params(params)
@@ -104,6 +107,7 @@ struct IFFTN(DifferentiableFftOp):
 
     @staticmethod
     fn __call__(inout curr: Array, args: List[Array]) raises:
+        """Executes the inverse FFT operation inplace."""
         setup_shape_and_data(curr)
 
         var params = curr.meta_data()
@@ -136,4 +140,15 @@ def ifftn(
     dims: List[Int] = List[Int](),
     norm: String = "backward",
 ) -> Array:
+    """
+    Compute the n-dimensional inverse FFT.
+
+    Args:
+        x: The input array.
+        dims: The dimensions along which to compute the FFT.
+        norm: The normalization mode.
+
+    Returns:
+        The n-dimensional FFT of the input array.
+    """
     return IFFTN.fwd(x, dims, norm)

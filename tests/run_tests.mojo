@@ -112,6 +112,7 @@ def run_unit_tests():
     # Unit Test: Test reduce ops
     run_test_reduce_add()
     run_test_reduce_add_grad()
+    run_test_reduce_mul()
 
     run_test_mean()
     run_test_mean_grad()
@@ -174,10 +175,15 @@ def run_fft_tests():
     fft_test()
     fft_grad_test()
     fft2_test()
+    fft2_grad_test()
     fftn_test()
-    # ifft_test()
-    # ifft2_test()
-    # ifftn_test()
+    fftn_grad_test()
+    ifft_test()
+    ifft_grad_test()
+    ifft2_test()
+    ifft2_grad_test()
+    ifftn_test()
+    ifftn_grad_test()
 
 
 def run_tests():

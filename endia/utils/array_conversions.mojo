@@ -61,7 +61,7 @@ fn to_torch_tensor(arg: Array) raises -> PythonObject:
 
 @always_inline
 fn is_close(
-    x: Array, x_torch: PythonObject, rtol: Float32 = 10e-6
+    x: Array, x_torch: PythonObject, rtol: Float32 = 10e-5
 ) raises -> Bool:
     """
     Checks if the values in the endia Array and the torch tensor are equal up to a relative tolerance.

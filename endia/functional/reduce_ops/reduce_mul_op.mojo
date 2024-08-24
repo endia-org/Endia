@@ -64,7 +64,7 @@ struct ReduceMul(DifferentiableReduceOp):
     @staticmethod
     fn __call__(inout curr: Array, args: List[Array]) raises:
         """
-        Performs the forward pass for element-wise addition of two arrays.
+        Performs the forward pass for element-wise mulition of two arrays.
 
         Computes the sum of the input arrays and stores the result in the current array.
         Initializes the current array if not already set up.
@@ -78,8 +78,8 @@ struct ReduceMul(DifferentiableReduceOp):
         If the current array (curr) is not initialized, it computes the shape based on the input array and the axis and sets up the data accordingly.
         """
         setup_shape_and_data(curr)
-        var arg = contiguous(args[0])
         ones_(curr)
+        var arg = contiguous(args[0])
         var arg_shape = arg.shape()
         var arg_stride = arg.stride()
         var target_shape = curr.shape()
@@ -92,6 +92,7 @@ struct ReduceMul(DifferentiableReduceOp):
         var target_storage_offset = curr.storage_offset()
         var curr_data = curr.data()
         var arg_data = arg.data()
+        var is_complex = curr.is_complex()
 
         if rank != 1:
             # check if both shapes are actually equal and we simply have to perdorm a fast copy
@@ -120,11 +121,30 @@ struct ReduceMul(DifferentiableReduceOp):
                             var target_idx = target_idx_1 + k * target_stride[
                                 rank - 1
                             ]
-                            curr_data.store[width=width](
-                                target_idx,
-                                curr_data.load[width=width](target_idx)
-                                * arg_data.load[width=width](base_idx),
-                            )
+                            if is_complex:
+                                var curr_d = curr_data.load[width = 2 * width](
+                                    2 * target_idx
+                                ).deinterleave()
+                                var d = arg_data.load[width = 2 * width](
+                                    2 * base_idx
+                                ).deinterleave()
+                                var curr_real = curr_d[0]
+                                var curr_imag = curr_d[1]
+                                var d_real = d[0]
+                                var d_imag = d[1]
+                                var res_real = curr_real * d_real - curr_imag * d_imag
+                                var res_imag = curr_real * d_imag + curr_imag * d_real
+                                curr_data.store[width = 2 * (2 * width // 2)](
+                                    2 * target_idx,
+                                    res_real.interleave(res_imag),
+                                )
+
+                            else:
+                                curr_data.store[width=width](
+                                    target_idx,
+                                    curr_data.load[width=width](target_idx)
+                                    * arg_data.load[width=width](base_idx),
+                                )
 
                         vectorize[reduce_v, nelts[dtype]()](cols)
 
@@ -134,31 +154,77 @@ struct ReduceMul(DifferentiableReduceOp):
                             var target_idx = target_idx_1 + k * target_stride[
                                 rank - 1
                             ]
-                            curr_data.store(
-                                target_idx,
-                                curr_data.load(target_idx)
-                                * arg_data.load(base_idx),
-                            )
+                            if is_complex:
+                                var curr_d = curr_data.load[width=2](
+                                    2 * target_idx
+                                ).deinterleave()
+                                var d = arg_data.load[width=2](
+                                    2 * base_idx
+                                ).deinterleave()
+                                var curr_real = curr_d[0]
+                                var curr_imag = curr_d[1]
+                                var d_real = d[0]
+                                var d_imag = d[1]
+                                var res_real = curr_real * d_real - curr_imag * d_imag
+                                var res_imag = curr_real * d_imag + curr_imag * d_real
+                                curr_data.store(2 * target_idx, res_real)
+                                curr_data.store(2 * target_idx + 1, res_imag)
+                            else:
+                                curr_data.store(
+                                    target_idx,
+                                    curr_data.load(target_idx)
+                                    * arg_data.load(base_idx),
+                                )
         else:
             # if the rank is one and we still want to reduce along the single axis
             if target_stride[0] == 0:
                 var end = arg.size() - arg.size() % nelts[dtype]()
                 for i in range(0, end, nelts[dtype]()):
-                    curr_data.store(
-                        0,
-                        curr_data.load(0)
-                        * arg_data.load[width = nelts[dtype]()](i).reduce_mul(),
-                    )
+                    if is_complex:
+                        var d = arg_data.load[width = 2 * nelts[dtype]()](
+                            2 * i
+                        ).deinterleave()
+                        var res_real = curr_data.load(0) * d[
+                            0
+                        ].reduce_mul() - curr_data.load(1) * d[1].reduce_mul()
+                        var res_imag = curr_data.load(0) * d[
+                            1
+                        ].reduce_mul() + curr_data.load(1) * d[0].reduce_mul()
+                        curr_data.store[width=2](
+                            0, SIMD[dtype, 2](res_real, res_imag)
+                        )
+                    else:
+                        curr_data.store(
+                            0,
+                            curr_data.load(0)
+                            * arg_data.load[width = nelts[dtype]()](
+                                i
+                            ).reduce_mul(),
+                        )
                 for i in range(end, arg.size()):
-                    curr_data.store(0, curr_data.load(0) * arg_data.load(i))
+                    if is_complex:
+                        var curr_real = curr_data.load(0)
+                        var curr_imag = curr_data.load(1)
+                        var d_real = arg_data.load(2 * i)
+                        var d_imag = arg_data.load(2 * i + 1)
+                        var res_real = curr_real * d_real - curr_imag * d_imag
+                        var res_imag = curr_real * d_imag + curr_imag * d_real
+                        curr_data.store(0, SIMD[dtype, 2](res_real, res_imag))
+                    else:
+                        curr_data.store(0, curr_data.load(0) * arg_data.load(i))
+
             # other wise, if we we have rank one but not´reduction, we simply copy the values
             else:
                 var end = arg.size() - arg.size() % nelts[dtype]()
                 for i in range(0, end, nelts[dtype]()):
-                    curr_data.store[width = nelts[dtype]()](
-                        i,
-                        arg_data.load[width = nelts[dtype]()](i).reduce_mul(),
-                    )
+                    if is_complex:
+                        curr_data.store[width = 2 * nelts[dtype]()](
+                            i, arg_data.load[width = 2 * nelts[dtype]()](2 * i)
+                        )
+                    else:
+                        curr_data.store[width = nelts[dtype]()](
+                            i, arg_data.load[width = nelts[dtype]()](i)
+                        )
                 for i in range(end, arg.size()):
                     curr_data.store(i, arg_data.load(i))
 
@@ -171,9 +237,9 @@ struct ReduceMul(DifferentiableReduceOp):
     @staticmethod
     fn vjp(primals: List[Array], grad: Array, out: Array) raises -> List[Array]:
         """
-        Computes the vector-Jacobian product for the addition function.
+        Computes the vector-Jacobian product for the mulition function.
 
-        Implements reverse-mode automatic differentiation for the addition function.
+        Implements reverse-mode automatic differentiation for the mulition function.
 
         Args:
             primals: A list containing the primal input arrays.
@@ -184,7 +250,7 @@ struct ReduceMul(DifferentiableReduceOp):
             A list containing the gradient with respect to the input.
 
         #### Note:
-        The vector-Jacobian product for the addition is computed as the gradient itself.
+        The vector-Jacobian product for the mulition is computed as the gradient itself.
         """
         return List(expand(grad, primals[0].array_shape()))
 

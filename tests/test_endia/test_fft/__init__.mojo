@@ -13,8 +13,8 @@
 
 
 from .test_fft import fft_test, fft_grad_test
-from .test_fft2 import fft2_test
-from .test_fftn import fftn_test
-from .test_ifft import ifft_test
-from .test_ifft2 import ifft2_test
-from .test_ifftn import ifftn_test
+from .test_fft2 import fft2_test, fft2_grad_test
+from .test_fftn import fftn_test, fftn_grad_test
+from .test_ifft import ifft_test, ifft_grad_test
+from .test_ifft2 import ifft2_test, ifft2_grad_test
+from .test_ifftn import ifftn_test, ifftn_grad_test

@@ -19,7 +19,6 @@ def ifft2(
     x: Array,
     dims: List[Int] = List(-2, -1),
     norm: String = "backward",
-    out: Optional[Array] = None,
 ) -> Array:
     """Compute the 2-dimensional inverse FFT.
 
@@ -33,4 +32,4 @@ def ifft2(
     """
     if len(dims) != 2:
         raise "fft2d: Invalid number of dimensions"
-    return ifftn(x, dims, norm, out)
+    return ifftn(x, dims, norm)

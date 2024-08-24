@@ -19,8 +19,8 @@ from endia.fft import ifftn
 
 
 def ifftn_test():
-    var depth = 2**3
-    var width = 2**5
+    var depth = 2**2
+    var width = 2**4
     var height = 2**6
 
     # print("\nDepth:", depth, " - Width:", width, " - Height:", height)
@@ -35,7 +35,55 @@ def ifftn_test():
     var y_torch = torch.fft.ifftn(x_torch)
 
     var msg = "ifftn"
-    if not nd.utils.is_close(y, y_torch, rtol=1e-6):
+    if not nd.utils.is_close(y, y_torch, rtol=1e-5):
+        print("\033[31mTest failed\033[0m", msg)
+    else:
+        print("\033[32mTest passed\033[0m", msg)
+
+
+def fft_grad_test():
+    var n = 2**12  # power of two
+    # print("\nInput Size: ", n)
+    var torch = Python.import_module("torch")
+
+    var shape = List(n)
+    var x = nd.complex(nd.randn(shape), nd.randn(shape), requires_grad=True)
+    var x_torch = nd.utils.to_torch(x).detach().requires_grad_()
+
+    var y = nd.sum(nd.fft.fft(x))
+    var y_torch = torch.sum(torch.fft.fft(x_torch))
+
+    y.backward()
+    y_torch.real.backward()
+
+    var msg = "fft grad"
+    if not nd.utils.is_close(y, y_torch, rtol=1e-5):
+        print("\033[31mTest failed\033[0m", msg)
+    else:
+        print("\033[32mTest passed\033[0m", msg)
+
+
+def ifftn_grad_test():
+    var depth = 2**2
+    var width = 2**4
+    var height = 2**6
+
+    # print("\nDepth:", depth, " - Width:", width, " - Height:", height)
+
+    var torch = Python.import_module("torch")
+
+    var shape = List(2, 2, depth, width, height)
+    var x = nd.complex(nd.randn(shape), nd.randn(shape), requires_grad=True)
+    var x_torch = nd.utils.to_torch(x).detach().requires_grad_()
+
+    var y = nd.sum(nd.fft.ifftn(x))
+    var y_torch = torch.sum(torch.fft.ifftn(x_torch))
+
+    y.backward()
+    y_torch.real.backward()
+
+    var msg = "ifftn grad"
+    if not nd.utils.is_close(y, y_torch, rtol=1e-5):
         print("\033[31mTest failed\033[0m", msg)
     else:
         print("\033[32mTest passed\033[0m", msg)

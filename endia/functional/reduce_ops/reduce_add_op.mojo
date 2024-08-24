@@ -91,6 +91,7 @@ struct ReduceAdd(DifferentiableReduceOp):
         var target_storage_offset = curr.storage_offset()
         var curr_data = curr.data()
         var arg_data = arg.data()
+        var is_complex = curr.is_complex()
 
         if rank != 1:
             # check if both shapes are actually equal and we simply have to perdorm a fast copy
@@ -119,11 +120,22 @@ struct ReduceAdd(DifferentiableReduceOp):
                             var target_idx = target_idx_1 + k * target_stride[
                                 rank - 1
                             ]
-                            curr_data.store[width=width](
-                                target_idx,
-                                curr_data.load[width=width](target_idx)
-                                + arg_data.load[width=width](base_idx),
-                            )
+                            if is_complex:
+                                curr_data.store[width = 2 * width](
+                                    2 * target_idx,
+                                    curr_data.load[width = 2 * width](
+                                        2 * target_idx
+                                    )
+                                    + arg_data.load[width = 2 * width](
+                                        2 * base_idx
+                                    ),
+                                )
+                            else:
+                                curr_data.store[width=width](
+                                    target_idx,
+                                    curr_data.load[width=width](target_idx)
+                                    + arg_data.load[width=width](base_idx),
+                                )
 
                         vectorize[reduce_v, nelts[dtype]()](cols)
 
@@ -133,31 +145,65 @@ struct ReduceAdd(DifferentiableReduceOp):
                             var target_idx = target_idx_1 + k * target_stride[
                                 rank - 1
                             ]
-                            curr_data.store(
-                                target_idx,
-                                curr_data.load(target_idx)
-                                + arg_data.load(base_idx),
-                            )
+                            if is_complex:
+                                curr_data.store[width=2](
+                                    2 * target_idx,
+                                    curr_data.load[width=2](2 * target_idx)
+                                    + arg_data.load[width=2](2 * base_idx),
+                                )
+                            else:
+                                curr_data.store(
+                                    target_idx,
+                                    curr_data.load(target_idx)
+                                    + arg_data.load(base_idx),
+                                )
         else:
             # if the rank is one and we still want to reduce along the single axis
             if target_stride[0] == 0:
                 var end = arg.size() - arg.size() % nelts[dtype]()
                 for i in range(0, end, nelts[dtype]()):
-                    curr_data.store(
-                        0,
-                        curr_data.load(0)
-                        + arg_data.load[width = nelts[dtype]()](i).reduce_add(),
-                    )
+                    if is_complex:
+                        var d = arg_data.load[width = 2 * nelts[dtype]()](
+                            2 * i
+                        ).deinterleave()
+                        curr_data.store(
+                            0,
+                            curr_data.load(0) + d[0].reduce_add(),
+                        )
+                        curr_data.store(
+                            1,
+                            curr_data.load(1) + d[1].reduce_add(),
+                        )
+                    else:
+                        curr_data.store(
+                            0,
+                            curr_data.load(0)
+                            + arg_data.load[width = nelts[dtype]()](
+                                i
+                            ).reduce_add(),
+                        )
                 for i in range(end, arg.size()):
-                    curr_data.store(0, curr_data.load(0) + arg_data.load(i))
+                    if is_complex:
+                        curr.store[width=2](
+                            0,
+                            curr_data.load[width=2](0)
+                            + arg_data.load[width=2](2 * i),
+                        )
+                    else:
+                        curr_data.store(0, curr_data.load(0) + arg_data.load(i))
+
             # other wise, if we we have rank one but not´reduction, we simply copy the values
             else:
                 var end = arg.size() - arg.size() % nelts[dtype]()
                 for i in range(0, end, nelts[dtype]()):
-                    curr_data.store[width = nelts[dtype]()](
-                        i,
-                        arg_data.load[width = nelts[dtype]()](i).reduce_add(),
-                    )
+                    if is_complex:
+                        curr_data.store[width = 2 * nelts[dtype]()](
+                            i, arg_data.load[width = 2 * nelts[dtype]()](2 * i)
+                        )
+                    else:
+                        curr_data.store[width = nelts[dtype]()](
+                            i, arg_data.load[width = nelts[dtype]()](i)
+                        )
                 for i in range(end, arg.size()):
                     curr_data.store(i, arg_data.load(i))
 

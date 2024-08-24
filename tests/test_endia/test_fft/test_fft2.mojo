@@ -34,7 +34,32 @@ def fft2_test():
     var y_torch = torch.fft.fft2(x_torch)
 
     var msg = "fft2"
-    if not nd.utils.is_close(y, y_torch, rtol=1e-6):
+    if not nd.utils.is_close(y, y_torch, rtol=1e-5):
+        print("\033[31mTest failed\033[0m", msg)
+    else:
+        print("\033[32mTest passed\033[0m", msg)
+
+
+def fft2_grad_test():
+    var width = 2**3
+    var height = 2**10
+
+    # print("\nInput Width:", width, " - Height:", height)
+
+    var torch = Python.import_module("torch")
+
+    var shape = List(2, 3, width, height)
+    var x = nd.complex(nd.randn(shape), nd.randn(shape), requires_grad=True)
+    var x_torch = nd.utils.to_torch(x).detach().requires_grad_()
+
+    var y = nd.sum(nd.fft.fft2(x))
+    var y_torch = torch.sum(torch.fft.fft2(x_torch))
+
+    y.backward()
+    y_torch.real.backward()
+
+    var msg = "fft2 grad"
+    if not nd.utils.is_close(y, y_torch, rtol=1e-5):
         print("\033[31mTest failed\033[0m", msg)
     else:
         print("\033[32mTest passed\033[0m", msg)

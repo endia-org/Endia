@@ -39,7 +39,6 @@ struct FFTN(DifferentiableFftOp):
 
     @staticmethod
     fn vjp(primals: List[Array], grad: Array, out: Array) raises -> List[Array]:
-        print(grad)
         var params = out.meta_data()
         var dims = get_dims_from_encoded_params(params)
         var norm = get_norm_from_encoded_params(params)

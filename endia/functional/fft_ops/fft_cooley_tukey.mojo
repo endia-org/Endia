@@ -23,7 +23,7 @@ from .utils import *
 alias pi = Float64(3.141592653589793)  # Maximum useful precision for Float64
 
 
-fn cooley_tukey_sequencial_split(
+fn cooley_tukey_non_recursive(
     n: Int, max_depth: Int, res_data: UnsafePointer[Scalar[DType.float64]]
 ):
     """
@@ -260,7 +260,7 @@ fn fft_cooley_tukey_parallel(
 
         # Split the data into individual subarrays to perform #workload indipendent FFTs
         if h > 0:
-            cooley_tukey_sequencial_split(size, h, res_data)
+            cooley_tukey_non_recursive(size, h, res_data)
 
         # Perform the Cooley-Tukey FFT on the subarrays in parallel
         var reordered_arr_data = UnsafePointer[Scalar[DType.uint32]].alloc(

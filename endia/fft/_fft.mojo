@@ -13,10 +13,15 @@
 
 
 from endia import Array
-from .utils import fft_c
+from ._fftn import fftn
 
 
-def fft(x: Array, dim: Int = -1, norm: String = "backward") -> Array:
+def fft(
+    x: Array,
+    dim: Int = -1,
+    norm: String = "backward",
+    out: Optional[Array] = None,
+) -> Array:
     """
     Compute the n-dimensional FFT.
 
@@ -28,4 +33,4 @@ def fft(x: Array, dim: Int = -1, norm: String = "backward") -> Array:
     Returns:
         The n-dimensional FFT of the input array.
     """
-    return fftn(x, dim, norm)
+    return fftn(x, dim, norm, out)

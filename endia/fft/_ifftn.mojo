@@ -14,7 +14,7 @@
 from endia import Array, permute, swapaxes
 from endia.utils import compute_stride
 from endia.functional._utils import is_contiguous, contiguous
-from .utils import *  # cooley_tukey_parallel
+from .utils import cooley_tukey_parallel
 import math
 
 

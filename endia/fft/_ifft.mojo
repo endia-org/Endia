@@ -13,10 +13,15 @@
 
 
 from endia import Array
-from .utils import fft_c
+from ._ifftn import ifftn
 
 
-def ifft(x: Array, dim: Int = -1, norm: String = "backward") -> Array:
+def ifft(
+    x: Array,
+    dim: Int = -1,
+    norm: String = "backward",
+    out: Optional[Array] = None,
+) -> Array:
     """
     Compute the n-dimensional inverse FFT.
 
@@ -28,4 +33,4 @@ def ifft(x: Array, dim: Int = -1, norm: String = "backward") -> Array:
     Returns:
         The n-dimensional inverse FFT of the input array.
     """
-    return ifftn(x, dim, norm)
+    return ifftn(x, dim, norm, out)

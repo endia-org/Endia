@@ -12,11 +12,14 @@
 # ===----------------------------------------------------------------------=== #
 
 from endia import Array, complex, zeros_like, permute, contiguous
-from .utils import fft_c
+from ._fftn import fftn
 
 
 def fft2(
-    x: Array, dims: List[Int] = List(-2, -1), norm: String = "backward"
+    x: Array,
+    dims: List[Int] = List(-2, -1),
+    norm: String = "backward",
+    out: Optional[Array] = None,
 ) -> Array:
     """Compute the 2-dimensional FFT.
 
@@ -30,4 +33,4 @@ def fft2(
     """
     if len(dims) != 2:
         raise "fft2d: Invalid number of dimensions"
-    return fftn(x, dims, norm)
+    return fftn(x, dims, norm, out)

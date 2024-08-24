@@ -47,7 +47,7 @@ This module provides a suite of optimized, non-recursive Fast Fourier Transform 
 
 ## Benchmarks 🔥
 
-The plot below illustrates speed comparisons of 1-dimensional FFTs across various input sizes, ranging from `2**1` to `2**22`. (Measured on an Apple M3).
+The plot below illustrates speed comparisons of 1-dimensional FFTs across various input sizes, ranging from `2**2` to `2**22`. (Measured on an Apple M3).
 
 <div align="center">
   <img src="../../../assets/Endia_vs_PyTorch_FFT_Benchmark.png" alt="Endia_vs_PyTorch_FFT_Benchmark Image" style="max-width: 800px;"/> 
@@ -57,13 +57,13 @@ The plot below illustrates speed comparisons of 1-dimensional FFTs across variou
 
 Endia's FFT implementation, despite its compactness, delivers performance **not far behind established frameworks**. Further optimizations and algorithmic refinements could push Endia's performance to fully match or even exceed existing solutions.
 
-**If you have ideas on how to further enhance Endia's FFT performance or functionality, feel free to submit a pull request to Enida's nightly branch. Let's push the boundaries of science together!**
+**If you have ideas on how to further enhance Endia's FFT performance or functionality, feel free to submit a pull request to the nightly branch. Let's push the boundaries of science together!**
 
 ## Current Limitations and Roadmap 🚧
 
 1. **Input Size Flexibility**: 
    - Current: Axis dimensions must be a power of 2
-   - Coming Soon: Support for arbitrary input sizes
+   - Coming Soon: Support for arbitrary input sizes (via chirp Z-transformm)
 
 2. **GPU Acceleration**: 
    - Current: CPU-only implementation

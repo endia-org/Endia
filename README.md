@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./assets/endia_stack_concept.png" alt="Endia Stack concept Image" style="max-width: 800px;"/>
+  <img src="./assets/title_image.png" alt="Endia Title Image" />
 </div>
 
 ###
@@ -25,6 +25,11 @@
 
 1. **Install [Mojo and MAX](https://docs.modular.com/max/install)** 🔥 (v24.4)
 
+   Optional but recommended: Install the [nightly version of Mojo](https://docs.modular.com/max/install#install-nightly-builds) to access Endia's most up-to-date features, such as the FFT module.
+
+   > Note: To use these cutting-edge features, you'll need to switch to Endia's nightly branch (see step 2).
+
+
 2. **Clone the repository**: Choose one of the following options to clone the repository:
 
 
@@ -49,6 +54,13 @@
     Required dependencies: `torch`, `numpy`, `graphviz`. These will be installed automatically by the setup script.
 
 
+## Endia's truly minimalistic Stack
+
+<div align="center">
+  <img src="./assets/endia_stack_concept.png" alt="Endia Stack concept Image" style="max-width: 800px;"/>
+</div>
+
+#### 
 
 ## A tiny example
 

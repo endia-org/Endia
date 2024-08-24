@@ -18,7 +18,6 @@ from endia.functional._utils import (
     setup_shape_and_data,
 )
 from ._utils import DifferentiableUnaryOp, unary_op_array, execute_unary_op
-from endia.functional import ge_zero
 
 
 ####-----------------------------------------------------------------------------------------------------------------####

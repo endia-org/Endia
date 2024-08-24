@@ -63,7 +63,7 @@ Endia's FFT implementation, despite its compactness, delivers performance **not 
 
 1. **Input Size Flexibility**: 
    - Current: Axis dimensions must be a power of 2
-   - Coming Soon: Support for arbitrary input sizes (via chirp Z-transformm)
+   - Coming Soon: Support for arbitrary input sizes (via chirp Z-transform)
 
 2. **GPU Acceleration**: 
    - Current: CPU-only implementation

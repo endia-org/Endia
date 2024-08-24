@@ -15,7 +15,7 @@ import math
 import endia as nd
 import time
 from python import Python
-from endia.fft import fft
+from endia import fft
 
 
 def fft_test():
@@ -46,7 +46,7 @@ def fft_grad_test():
     var x = nd.complex(nd.randn(shape), nd.randn(shape), requires_grad=True)
     var x_torch = nd.utils.to_torch(x).detach().requires_grad_()
 
-    var y = nd.sum(nd.fft.fft(x))
+    var y = nd.sum(nd.fft(x))
     var y_torch = torch.sum(torch.fft.fft(x_torch))
 
     y.backward()

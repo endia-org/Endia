@@ -11,25 +11,25 @@
 # limitations under the License.
 # ===----------------------------------------------------------------------=== #
 
+from endia import Array, complex, zeros_like, permute, contiguous
+from .ifftn_op import ifftn
 
-from endia import Array
-from ._ifftn import ifftn
 
-
-def ifft(
+def ifft2(
     x: Array,
-    dim: Int = -1,
+    dims: List[Int] = List(-2, -1),
     norm: String = "backward",
 ) -> Array:
-    """
-    Compute the n-dimensional inverse FFT.
+    """Compute the 2-dimensional inverse FFT.
 
     Args:
         x: The input array.
-        dim: The dimension along which to compute the inverse FFT.
+        dims: The dimensions along which to compute the inverse FFT.
         norm: The normalization mode.
 
     Returns:
-        The n-dimensional inverse FFT of the input array.
+        The 2-dimensional inverse FFT of the input array.
     """
-    return ifftn(x, dim, norm)
+    if len(dims) != 2:
+        raise "fft2d: Invalid number of dimensions"
+    return ifftn(x, dims, norm)

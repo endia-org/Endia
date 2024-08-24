@@ -13,7 +13,7 @@
 
 
 from endia import Array
-from ._fftn import fftn
+from .fftn_op import fftn
 
 
 # ===----------------------------------------------------------------------=== #

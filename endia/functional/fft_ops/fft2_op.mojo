@@ -12,7 +12,7 @@
 # ===----------------------------------------------------------------------=== #
 
 from endia import Array, complex, zeros_like, permute, contiguous
-from ._fftn import fftn
+from .fftn_op import fftn
 
 
 def fft2(

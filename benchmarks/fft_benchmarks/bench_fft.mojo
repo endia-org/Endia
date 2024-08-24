@@ -42,7 +42,7 @@ def fft_benchmark():
                 total_torch = 0
 
             start = now()
-            _ = nd.fft.fft(x)
+            _ = nd.fft(x)
             total += now() - start
 
             start = now()

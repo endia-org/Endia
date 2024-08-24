@@ -12,10 +12,9 @@
 # ===----------------------------------------------------------------------=== #
 
 
-from .utils import fft_c
-from ._fft import fft
-from ._fft2 import fft2
-from ._fftn import fftn
-from ._ifft import ifft
-from ._ifft2 import ifft2
-from ._ifftn import ifftn
+from .fft_op import fft
+from .fft2_op import fft2
+from .fftn_op import fftn
+from .ifft_op import ifft
+from .ifft2_op import ifft2
+from .ifftn_op import ifftn

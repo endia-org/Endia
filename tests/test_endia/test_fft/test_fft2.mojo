@@ -19,14 +19,14 @@ from endia.fft import fft2
 
 
 def fft2_test():
-    var widht = 2**2
+    var width = 2**3
     var height = 2**10
 
-    # print("\nInput Width:", widht, " - Height:", height)
+    # print("\nInput Width:", width, " - Height:", height)
 
     var torch = Python.import_module("torch")
 
-    var shape = List(4, 4, widht, height)
+    var shape = List(2, 3, width, height)
     var x = nd.complex(nd.randn(shape), nd.randn(shape))
     var x_torch = nd.utils.to_torch(x)
 

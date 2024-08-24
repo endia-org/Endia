@@ -110,6 +110,9 @@ struct Node(CollectionElement):
     var id_in_graph: Optional[Int]
     var has_real: Bool
     var has_imag: Bool
+    var meta_data: Arc[
+        List[Int]
+    ]  # some additional information encoded as a list of integers
 
     fn __init__(
         inout self,
@@ -171,6 +174,7 @@ struct Node(CollectionElement):
         self.id_in_graph = None
         self.has_real = True
         self.has_imag = is_complex
+        self.meta_data = Arc(List[Int]())
 
     fn __del__(owned self):
         # print("Node __del__")
@@ -491,6 +495,12 @@ struct Array(CollectionElement, Stringable, Formattable):
     fn _requires_grad(self, requires_grad: Bool) -> Self:
         self.node[].requires_grad = requires_grad
         return self
+
+    fn meta_data(self) -> List[Int]:
+        return self.node[].meta_data[]
+
+    fn meta_data_(inout self, meta_data: List[Int]):
+        self.node[].meta_data[] = meta_data
 
     fn has_real(self) -> Bool:
         return self.node[].has_real

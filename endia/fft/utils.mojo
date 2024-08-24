@@ -18,6 +18,7 @@ import math
 from algorithm import parallelize, vectorize
 from memory import memcpy
 from sys import num_physical_cores
+from endia.utils import copy_shape, NA, list_to_array_shape, array_shape_to_list
 
 alias pi = Float64(3.141592653589793)  # Maximum useful precision for Float64
 
@@ -297,8 +298,8 @@ fn determine_num_workers(size: Int) raises -> Int:
 
 fn cooley_tukey_parallel(
     input: Array,
-    dims: List[Int] = List[Int](),
-    norm: String = "backward",
+    dims: List[Int],
+    norm: String,
     out: Optional[Array] = None,
     conj_input: Bool = False,
     conj_output: Bool = False,
@@ -429,3 +430,123 @@ fn cooley_tukey_parallel(
     data.free()
 
     return output
+
+
+fn cooley_tukey_parallel_inplace(
+    input: Array,
+    inout out: Array,
+    dims: List[Int],
+    norm: String,
+    conj_input: Bool = False,
+    conj_output: Bool = False,
+    input_divisor: Float64 = 1.0,
+    output_divisor: SIMD[dtype, 1] = 1.0,
+) raises:
+    _ = cooley_tukey_parallel(
+        input,
+        dims,
+        norm,
+        out,
+        conj_input,
+        conj_output,
+        input_divisor,
+        output_divisor,
+    )
+
+
+trait DifferentiableFftOp:
+    @staticmethod
+    fn fwd(
+        arg0: Array,
+        dims: List[Int],
+        norm: String,
+    ) raises -> Array:
+        ...
+
+    @staticmethod
+    fn jvp(primals: List[Array], tangents: List[Array]) raises -> Array:
+        ...
+
+    @staticmethod
+    fn vjp(primals: List[Array], grad: Array, out: Array) raises -> List[Array]:
+        ...
+
+    @staticmethod
+    fn __call__(inout curr: Array, args: List[Array]) raises:
+        ...
+
+
+fn fft_op_array(
+    arg0: Array,
+    name: String,
+    fwd: fn (inout Array, List[Array]) raises -> None,
+    jvp: fn (List[Array], List[Array]) raises -> Array,
+    vjp: fn (List[Array], Array, Array) raises -> List[Array],
+    dims: List[Int],
+    norm: String,
+) raises -> Array:
+    var arr_shape = setup_array_shape(
+        arg0.array_shape(),
+        "copy_shape",
+        copy_shape,
+    )
+    # print("inside fft_op_array 2222")
+    # var p = encode_fft_params(dims, norm)
+    # print("params ehre: ", end="")
+    # for i in range(len(p)):
+    #     print(p[i], end=", ")
+    # print()
+
+    return op_array(
+        arr_shape,
+        arg0,
+        NA,
+        name,
+        fwd,
+        jvp,
+        vjp,
+        meta_data=encode_fft_params(dims, norm),
+        is_complex_p=True,
+    )
+
+
+fn encode_fft_params(
+    dims: List[Int],
+    norm: String,
+) raises -> List[Int]:
+    var num_dims = len(dims)
+    var params = List[Int](num_dims)
+    params.extend(dims)
+    if norm == "backward":
+        params.append(0)
+    elif norm == "forward":
+        params.append(1)
+    elif norm == "ortho":
+        params.append(2)
+    else:
+        raise "encode: Invalid norm"
+    return params
+
+
+fn get_dims_from_encoded_params(
+    params: List[Int],
+) raises -> List[Int]:
+    var num_dims = params[0]
+    var dims = List[Int]()
+    for i in range(1, num_dims + 1):
+        dims.append(params[i])
+    return dims
+
+
+fn get_norm_from_encoded_params(
+    params: List[Int],
+) raises -> String:
+    var num_dims = params[0]
+    if params[num_dims + 1] == 0:
+        return "backward"
+    elif params[num_dims + 1] == 1:
+        return "forward"
+    elif params[num_dims + 1] == 2:
+        return "ortho"
+    else:
+        raise "get_norm: Invalid norm"

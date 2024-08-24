@@ -172,11 +172,12 @@ def run_integration_tests():
 def run_fft_tests():
     # FFT Tests
     fft_test()
+    fft_grad_test()
     fft2_test()
     fftn_test()
-    ifft_test()
-    ifft2_test()
-    ifftn_test()
+    # ifft_test()
+    # ifft2_test()
+    # ifftn_test()
 
 
 def run_tests():

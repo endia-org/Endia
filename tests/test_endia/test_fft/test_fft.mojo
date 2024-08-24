@@ -35,3 +35,31 @@ def fft_test():
         print("\033[31mTest failed\033[0m", msg)
     else:
         print("\033[32mTest passed\033[0m", msg)
+
+
+def fft_grad_test():
+    var n = 2**12  # power of two
+    # print("\nInput Size: ", n)
+    var torch = Python.import_module("torch")
+
+    var shape = List(n)
+    var x = nd.complex(nd.randn(shape), nd.randn(shape), requires_grad=True)
+    var x_torch = nd.utils.to_torch(x).detach().requires_grad_()
+
+    var y = nd.sum(fft(x))
+    var y_torch = torch.sum(torch.fft.fft(x_torch))
+
+    print(y)
+    print(y_torch)
+
+    y.backward()
+    y_torch.real.backward()
+
+    print("Endia Grad: ", x.grad())
+    print("Torch Grad: ", x_torch.grad)
+
+    # var msg = "fft"
+    # if not nd.utils.is_close(y, y_torch, rtol=1e-6):
+    #     print("\033[31mTest failed\033[0m", msg)
+    # else:
+    #     print("\033[32mTest passed\033[0m", msg)

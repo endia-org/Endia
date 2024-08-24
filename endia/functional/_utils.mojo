@@ -234,6 +234,8 @@ fn op_array(
             SIMD[dtype, nelts[dtype]() * 2 // 2],
         ]
     ] = None,
+    meta_data: List[Int] = List[Int](),
+    is_complex_p: Bool = False,
 ) raises -> Array:
     """
     This operation will setup an array i.e. a node in the background with all its necessary data and
@@ -241,14 +243,24 @@ fn op_array(
     point to JIT graph on which cachs all the operations, we also always use this graph for the current newly created
     array. The JIT FxGraph is always passed as a reference to the node, so that we can always access the graph.
     """
+    # var res_arr: Array
+    # if is_view:
+    #     res_arr = Array(array_shape, is_view=is_view)
+    # else:
+    #     var is_arg_complex = False
+    #     for arg in args:
+    #         is_arg_complex = is_arg_complex or arg[].is_complex()
+    #     res_arr = Array(array_shape.shape(), is_complex or is_arg_complex)
+
     var res_arr = Array(array_shape, is_view=is_view)
     res_arr.set_fwd(callable)
     res_arr.kwargs_(kwargs)
     res_arr.set_name(name)
+    res_arr.meta_data_(meta_data)
     # res_arr.is_view_(is_view)
 
     var requires_grad = False
-    var is_complex = False
+    var is_complex = is_complex_p
     for arg in args:
         requires_grad = requires_grad or arg[].requires_grad()
         is_complex = is_complex or arg[].is_complex()

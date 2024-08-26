@@ -1,14 +1,14 @@
-# Implementing, Testing and Benchmarking a Custom FFT Operation with Endia Arrays 🚀 
+# Implementing, Testing and Benchmarking a Custom FFT Operation with [Endia Arrays](https://endia.vercel.app/docs/array)
 
 We'll explore how to create your own Fast Fourier Transform (FFT) implementation using Endia Arrays. We'll also cover methods for testing and benchmarking your implementation against established solutions like PyTorch, NumPy and Endia itself.
 
-> **🧪 Experimental:** Some of the functions like the `close_to` function, which computes a relative difference between an Endia Array and a PyTorch Tensor, have been fixed and updated in the crrent nightly version of Endia. Also, the entire FFT module itself is still only availabe on Endia's nightly branch, requiring the [Mojo nightly build](https://docs.modular.com/max/install). This will change in a couple of weeks, as soon as the next Mojo version will be released.
+> **🧪 Experimental:** The `close_to` function, which calculates the relative difference between an Endia Array and a PyTorch Tensor, has been updated and fixed in the current nightly version of Endia. Additionally, the entire FFT module is currently only available in Endia's nightly branch. To access these features, you need the [Mojo nightly build](https://docs.modular.com/max/install).
 
-## Introduction to Endia Arrays 
+## Working with Endia Arrays
 
 Endia Arrays provide a convenient way to set up data for your FFT implementation in Mojo and facilitate testing against other frameworks. Let's start by examining how to initialize these arrays.
 
-### Initializing Endia Arrays
+### Array Initialization 🚀
 
 You can create both real-valued and complex-valued Endia Arrays. For FFT operations, while the input can be either real or complex, the output should always be complex-valued.
 
@@ -45,7 +45,7 @@ for i in range(x.size()):
 
 **Note:** Endia stores complex numbers as two consecutive floating point numbers in a contiguous memory buffer, with the real part first, followed by the imaginary part. If we have more than one entry in our Array, these real and imaginary parts are therefore alternating.
 
-### Working Directly with Array Data 🛠️
+### Accessing the Data Pointer of an Array 🛠️
 
 For optimal performance, you can work directly with the Array's data buffer. This approach avoids the overhead of creating intermediate Array objects and Array slices.
 
@@ -60,6 +60,50 @@ _ = x
 ```
 
 **Important:** Be cautious when storing the data buffer in a variable, as it may be freed when the Array object is no longer needed. To prevent this, use an empty assignment to the Array object as shown above.
+
+### Arrays as special views on Memory 📦
+
+[See the full list of viewing operations here](https://endia.vercel.app/docs/view_ops)
+
+You can access the shape of an Array, its stride, and the offset of the first element in memory. The stride is the number of elements to move in memory to reach the next element along each dimension.
+
+```python
+var x = endia.randn(shape=List(2,3,4))
+
+var shape = x.shape()
+var stride = x.stride()
+var offset = x.storage_offset()
+```
+
+You can also create slices on an Array to work with specific parts of the data:
+
+```python
+var x = endia.randn(shape=List(2,3,4))
+
+var x_slice = x[0:1, 1:3, :] # Slicing along the first and second dimensions
+```
+
+Additionally, you can assign Arrays to slices of an Array:
+
+```python
+var x = endia.randn(shape=List(2,3,4))
+
+var y = endia.randn(shape=List(1,2,4))
+x[1:2, 1:3, :] = y # Assigning y to a slice of x
+```
+
+If you created a slice and want to work on the data as if the slice was the original Array, you can use the `contiguous` function:
+
+```python
+var x = endia.randn(shape=List(2,3,4))
+
+var x_slice = x[0:1, 1:3, :]
+var x_slice_contiguous = endia.contiguous(x_slice)
+```
+
+**Note:** Slicing oeprations create views on the original Array, so modifying the slice will also modify the original Array.
+
+**Important:** Even though Slcing only creates views and does not allocate new memory, it is still a costly operation. Therefore, it is recommended to avoid slicing in performance-critical code.
 
 ## Implementing Your Custom FFT 🌟
 

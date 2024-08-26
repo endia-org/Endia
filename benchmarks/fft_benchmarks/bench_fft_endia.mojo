@@ -1,12 +1,9 @@
 import endia as nd
 import time
-
-# import csv
-from python import Python, PythonObject
 import os
 
 
-fn benchmark_pytorch_fft(
+fn benchmark_endia_fft(
     shapes: List[Int],
     base_num_iterations: Int = 100,
     warm_up_iterations: Int = 10,
@@ -64,4 +61,4 @@ def main():
         2**22,
     )
 
-    benchmark_pytorch_fft(shapes_to_benchmark)
+    benchmark_endia_fft(shapes_to_benchmark)

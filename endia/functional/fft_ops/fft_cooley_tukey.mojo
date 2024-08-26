@@ -186,7 +186,7 @@ fn fft_cooley_tukey_parallel(
     input_divisor: Float64 = 1.0,
     output_divisor: SIMD[dtype, 1] = 1.0,
 ) raises -> Array:
-    """Compute the n-dimensional FFT.
+    """Compute the n-dimensional FFT using a hybrid version of the Cooley-Tukey algorithm.
 
     Args:
         input: The input array.
@@ -322,6 +322,18 @@ fn fft_cooley_tukey_parallel_inplace(
     input_divisor: Float64 = 1.0,
     output_divisor: SIMD[dtype, 1] = 1.0,
 ) raises:
+    """Compute the n-dimensional FFT inplace using a hybrid version of the Cooley-Tukey algorithm.
+
+    Args:
+        input: The input array.
+        out: The output array.
+        dims: The dimensions along which to compute the FFT.
+        norm: The normalization mode.
+        conj_input: Whether to conjugate the input data.
+        conj_output: Whether to conjugate the output data.
+        input_divisor: The divisor for the input data.
+        output_divisor: The divisor for the output data.
+    """
     _ = fft_cooley_tukey_parallel(
         input,
         dims,

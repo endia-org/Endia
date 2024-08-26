@@ -2,7 +2,7 @@
 
 We'll explore how to create your own Fast Fourier Transform (FFT) implementation using Endia Arrays. We'll also cover methods for testing and benchmarking your implementation against established solutions like PyTorch, NumPy and Endia itself.
 
-> **🧪 Experimental:** The `close_to` function, which calculates the relative difference between an Endia Array and a PyTorch Tensor, has been updated and fixed in the current nightly version of Endia. Additionally, the entire FFT module is currently only available in Endia's nightly branch. To access these features, you need the [Mojo nightly build](https://docs.modular.com/max/install).
+> **🧪 Experimental:** The `close_to` function, which calculates the relative difference between an Endia Array and a PyTorch Tensor, has been updated and fixed in the current nightly version of Endia. Additionally, a lot of new Array methods and also the entire FFT module itself is currently only available in Endia's nightly branch. To access these features, you need the [Mojo nightly build](https://docs.modular.com/max/install).
 
 ## Working with Endia Arrays
 
@@ -161,7 +161,7 @@ This test generates random complex-valued input, applies both your custom FFT an
 
 ## Benchmarking Your FFT ⏱️
 
-Benchmarking helps you assess the performance of your custom FFT against established libraries. Here's how to set up a benchmark:
+Benchmarking helps you assess the performance of your custom FFT against established libraries. Here's how to set up a benchmark in Mojo using your custom FFT implementation:
 
 ```python
 import endia as nd
@@ -351,5 +351,3 @@ def plot_benchmark_results(
 
 plot_benchmark_results()
 ```
-
-This visualization will help you understand how your implementation performs across different input sizes and dimensions compared to established libraries.

@@ -121,9 +121,7 @@ def fftn(
 
 This interface allows for flexibility in input type, dimensions for computation, and normalization mode.
 
-Certainly! I'll revise that section to make the second part fit in better. Here's the updated version:
-
-## Testing Your Implementation 🧪
+## Testing 🧪
 
 To ensure the accuracy of your custom FFT, it's crucial to test it against established implementations. Here's how you can compare your results with PyTorch directly inside Mojo:
 
@@ -155,11 +153,13 @@ def your_custom_fftn_test():
         print("\033[32mTest passed\033[0m", msg)
 ```
 
-**Note:** The above setup requires the installation of a CPU version of PyTorch. If you prefer not to use PyTorch, you can alternatively compare your custom solutions directly against Endia's built-in FFT implementations. This approach allows you to validate your custom FFT without external dependencies.
-
 This test generates random complex-valued input, applies both your custom FFT and the reference FFT (either PyTorch's or Endia's), and compares the results. It's recommended to start with one-dimensional arrays and progressively move to higher dimensions as you refine your implementation. This incremental approach helps isolate and address any dimension-specific challenges in your FFT algorithm.
 
-## Benchmarking Your FFT ⏱️
+**Note:** The above setup requires the installation of a CPU version of PyTorch. If you prefer not to use any **external dependencies**, you can alternatively compare your custom solutions directly against Endia's built-in FFT implementations. You might achieve this by making both your output and the Endia output `contiguous` and simply iterate over the resulting data buffers and compare the values.
+
+## Benchmarking 🔥
+
+### Benchmarking Your FFT
 
 Benchmarking helps you assess the performance of your custom FFT against established libraries. Here's how to set up a benchmark in Mojo using your custom FFT implementation:
 
@@ -205,7 +205,7 @@ def main():
 
 This benchmark measures the average computation time for various input shapes and saves the results to a CSV file.
 
-### Benchmarking PyTorch's FFT 🔥
+### Benchmarking PyTorch's FFT
 
 For comparison, you'll want to benchmark PyTorch's FFT implementation:
 
@@ -256,9 +256,9 @@ shapes_to_benchmark = [(2**1,), (2**2,), (2**3,), (2**4,), (2**5,), (2**6,)]
 benchmark_pytorch_fft(shapes_to_benchmark)
 ```
 
-### Visualizing Benchmark Results 📈
+### Visualizing Benchmark Results
 
-Finally, use this script to create a comparative plot of your custom FFT against PyTorch and NumPy:
+Finally, use this script to create a comparative plot 📈 of your custom FFT against PyTorch and NumPy:
 
 ```python
 import matplotlib.pyplot as plt

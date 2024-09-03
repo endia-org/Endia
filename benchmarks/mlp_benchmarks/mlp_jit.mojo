@@ -104,8 +104,9 @@ def benchmark_mlp_jit():
         start = now()
 
         # fill input and target inplace
-        nd.randu_(args[0])
-        fill_sin_(args[1], args[0])
+        arg0 = args[0]
+        nd.randu_(arg0)
+        fill_sin_(args[1], arg0)
 
         # compute loss
         fwd_start = now()

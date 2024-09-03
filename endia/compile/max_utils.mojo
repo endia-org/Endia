@@ -442,20 +442,26 @@ fn build_model(
 def execute_model(
     args: List[Array], outputs: List[Array], model: Model
 ) -> List[Array]:
-    # Convert args to numpy arrays and store in numpy dict with key "input0", "input1", ...
-    var np = Python.import_module("numpy")
-    var numpy_dict = Python.dict()
+    """
+    Execution of a model with MAX JIT compilation. No data copying, only temporary pointer borrowing for inputs and ownership stealing for outputs.
+    """
+    # borrow data pointers to the MAX graph inputs
+    var tensor_map = TensorMap(model._ctx, model._lib, model._session)
     for id in range(len(args)):
         var arg = args[id]
-        var np_array = array_to_numpy(arg, np)
-        numpy_dict["input" + str(id)] = np_array
+        tensor_map.borrow(
+            "input" + str(id),
+            TensorSpec(DType.float32, arg.shape()),
+            arg.data(),
+        )
 
     # Execute_max_graph the model
-    var results = model.execute(numpy_dict^)
+    var results = model.execute(tensor_map^)
 
-    # Put all intermediate nodes into the output list
+    # Steal data pointers of outputs from MAX graph and make them the memory locations of the output Arrays
     var array_outputs = List[Array]()
     for i in range(len(outputs)):
         var output = results.get[DType.float32]("output" + str(i))
         array_outputs.append(tensor_to_array(output))
+
     return array_outputs

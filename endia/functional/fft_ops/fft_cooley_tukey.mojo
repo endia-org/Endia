@@ -208,7 +208,7 @@ fn fft_cooley_tukey_parallel(
         x = contiguous(input)
 
     if norm == "backward":
-        x = x
+        pass
     elif norm == "forward":
         x = x / x.size()
     elif "ortho":
@@ -231,6 +231,7 @@ fn fft_cooley_tukey_parallel(
             if fft_dims[i] < 0 or fft_dims[i] >= ndim:
                 raise "Invalid dimension"
             if (shape[fft_dims[i]] & (shape[fft_dims[i]] - 1)) != 0:
+                print(shape[fft_dims[i]])
                 raise "Dimension must be a power of two"
 
     var res_data = UnsafePointer[Scalar[DType.float64]].alloc(size * 2)

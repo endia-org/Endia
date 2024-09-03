@@ -92,9 +92,9 @@ def benchmark_mlp_jit_with_MAX():
     fwd_start = SIMD[dtype, 1](0)
     fwd_end = SIMD[dtype, 1](0)
     time_fwd = SIMD[dtype, 1](0)
-    grad_start = SIMD[dtype, 1](0)
-    grad_end = SIMD[dtype, 1](0)
-    time_grad = SIMD[dtype, 1](0)
+    # grad_start = SIMD[dtype, 1](0)
+    # grad_end = SIMD[dtype, 1](0)
+    # time_grad = SIMD[dtype, 1](0)
     optim_start = SIMD[dtype, 1](0)
     optim_end = SIMD[dtype, 1](0)
     time_optim = SIMD[dtype, 1](0)
@@ -104,8 +104,9 @@ def benchmark_mlp_jit_with_MAX():
         start = now()
 
         # fill input and target inplace
-        nd.randu_(args[0])
-        fill_sin_(args[1], args[0])
+        var arg0 = args[0]
+        nd.randu_(arg0)
+        fill_sin_(args[1], arg0)
 
         # compute loss
         fwd_start = now()

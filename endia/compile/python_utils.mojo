@@ -62,12 +62,11 @@ fn array_to_numpy(tensor: Array, np: PythonObject) raises -> PythonObject:
     return tensor_as_numpy^
 
 
-fn tensor_to_array(src: Tensor[dtype]) raises -> Array:
+fn tensor_to_array(owned src: Tensor[dtype]) raises -> Array:
     var shape = List[Int]()
     for i in range(src.rank()):
         shape.append(src.shape()[i])
-    var dst = Array(shape)
-    var dst_data = dst.data()
-    var src_data = src._ptr
-    memcpy(dst_data, src_data, dst.size())
+    var dst = Array(shape, is_view=True)
+    dst.data_(src._steal_ptr())
+    dst.is_view_(False)
     return dst

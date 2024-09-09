@@ -1,15 +1,15 @@
-<div align="center">
-  <img src="./assets/title_image.png" alt="Endia Title Image" />
+<div align="center" style="max-width: 700px; margin: auto;">
+  <img src="./assets/title_image.png" alt="Endia Title Image" style="max-width: 100%;" />
 </div>
 
 ###
 
-**Endia** is a dynamic Array library for Scientific Computing, similar to PyTorch, Numpy and JAX. It offers:
+**Endia** is a lightweight, dynamic Neural Network library for Mojo, featuring:
 
 - **Automatic differentiation**: Compute derivatives of arbitrary order.
-- **Complex number support:** Use Endia for advanced scientific applications.
+- **Complex numbers:** Use Endia for advanced scientific applications.
 - **Dual API:** Choose between a PyTorch-like imperative or a JAX-like functional interface.
-- **JIT Compilation:** Leverage MAX to speed up training and inference.
+- **JIT Compilation:** Leverage [MAX](https://www.modular.com/) to speed up training and inference.
 
 <div align="center">
   
@@ -21,39 +21,24 @@
 
 </div>
 
+> <span style="color: yellow;">⚠️ ***Warning:**</span> Endia is currently in an early development stage and not yet ready for production use. The API is subject to change without notice. Stay tuned for more exciting features to come (e.g. GPU support).*
+
+
 ## Installation
 
-1. **Install [MAX/Mojo](https://docs.modular.com/max/install)** 🔥 (nightly)
+1. **Set up your project using the [Mojo nightly build](https://docs.modular.com/mojo/manual/get-started) 🔥 via [Magic](https://docs.modular.com/magic/) 🪄**.
 
-2. **Clone the repository**: Choose one of the following options to clone the repository:
-
-
-    ```bash
-    git clone https://github.com/endia-org/Endia.git
-    cd Endia
-    ```
-
-    If you aim to use the nightly (development) version, switch to the `nightly` branch:
+2. **Add the Endia Package** (at the top level of your project):
 
     ```bash
-    git checkout nightly
+    curl -O https://raw.githubusercontent.com/endia-org/Endia/nightly/endia.mojopkg
     ```
 
-3. **Set Up Environment**:
+    > *<span style="color: green;">**Note:**</span> In the near future, you will be able to simply call `magic add endia`, which will manage this dependency in your project's environment automatically. QOL is in sight!*
 
-    ```bash
-    chmod +x setup.sh
-    ./setup.sh
-    ```
+    
 
-    Required dependencies: `torch`, `numpy`, `graphviz`. These will be installed automatically by the setup script.
-
-
-## Endia's truly minimalistic Stack
-
-<div align="center">
-  <img src="./assets/endia_stack_concept.png" alt="Endia Stack concept Image" style="max-width: 800px;"/>
-</div>
+  
 
 #### 
 
@@ -131,6 +116,13 @@ def main():
 
 *And there is so much more! Endia can handle complex valued functions, can perform both forward and reverse-mode automatic differentiation, it even has a builtin JIT compiler to make things go brrr. Explore the full **list of features** in the [documentation](https://endia.org).*
 
+
+## Endia's truly minimalistic Stack
+
+<div align="center" style="max-width: 700px; margin: auto;">
+  <img src="./assets/endia_stack_concept.png" alt="Endia Stack concept Image" style="max-width: 100%;" />
+</div>
+
 ## Why another ML framework?
 
 - 🧠 **Advance AI & Scientific Computing:** Push boundaries with clear and understandable algorithms
@@ -155,7 +147,7 @@ If you use Endia in your research or project, please cite it as follows:
   month = jul,
   title = {{Endia}},
   url = {https://github.com/endia-org/Endia},
-  version = {24.4.2},
+  version = {24.9.0},
   year = {2024}
 }
 ```

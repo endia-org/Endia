@@ -15,7 +15,6 @@ from endia.utils.aliases import dtype, nelts
 from endia.utils import (
     ArrayShape,
     ShapeNode,
-    # float_to_string,
     extract_array,
     zero_grad_rec,
     reset_node_id_recursive,
@@ -187,7 +186,7 @@ struct Node(CollectionElement):
 @value
 struct Array(CollectionElement, Stringable, Formattable):
     """
-    Array is the primary data structure in the autograd engine, providing a user-friendly interface for working with arrays.
+    Array is the primary data structure in the autograd engine.
     It serves as a wrapper around the Node struct, which encapsulates the array's data, shape, gradients, and other metadata.
     """
 
@@ -1098,48 +1097,6 @@ struct Array(CollectionElement, Stringable, Formattable):
 
     fn __ipow__(inout self, other: SIMD[dtype, 1]) raises:
         self = self.__pow__(other)
-
-    # fn __eq__(self, other: Array) raises -> Array:
-    #     return equal(self, other)
-
-    # fn __eq__(self, other: SIMD[dtype, 1]) raises -> Array:
-    #     var other_array = full(self.shape()[self.ndim() - 1], other)
-    #     return equal(self, other_array)
-
-    # fn __ne__(self, other: Array) raises -> Array:
-    #     return not_equal(self, other)
-
-    # fn __ne__(self, other: SIMD[dtype, 1]) raises -> Array:
-    #     var other_array = full(self.shape()[self.ndim() - 1], other)
-    #     return not_equal(self, other_array)
-
-    # fn __ge__(self, other: Array) raises -> Array:
-    #     return greater_equal(self, other)
-
-    # fn __ge__(self, other: SIMD[dtype, 1]) raises -> Array:
-    #     var other_array = full(self.shape()[self.ndim() - 1], other)
-    #     return greater_equal(self, other_array)
-
-    # fn __gt__(self, other: Array) raises -> Array:
-    #     return greater(self, other)
-
-    # fn __gt__(self, other: SIMD[dtype, 1]) raises -> Array:
-    #     var other_array = full(self.shape()[self.ndim() - 1], other)
-    #     return greater(self, other_array)
-
-    # fn __le__(self, other: Array) raises -> Array:
-    #     return less_equal(self, other)
-
-    # fn __le__(self, other: SIMD[dtype, 1]) raises -> Array:
-    #     var other_array = full(self.shape()[self.ndim() - 1], other)
-    #     return less_equal(self, other_array)
-
-    # fn __lt__(self, other: Array) raises -> Array:
-    #     return less(self, other)
-
-    # fn __lt__(self, other: SIMD[dtype, 1]) raises -> Array:
-    #     var other_array = full(self.shape()[self.ndim() - 1], other)
-    #     return less(self, other_array)
 
     fn __eq__(self, other: Array) raises -> Bool:
         var shape = self.shape()

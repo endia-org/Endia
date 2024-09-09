@@ -23,12 +23,7 @@
 
 ## Installation
 
-1. **Install [Mojo and MAX](https://docs.modular.com/max/install)** 🔥 (v24.4)
-
-   Optional but recommended: Install the [nightly version of Mojo](https://docs.modular.com/max/install#install-nightly-builds) to access Endia's most up-to-date features, such as the FFT module.
-
-   > Note: To use these cutting-edge features, you'll need to switch to Endia's nightly branch (see step 2).
-
+1. **Install [MAX/Mojo](https://docs.modular.com/max/install)** 🔥 (nightly)
 
 2. **Clone the repository**: Choose one of the following options to clone the repository:
 

@@ -1,0 +1,13 @@
+[project]
+authors = ["Tillmann Fehrenbach"]
+channels = ["conda-forge", "https://conda.modular.com/max-nightly"]
+description = "Endia is an open-source project for scientific computing in Mojo, aiming to provide high-performance numerical methods and tools for researchers and developers."
+name = "Endia"
+platforms = ["osx-arm64"]
+version = "0.1.0"
+
+[tasks]
+
+[dependencies]
+max = ">=24.6.0.dev2024090905,<25"
+graphviz = ">=12.0.0,<13"

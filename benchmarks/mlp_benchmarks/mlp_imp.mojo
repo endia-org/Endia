@@ -57,8 +57,8 @@ def benchmark_mlp_imp():
         loss = nd.mse(pred, y)
         end_fwd = now()
 
-        if i == 1:
-            nd.utils.visualize_graph(loss, "./assets/mlp_imp_graph")
+        # if i == 1:
+        #     nd.utils.visualize_graph(loss, "./assets/mlp_imp_graph")
 
         avg_loss += loss.load(0)
 

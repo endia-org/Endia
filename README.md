@@ -36,11 +36,7 @@
 
     > *<span style="color: green;">**Note:**</span> In the near future, you will be able to simply call `magic add endia`, which will manage this dependency in your project's environment automatically. QOL is in sight!*
 
-    
-
-  
-
-#### 
+####
 
 ## A tiny example
 

@@ -140,7 +140,7 @@ If you use Endia in your research or project, please cite it as follows:
   author = {Fehrenbach, Tillmann},
   license = {Apache-2.0 with LLVM Exceptions},
   doi = {10.5281/zenodo.12810766},
-  month = jul,
+  month = {09},
   title = {{Endia}},
   url = {https://github.com/endia-org/Endia},
   version = {24.9.0},

@@ -2,7 +2,6 @@ from endia import Array, arange, contiguous, squeeze
 from random import random_si64, seed
 
 
-
 @value
 struct _DataLoaderSpecs(CollectionElement):
     var storage: Array
@@ -22,7 +21,7 @@ struct _DataLoaderSpecs(CollectionElement):
         shuffle: Bool,
         batch_size: Int,
         drop_last: Bool,
-        seed: Int
+        seed: Int,
     ) raises:
         if curr_data.ndim() != 2:
             raise "Data must be 2D"
@@ -71,7 +70,7 @@ struct _DataLoaderSpecs(CollectionElement):
                 curr_data[src_row + k] = storage[dest_row + k]
 
     fn __getitem__(inout self, index: Int) raises -> Array:
-        return contiguous(squeeze(self.curr_data[index:index + 1]))
+        return contiguous(squeeze(self.curr_data[index : index + 1]))
 
     fn curr_data_(inout self, value: Array) raises:
         self.storage = contiguous(value)
@@ -98,18 +97,19 @@ struct _DataLoaderSpecs(CollectionElement):
         self.shuffle_data()
 
     fn __len__(self) -> Int:
-        return self.num_rows - self.index if not self.drop_last else self.num_rows - self.index - self.num_rows % self.batch_size
-
+        return (
+            self.num_rows
+            - self.index if not self.drop_last else self.num_rows
+            - self.index
+            - self.num_rows % self.batch_size
+        )
 
 
 @value
 struct _DatatLoaderIter(CollectionElement):
     var _data_loader_specs: _DataLoaderSpecs
 
-    fn __init__(
-        inout self,
-        _data_loader_specs: _DataLoaderSpecs
-    ) raises:
+    fn __init__(inout self, _data_loader_specs: _DataLoaderSpecs) raises:
         self._data_loader_specs = _data_loader_specs
 
     fn __len__(self) -> Int:
@@ -123,11 +123,18 @@ struct _DatatLoaderIter(CollectionElement):
         var batch_size = self._data_loader_specs.batch_size
 
         if index + batch_size <= self._data_loader_specs.num_rows:
-            var res = self._data_loader_specs.curr_data[index : index + batch_size]
+            var res = self._data_loader_specs.curr_data[
+                index : index + batch_size
+            ]
             self._data_loader_specs.index += batch_size
             return Arc(contiguous(res))
-        elif index < self._data_loader_specs.num_rows and not self._data_loader_specs.drop_last:
-            var res = self._data_loader_specs.curr_data[index : self._data_loader_specs.num_rows]
+        elif (
+            index < self._data_loader_specs.num_rows
+            and not self._data_loader_specs.drop_last
+        ):
+            var res = self._data_loader_specs.curr_data[
+                index : self._data_loader_specs.num_rows
+            ]
             self._data_loader_specs.index = self._data_loader_specs.num_rows
             return Arc(contiguous(res))
         else:
@@ -145,10 +152,11 @@ struct DataLoader(CollectionElement):
         shuffle: Bool = True,
         batch_size: Int = 1,
         drop_last: Bool = True,
-        seed: Int = 0
-
+        seed: Int = 0,
     ) raises:
-        self._data_loader_specs = _DataLoaderSpecs(curr_data, shuffle, batch_size, drop_last, seed)
+        self._data_loader_specs = _DataLoaderSpecs(
+            curr_data, shuffle, batch_size, drop_last, seed
+        )
         self._data_loader_iter = _DatatLoaderIter(self._data_loader_specs)
 
     fn __iter__(inout self) raises -> _DatatLoaderIter:
@@ -163,11 +171,18 @@ struct DataLoader(CollectionElement):
         var batch_size = self._data_loader_specs.batch_size
 
         if index + batch_size <= self._data_loader_specs.num_rows:
-            var res = self._data_loader_specs.curr_data[index : index + batch_size]
+            var res = self._data_loader_specs.curr_data[
+                index : index + batch_size
+            ]
             self._data_loader_specs.index += batch_size
             return contiguous(res)
-        elif index < self._data_loader_specs.num_rows and not self._data_loader_specs.drop_last:
-            var res = self._data_loader_specs.curr_data[index : self._data_loader_specs.num_rows]
+        elif (
+            index < self._data_loader_specs.num_rows
+            and not self._data_loader_specs.drop_last
+        ):
+            var res = self._data_loader_specs.curr_data[
+                index : self._data_loader_specs.num_rows
+            ]
             self._data_loader_specs.index = self._data_loader_specs.num_rows
             return contiguous(res)
         else:
@@ -175,11 +190,11 @@ struct DataLoader(CollectionElement):
             self._data_loader_specs.index = 0
             self._data_loader_specs.shuffle_data()
             return self.__next__()
-            
-
 
     fn __getitem__(inout self, index: Int) raises -> Array:
-        return contiguous(squeeze(self._data_loader_specs.curr_data[index:index + 1]))
+        return contiguous(
+            squeeze(self._data_loader_specs.curr_data[index : index + 1])
+        )
 
     fn curr_data_(inout self, value: Array) raises:
         self._data_loader_specs.curr_data_(value)
@@ -189,7 +204,7 @@ struct DataLoader(CollectionElement):
 
     fn drop_last_(inout self, value: Bool) raises:
         self._data_loader_specs.drop_last_(value)
-    
+
     fn batch_size_(inout self, value: Int) raises:
         self._data_loader_specs.batch_size_(value)
 

@@ -33,8 +33,6 @@ from random import seed, random_ui64
 import math
 from python import Python, PythonObject
 from collections import Optional
-from utils._format import Formattable, Formatter
-
 
 fn default_fwd(inout curr: Array, args: List[Array]) raises -> None:
     print("Attention: Default fwd is being used!")
@@ -492,7 +490,8 @@ struct Array(CollectionElement, Stringable, Formattable):
         self.node[].requires_grad = requires_grad
 
     fn _requires_grad(self, requires_grad: Bool) -> Self:
-        self.node[].requires_grad = requires_grad
+        var node = self.node
+        node[].requires_grad = requires_grad
         return self
 
     fn meta_data(self) -> List[Int]:

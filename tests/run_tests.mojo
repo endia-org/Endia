@@ -11,8 +11,8 @@
 # limitations under the License.
 # ===----------------------------------------------------------------------=== #
 
-from tests import *
-from benchmarks import *
+from .test_endia import *
+from .integration_tests import *
 
 
 def run_unit_tests():
@@ -190,6 +190,6 @@ def run_tests():
     """
     This is the main function that runs all the tests and benchmarks.
     """
-    run_fft_tests()
-    # run_unit_tests()
+    # run_fft_tests()
+    run_unit_tests()
     # run_integration_tests()

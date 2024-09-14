@@ -26,7 +26,7 @@
 
 ## Installation
 
-1. **Set up your project using the [Mojo nightly build](https://docs.modular.com/mojo/manual/get-started) 🔥 via [Magic](https://docs.modular.com/magic/) 🪄**.
+1. **Set up your project using [Mojo 24.5](https://docs.modular.com/mojo/manual/get-started) 🔥 via [Magic](https://docs.modular.com/magic/) 🪄**.
 
 2. **Install the Endia Package** (at the top level of your project):
 

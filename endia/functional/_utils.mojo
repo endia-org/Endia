@@ -76,9 +76,11 @@ fn compute_indeces_for_matmul(
     return List(lhs_idx_tmp, rhs_idx_tmp)
 
 
-fn execute_copy_raw(
-    source_data: DTypePointer[DType.float32],
-    dest_data: DTypePointer[DType.float32],
+fn execute_copy_raw[
+    src_dtype: DType, dst_dtype: DType
+](
+    source_data: UnsafePointer[Scalar[src_dtype]],
+    dest_data: UnsafePointer[Scalar[dst_dtype]],
     val_shape: ArrayShape,
     is_complex: Bool,
 ) raises:
@@ -113,11 +115,41 @@ fn execute_copy_raw(
                 if stride[rank - 1] == 1:
 
                     @parameter
-                    fn copy_v[simd_width: Int](j: Int):
+                    fn copy_v_complex[simd_width: Int](j: Int):
                         var j_idx = i_idx + j * stride[rank - 1]
                         dest_data.store[width = 2 * simd_width](
                             flat_idx * 2,
-                            source_data.load[width = 2 * simd_width](j_idx * 2),
+                            source_data.load[width = 2 * simd_width](
+                                j_idx * 2
+                            ).cast[dst_dtype](),
+                        )
+                        flat_idx += simd_width
+
+                    vectorize[copy_v_complex, nelts[dtype]()](cols)
+                else:
+                    for j in range(cols):
+                        var j_idx = i_idx + j * stride[rank - 1]
+                        dest_data.store(
+                            2 * flat_idx,
+                            source_data.load(2 * j_idx).cast[dst_dtype](),
+                        )
+                        dest_data.store(
+                            2 * flat_idx + 1,
+                            source_data.load(2 * j_idx + 1).cast[dst_dtype](),
+                        )
+                        flat_idx += 1
+
+            else:
+                if stride[rank - 1] == 1:
+
+                    @parameter
+                    fn copy_v[simd_width: Int](j: Int):
+                        var j_idx = i_idx + j * stride[rank - 1]
+                        dest_data.store[width=simd_width](
+                            flat_idx,
+                            source_data.load[width=simd_width](j_idx).cast[
+                                dst_dtype
+                            ](),
                         )
                         flat_idx += simd_width
 
@@ -126,33 +158,26 @@ fn execute_copy_raw(
                     for j in range(cols):
                         var j_idx = i_idx + j * stride[rank - 1]
                         dest_data.store(
-                            2 * flat_idx, source_data.load(2 * j_idx)
-                        )
-                        dest_data.store(
-                            2 * flat_idx + 1, source_data.load(2 * j_idx + 1)
+                            flat_idx, source_data.load(j_idx).cast[dst_dtype]()
                         )
                         flat_idx += 1
 
-            else:
-                if stride[rank - 1] == 1:
 
-                    @parameter
-                    fn copy_v_complex[simd_width: Int](j: Int):
-                        var j_idx = i_idx + j * stride[rank - 1]
-                        dest_data.store[width=simd_width](
-                            flat_idx, source_data.load[width=simd_width](j_idx)
-                        )
-                        flat_idx += simd_width
+# fn exeucute_copy(dst: Array, src: Array) raises:
+#     # copy from one strided array to another, this is more specific than the general copy function which copies the entire array
+#     var dst_shape = dst.shape()
+#     var dst_stride = dst.stride()
+#     var dst_offset = dst.storage_offset()
 
-                    vectorize[copy_v_complex, nelts[dtype]()](cols)
-                else:
-                    for j in range(cols):
-                        var j_idx = i_idx + j * stride[rank - 1]
-                        dest_data.store(flat_idx, source_data.load(j_idx))
-                        flat_idx += 1
+#     var src_shape = src.shape()
+#     var src_stride = src.stride()
+#     var src_offset = src.storage_offset()
+
+#     var rank = dst.ndim()
 
 
 fn copy(arg: Array) raises -> Array:
+    # print("Copy", arg.name())
     var res = Array(arg.shape(), False, arg.is_complex())
     execute_copy_raw(
         arg.data(), res.data(), arg.array_shape(), arg.is_complex()
@@ -160,19 +185,24 @@ fn copy(arg: Array) raises -> Array:
     return res
 
 
-fn contiguous(arg: Array) raises -> Array:
+fn is_contiguous(arg: ArrayShape) raises -> Bool:
     var arg_stride = arg.stride()
     var expected_stride = compute_stride(arg.shape())
-    if arg.is_complex():
-        for i in range(len(expected_stride)):
-            expected_stride[i] *= 2
-    var is_contiguous = True
+    var is_contiguous = (arg.storage_offset() == 0)
+    if not is_contiguous:
+        return False
     for i in range(len(arg_stride)):
         if arg_stride[i] != expected_stride[i]:
             is_contiguous = False
             break
-    var res = arg if is_contiguous else copy(arg)
-    return res
+    return is_contiguous
+
+
+fn contiguous(arg: Array) raises -> Array:
+    if is_contiguous(arg.array_shape()):
+        return arg
+    else:
+        return copy(arg)
 
 
 fn op_array(
@@ -204,21 +234,33 @@ fn op_array(
             SIMD[dtype, nelts[dtype]() * 2 // 2],
         ]
     ] = None,
+    meta_data: List[Int] = List[Int](),
+    is_complex_p: Bool = False,
 ) raises -> Array:
     """
     This operation will setup an array i.e. a node in the background with all its necessary data and
     the functions (forward/jvp/vjp etc.) that act on its direct parent nodes. If any of the parent nodes/args
-    point to JIT graph on which caches all the operations, we also always use this graph for the current newly created
+    point to JIT graph on which cachs all the operations, we also always use this graph for the current newly created
     array. The JIT FxGraph is always passed as a reference to the node, so that we can always access the graph.
     """
-    var res_arr = Array(array_shape)
+    # var res_arr: Array
+    # if is_view:
+    #     res_arr = Array(array_shape, is_view=is_view)
+    # else:
+    #     var is_arg_complex = False
+    #     for arg in args:
+    #         is_arg_complex = is_arg_complex or arg[].is_complex()
+    #     res_arr = Array(array_shape.shape(), is_complex or is_arg_complex)
+
+    var res_arr = Array(array_shape, is_view=is_view)
     res_arr.set_fwd(callable)
     res_arr.kwargs_(kwargs)
     res_arr.set_name(name)
-    res_arr.is_view_(is_view)
+    res_arr.meta_data_(meta_data)
+    # res_arr.is_view_(is_view)
 
     var requires_grad = False
-    var is_complex = False
+    var is_complex = is_complex_p
     for arg in args:
         requires_grad = requires_grad or arg[].requires_grad()
         is_complex = is_complex or arg[].is_complex()
@@ -278,7 +320,7 @@ fn setup_shape_and_data(inout curr: Array) raises:
     var array_shape = curr.array_shape()
     compute_shape(array_shape, curr.requires_grad() or curr.has_fxgraph())
     var true_size = array_shape.size() if not curr.is_complex() else 2 * array_shape.size()
-    curr.data_(DTypePointer[dtype].alloc(true_size))
+    curr.data_(UnsafePointer[Scalar[dtype]].alloc(true_size))
     memset_zero(curr.data(), true_size)
     if not curr.requires_grad():
         array_shape.shape_node[].args.clear()

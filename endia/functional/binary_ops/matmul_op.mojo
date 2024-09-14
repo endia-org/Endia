@@ -165,8 +165,9 @@ fn matmul_fwd(inout curr: Array, args: List[Array]) raises:
         var rhs_idx_start = indeces[1]
 
         # perform the matmul
-        @parameter
-        fn matmul_par(m: Int):
+        # @parameter
+        # fn matmul_par(m: Int):
+        for m in range(res_rows):
             var res_idx_0 = i + m * res_stride_min_2
             var lhs_idx_0 = lhs_idx_start + m * lhs_stride_min_2
 
@@ -236,7 +237,7 @@ fn matmul_fwd(inout curr: Array, args: List[Array]) raises:
                     res_data.store(2 * res_idx, sum_real_reduced)
                     res_data.store(2 * res_idx + 1, sum_imag_reduced)
 
-        parallelize[matmul_par](res_rows, res_rows)
+        # parallelize[matmul_par](res_rows, res_rows)
 
     _ = res_stride
     _ = lhs_stride

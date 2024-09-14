@@ -13,3 +13,4 @@
 
 from .random_benchmarks import *
 from .mlp_benchmarks import *
+from .fft_benchmarks import *

@@ -12,6 +12,7 @@
 # ===----------------------------------------------------------------------=== #
 
 from .test_reduce_add_op import *
+from .test_reduce_mul_op import *
 from .test_reduce_max_op import *
 from .test_reduce_argmax_op import *
 from .test_reduce_min_op import *

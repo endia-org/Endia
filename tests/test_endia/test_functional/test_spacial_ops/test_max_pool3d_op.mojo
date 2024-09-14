@@ -12,7 +12,7 @@
 # ===----------------------------------------------------------------------=== #
 
 import endia as nd
-from python import Python
+from python import Python, PythonObject
 
 
 def run_test_max_pool3d(msg: String = "max_pool3d"):

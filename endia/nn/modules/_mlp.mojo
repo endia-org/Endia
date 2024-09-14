@@ -60,9 +60,9 @@ struct MLP(StringableRaising):
         return params
 
     fn __str__(self) raises -> String:
-        var out = String("")
+        var out = str("")
         for i in range(self.num_layers):
-            out += "Layer " + String(i) + "\n"
+            out += "Layer " + str(i) + "\n"
             out += self.weights[i].__str__() + "\n"
             out += self.biases[i].__str__() + "\n"
         return out

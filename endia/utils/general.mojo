@@ -18,14 +18,16 @@ from endia.functional import *
 fn reset_node_id_recursive(inout curr: Array):
     for arg in curr.args():
         if arg[].node[].id != -1:
-            reset_node_id_recursive(arg[])
+            var arg_deref = arg[]
+            reset_node_id_recursive(arg_deref)
     curr.id_(-1)
 
 
 fn top_order_rec(inout curr: Array, inout trace: List[Array]):
     for arg in curr.args():
         if arg[].node[].id == -1:
-            top_order_rec(arg[], trace)
+            var arg_deref = arg[]
+            top_order_rec(arg_deref, trace)
     curr.id_(len(trace))
     trace.append(curr)
 
@@ -33,7 +35,8 @@ fn top_order_rec(inout curr: Array, inout trace: List[Array]):
 fn zero_grad_recursive(inout curr: Array):
     for arg in curr.args():
         if arg[].id() == -1:
-            zero_grad_recursive(arg[])
+            var arg_deref = arg[]
+            zero_grad_recursive(arg_deref)
     curr.id_(1)
     curr.remove_grad()
 
@@ -47,7 +50,8 @@ fn zero_grad_rec(inout curr: Array):
 fn remove_grad_recursive(inout curr: Array):
     for arg in curr.args():
         if arg[].id() == -1:
-            remove_grad_recursive(arg[])
+            var arg_deref = arg[]
+            remove_grad_recursive(arg_deref)
     curr.id_(1)
     curr.remove_grad()
 

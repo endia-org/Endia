@@ -18,7 +18,6 @@ from endia.functional._utils import (
     setup_shape_and_data,
 )
 from ._utils import DifferentiableUnaryOp, unary_op_array, execute_unary_op
-from endia.functional import ge_zero
 
 
 ####-----------------------------------------------------------------------------------------------------------------####
@@ -73,7 +72,7 @@ struct Relu(DifferentiableUnaryOp):
         The Jacobian-vector product for ReLU is computed as ge_zero(x) * dx,
         where x is the primal input and dx is the tangent vector.
         """
-        return (primals[0] > 0) * tangents[0]
+        return greater(primals[0], zeros(primals[0].shape()[-1])) * tangents[0]
 
     @staticmethod
     fn vjp(primals: List[Array], grad: Array, out: Array) raises -> List[Array]:
@@ -93,7 +92,7 @@ struct Relu(DifferentiableUnaryOp):
         The vector-Jacobian product for ReLU is computed as ge_zero(x) * grad,
         where x is the primal input and grad is the incoming gradient.
         """
-        return (primals[0] > 0) * grad
+        return greater(primals[0], zeros(primals[0].shape()[-1])) * grad
 
     @staticmethod
     fn unary_simd_op(

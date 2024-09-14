@@ -13,15 +13,18 @@
 
 # from extensibility import Tensor, empty_tensor
 from max.tensor import Tensor
+from memory import memcpy
 import python
 from endia import Array
+from python import PythonObject
+from endia.utils.aliases import dtype, nelts
 
 
 @always_inline
 fn memcpy_to_numpy(array: PythonObject, tensor: Array) raises:
-    var dst = DTypePointer[dtype](
-        address=int(array.__array_interface__["data"][0])
-    )
+    var dst = array.__array_interface__["data"][0].unsafe_get_as_pointer[
+        dtype
+    ]()
     var src = tensor.data()
     var length = tensor.size()
     memcpy(dst, src, length)
@@ -38,13 +41,13 @@ fn shape_to_python_list(shape: List[Int]) raises -> PythonObject:
 @always_inline
 fn get_np_dtype[dtype: DType](np: PythonObject) raises -> PythonObject:
     @parameter
-    if dtype.is_float32():
+    if dtype.__is__(DType.float32):
         return np.float32
-    elif dtype.is_int32():
+    elif dtype.__is__(DType.float64):
         return np.int32
-    elif dtype.is_int64():
+    elif dtype.__is__(DType.int32):
         return np.int64
-    elif dtype.is_uint8():
+    elif dtype.__is__(DType.int64):
         return np.uint8
 
     raise "Unknown datatype"
@@ -59,12 +62,11 @@ fn array_to_numpy(tensor: Array, np: PythonObject) raises -> PythonObject:
     return tensor_as_numpy^
 
 
-fn tensor_to_array(src: Tensor[dtype]) raises -> Array:
+fn tensor_to_array(owned src: Tensor[dtype]) raises -> Array:
     var shape = List[Int]()
     for i in range(src.rank()):
         shape.append(src.shape()[i])
-    var dst = Array(shape)
-    var dst_data = dst.data()
-    var src_data = src._ptr
-    memcpy(dst_data, src_data, dst.size())
+    var dst = Array(shape, is_view=True)
+    dst.data_(src._steal_ptr())
+    dst.is_view_(False)
     return dst

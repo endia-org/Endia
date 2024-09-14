@@ -15,7 +15,6 @@ from endia.utils.aliases import dtype, nelts
 from endia.utils import (
     ArrayShape,
     ShapeNode,
-    float_to_string,
     extract_array,
     zero_grad_rec,
     reset_node_id_recursive,
@@ -27,13 +26,13 @@ from endia.compile import FxGraph
 from endia.functional import *
 from endia.functional._utils import execute_copy_raw
 
-from memory.arc import Arc
+from memory import Arc, memset_zero
 from algorithm import vectorize, parallelize
 from time import now
 from random import seed, random_ui64
 import math
-from python import Python
-
+from python import Python, PythonObject
+from collections import Optional
 
 fn default_fwd(inout curr: Array, args: List[Array]) raises -> None:
     print("Attention: Default fwd is being used!")
@@ -63,7 +62,7 @@ struct Node(CollectionElement):
     var id: Int
     var name: String
     var shape: Arc[ShapeNode]
-    var data: DTypePointer[dtype]
+    var data: UnsafePointer[Scalar[dtype]]
     var is_view: Bool
     var base: List[Arc[Self]]
     var args: List[Arc[Self]]
@@ -108,20 +107,27 @@ struct Node(CollectionElement):
     var id_in_graph: Optional[Int]
     var has_real: Bool
     var has_imag: Bool
+    var meta_data: Arc[
+        List[Int]
+    ]  # some additional information encoded as a list of integers
 
     fn __init__(
         inout self,
         array_shape: ArrayShape,
         requires_grad: Bool = False,
         is_complex: Bool = False,
+        is_view: Bool = False,
     ):
         self.id = -1
         self.name = "arg"
         self.shape = array_shape.shape_node
-        var true_size = array_shape.size() if not is_complex else 2 * array_shape.size()
-        self.data = DTypePointer[dtype].alloc(true_size)
-        memset_zero(self.data, true_size)
-        self.is_view = False
+        if not is_view:
+            var true_size = array_shape.size() if not is_complex else 2 * array_shape.size()
+            self.data = UnsafePointer[Scalar[dtype]].alloc(true_size)
+            memset_zero(self.data, true_size)
+        else:
+            self.data = UnsafePointer[Scalar[dtype]].alloc(0)
+        self.is_view = is_view
         self.base = List[Arc[Node]]()
         self.args = List[Arc[Self]]()
         self.kwargs = List[Arc[Self]]()
@@ -165,6 +171,7 @@ struct Node(CollectionElement):
         self.id_in_graph = None
         self.has_real = True
         self.has_imag = is_complex
+        self.meta_data = Arc(List[Int]())
 
     fn __del__(owned self):
         # print("Node __del__")
@@ -175,9 +182,9 @@ struct Node(CollectionElement):
 #                                                       Array
 ###############################################################################################################
 @value
-struct Array(CollectionElement, Stringable):
+struct Array(CollectionElement, Stringable, Formattable):
     """
-    Array is the primary data structure in the autograd engine, providing a user-friendly interface for working with arrays.
+    Array is the primary data structure in the autograd engine.
     It serves as a wrapper around the Node struct, which encapsulates the array's data, shape, gradients, and other metadata.
     """
 
@@ -191,8 +198,8 @@ struct Array(CollectionElement, Stringable):
     ):
         self.node = Arc(Node(shape, requires_grad, is_complex))
 
-    fn __init__(inout self, array_shape: ArrayShape):
-        self.node = Arc[Node](Node(array_shape.shape_node))
+    fn __init__(inout self, array_shape: ArrayShape, is_view: Bool = False):
+        self.node = Arc[Node](Node(array_shape.shape_node, is_view=is_view))
 
     fn __copyinit__(inout self, other: Self):
         self.node = other.node
@@ -296,7 +303,7 @@ struct Array(CollectionElement, Stringable):
         var graph_opt = self.node[].graph
         return graph_opt.unsafe_take()
 
-    fn data_(inout self, owned data_ptr: DTypePointer[dtype]):
+    fn data_(inout self, owned data_ptr: UnsafePointer[Scalar[dtype]]):
         self.node[].data.free()
         self.node[].data = data_ptr
 
@@ -427,6 +434,16 @@ struct Array(CollectionElement, Stringable):
         compute_shape(array_shape, self.requires_grad() or self.has_fxgraph())
         return array_shape.shape()
 
+    fn shape_(inout self, shape: List[Int]) raises:
+        var array_shape = self.array_shape()
+        compute_shape(array_shape, self.requires_grad() or self.has_fxgraph())
+        array_shape.shape_node[].shape = shape
+
+    fn stride_(inout self, stride: List[Int]) raises:
+        var array_shape = self.array_shape()
+        compute_shape(array_shape, self.requires_grad() or self.has_fxgraph())
+        array_shape.shape_node[].stride = stride
+
     fn stride(self) raises -> List[Int]:
         var array_shape = self.array_shape()
         compute_shape(array_shape, self.requires_grad() or self.has_fxgraph())
@@ -436,6 +453,10 @@ struct Array(CollectionElement, Stringable):
         var array_shape = self.array_shape()
         compute_shape(array_shape, self.requires_grad() or self.has_fxgraph())
         return array_shape.storage_offset()
+
+    fn storage_offset_(inout self, storage_offset: Int) raises:
+        var array_shape = self.array_shape()
+        array_shape.shape_node[].storage_offset = storage_offset
 
     fn ndim(self) raises -> Int:
         var array_shape = self.array_shape()
@@ -468,6 +489,17 @@ struct Array(CollectionElement, Stringable):
     fn requires_grad_(inout self, requires_grad: Bool):
         self.node[].requires_grad = requires_grad
 
+    fn _requires_grad(self, requires_grad: Bool) -> Self:
+        var node = self.node
+        node[].requires_grad = requires_grad
+        return self
+
+    fn meta_data(self) -> List[Int]:
+        return self.node[].meta_data[]
+
+    fn meta_data_(inout self, meta_data: List[Int]):
+        self.node[].meta_data[] = meta_data
+
     fn has_real(self) -> Bool:
         return self.node[].has_real
 
@@ -487,7 +519,7 @@ struct Array(CollectionElement, Stringable):
         self.has_real_(True)
         self.has_imag_(is_complex)
 
-    fn data(self) -> DTypePointer[dtype]:
+    fn data(self) -> UnsafePointer[Scalar[dtype]]:
         if self.is_view():
             return self.base().node[].data
         return self.node[].data
@@ -694,8 +726,12 @@ struct Array(CollectionElement, Stringable):
         var dim = 0
         var indent = " "
         var ndim = self.node[].shape[].ndim
-        if ndim == 1 and self.node[].shape[].shape[0] == 1:
-            out = self.load(0)
+        if (
+            ndim == 1
+            and self.node[].shape[].shape[0] == 1
+            and not self.is_complex()
+        ):
+            out = str(self.load(0))
         else:
             build_out_string(self, out, idx, dim, indent)
         # out += ", shape=("
@@ -712,6 +748,9 @@ struct Array(CollectionElement, Stringable):
         # out += "), storage_offset: " + str(self.node[].shape[].storage_offset)
         # out += ", dtype=" + str(dtype) + ")"
         return out
+
+    fn format_to(self, inout writer: Formatter):
+        writer.write[String](str(self))
 
     fn execute_fwds(
         inout self,
@@ -767,6 +806,152 @@ struct Array(CollectionElement, Stringable):
         for i in range(len(slices)):
             slices_list.append(slices[i])
         return array_slice(self, slices_list)
+
+    fn __setitem__(
+        inout self, *slices: Slice, value: Variant[SIMD[dtype, 1], Self]
+    ) raises:
+        var slices_list = List[Slice]()
+        for i in range(len(slices)):
+            slices_list.append(slices[i])
+        var subarray = array_slice(self, slices_list)
+        var subarray_shape = subarray.shape()
+        if value.isa[Self]():
+            var value = value[Self][]
+            var value_shape = value.shape()
+            for i in range(len(subarray_shape)):
+                if subarray_shape[i] != value_shape[i]:
+                    raise "Error: Shapes do not match"
+
+            var dst = subarray
+            var src = value
+            var dst_rank = subarray.ndim()
+            var src_rank = value.ndim()
+            var dst_shape = List[Int]()
+            var src_shape = List[Int]()
+            var dst_stride = List[Int]()
+            var src_stride = List[Int]()
+            var dst_storage_offset = dst.storage_offset()
+            var src_storage_offset = src.storage_offset()
+
+            if dst_rank == 1 and src_rank == 1:
+                dst_shape.append(1)
+                dst_stride.append(0)
+                dst_shape.append(dst.shape()[0])
+                dst_stride.append(dst.stride()[0])
+                src_shape.append(1)
+                src_stride.append(0)
+                src_shape.append(src.shape()[0])
+                src_stride.append(src.stride()[0])
+            else:
+                dst_shape = dst.shape()
+                dst_stride = dst.stride()
+                src_shape = src.shape()
+                src_stride = src.stride()
+
+            var rank = len(dst_shape)
+            var rows = dst_shape[rank - 2]
+            var cols = dst_shape[rank - 1]
+            var size = 1
+            for i in range(rank):
+                size *= dst_shape[i]
+            var dest_data = dst.data()
+            var source_data = src.data()
+
+            for k in range(0, size, rows * cols):
+                var dst_nd_idx = compute_nd_index(k, dst_shape)
+                var dst_base_idx = compute_storage_offset(
+                    dst_nd_idx, dst_stride, dst_storage_offset
+                )
+                var src_nd_idx = compute_nd_index(k, src_shape)
+                var src_base_idx = compute_storage_offset(
+                    src_nd_idx, src_stride, src_storage_offset
+                )
+
+                for i in range(rows):
+                    var dst_i_idx = dst_base_idx + i * dst_stride[rank - 2]
+                    var src_i_idx = src_base_idx + i * src_stride[src_rank - 2]
+
+                    if dst.is_complex() and src.is_complex():
+                        if (
+                            dst_stride[rank - 1] == 1
+                            and src_stride[src_rank - 1] == 1
+                        ):
+                            alias simd_width = nelts[dtype]() * 2 // 2
+
+                            @parameter
+                            fn copy_v_complex[simd_width: Int](j: Int):
+                                var dst_j_idx = 2 * (
+                                    dst_i_idx + j * dst_stride[rank - 1]
+                                )
+                                var src_j_idx = 2 * (
+                                    src_i_idx + j * src_stride[rank - 1]
+                                )
+                                dest_data.store[width = 2 * simd_width](
+                                    dst_j_idx,
+                                    source_data.load[width = 2 * simd_width](
+                                        src_j_idx
+                                    ),
+                                )
+
+                            vectorize[copy_v_complex, 2 * nelts[dtype]()](cols)
+
+                        else:
+                            for j in range(cols):
+                                var dst_j_idx = 2 * (
+                                    dst_i_idx + j * dst_stride[rank - 1]
+                                )
+                                var src_j_idx = 2 * (
+                                    src_i_idx + j * src_stride[rank - 1]
+                                )
+                                dest_data.store[width=2](
+                                    dst_j_idx,
+                                    source_data.load[width=2](src_j_idx),
+                                )
+
+                    else:
+                        if (
+                            dst_stride[rank - 1] == 1
+                            and src_stride[src_rank - 1] == 1
+                        ):
+                            alias simd_width = nelts[dtype]() * 2 // 2
+
+                            @parameter
+                            fn copy_v[simd_width: Int](j: Int):
+                                var dst_j_idx = dst_i_idx + j * dst_stride[
+                                    rank - 1
+                                ]
+                                var src_j_idx = src_i_idx + j * src_stride[
+                                    src_rank - 1
+                                ]
+                                dest_data.store[width=simd_width](
+                                    dst_j_idx,
+                                    source_data.load[width=simd_width](
+                                        src_j_idx
+                                    ),
+                                )
+
+                            vectorize[copy_v, nelts[dtype]()](cols)
+
+                        else:
+                            for j in range(cols):
+                                var dst_j_idx = dst_i_idx + j * dst_stride[
+                                    rank - 1
+                                ]
+                                var src_j_idx = src_i_idx + j * src_stride[
+                                    rank - 1
+                                ]
+                                dest_data.store(
+                                    dst_j_idx, source_data.load(src_j_idx)
+                                )
+
+            _ = value
+
+        elif value.isa[SIMD[dtype, 1]]():
+            for i in range(subarray.size()):
+                subarray.store(i, value[SIMD[dtype, 1]])
+
+        else:
+            raise "Error: Invalid value type"
 
     fn __add__(self, other: Array) raises -> Array:
         return add(self, other)
@@ -912,47 +1097,67 @@ struct Array(CollectionElement, Stringable):
     fn __ipow__(inout self, other: SIMD[dtype, 1]) raises:
         self = self.__pow__(other)
 
-    fn __ge__(self, other: Array) raises -> Array:
-        return greater_equal(self, other)
+    fn __eq__(self, other: Array) raises -> Bool:
+        var shape = self.shape()
+        var other_shape = other.shape()
+        for i in range(len(shape)):
+            if shape[i] != other_shape[i]:
+                return False
+        var eq_compared = equal(self, other)
+        if prod(eq_compared).load(0) == 1:
+            return True
+        return False
 
-    fn __ge__(self, other: SIMD[dtype, 1]) raises -> Array:
+    fn __eq__(self, other: SIMD[dtype, 1]) raises -> Bool:
         var other_array = full(self.shape()[self.ndim() - 1], other)
-        return greater_equal(self, other_array)
+        return self.__eq__(other_array)
 
-    fn __gt__(self, other: Array) raises -> Array:
-        return greater(self, other)
+    fn __ne__(self, other: Array) raises -> Bool:
+        return not self.__eq__(other)
 
-    fn __gt__(self, other: SIMD[dtype, 1]) raises -> Array:
+    fn __ne__(self, other: SIMD[dtype, 1]) raises -> Bool:
         var other_array = full(self.shape()[self.ndim() - 1], other)
-        return greater(self, other_array)
+        return self.__ne__(other_array)
 
-    fn __le__(self, other: Array) raises -> Array:
-        return less_equal(self, other)
+    fn __ge__(self, other: Array) raises -> Bool:
+        var ge_compared = greater_equal(self, other)
+        if prod(ge_compared).load(0) == 1:
+            return True
+        return False
 
-    fn __le__(self, other: SIMD[dtype, 1]) raises -> Array:
+    fn __ge__(self, other: SIMD[dtype, 1]) raises -> Bool:
         var other_array = full(self.shape()[self.ndim() - 1], other)
-        return less_equal(self, other_array)
+        return self.__ge__(other_array)
 
-    fn __lt__(self, other: Array) raises -> Array:
-        return less(self, other)
+    fn __gt__(self, other: Array) raises -> Bool:
+        var gt_compared = greater(self, other)
+        if prod(gt_compared).load(0) == 1:
+            return True
+        return False
 
-    fn __lt__(self, other: SIMD[dtype, 1]) raises -> Array:
+    fn __gt__(self, other: SIMD[dtype, 1]) raises -> Bool:
         var other_array = full(self.shape()[self.ndim() - 1], other)
-        return less(self, other_array)
+        return self.__gt__(other_array)
 
-    fn __eq__(self, other: Array) raises -> Array:
-        return equal(self, other)
+    fn __le__(self, other: Array) raises -> Bool:
+        var le_compared = less_equal(self, other)
+        if prod(le_compared).load(0) == 1:
+            return True
+        return False
 
-    fn __eq__(self, other: SIMD[dtype, 1]) raises -> Array:
+    fn __le__(self, other: SIMD[dtype, 1]) raises -> Bool:
         var other_array = full(self.shape()[self.ndim() - 1], other)
-        return equal(self, other_array)
+        return self.__le__(other_array)
 
-    fn __ne__(self, other: Array) raises -> Array:
-        return not_equal(self, other)
+    fn __lt__(self, other: Array) raises -> Bool:
+        var lt_compared = less(self, other)
+        if prod(lt_compared).load(0) == 1:
+            return True
+        return False
 
-    fn __ne__(self, other: SIMD[dtype, 1]) raises -> Array:
+    fn __lt__(self, other: SIMD[dtype, 1]) raises -> Bool:
         var other_array = full(self.shape()[self.ndim() - 1], other)
-        return not_equal(self, other_array)
+        return self.__lt__(other_array)
 
 
 alias Tensor = Array

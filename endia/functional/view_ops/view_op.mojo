@@ -16,7 +16,8 @@ from endia.utils import setup_array_shape
 from endia.utils.aliases import dtype, nelts, NA
 from algorithm import vectorize, parallelize
 import math
-from endia.functional._utils import contiguous
+from endia.functional._utils import contiguous, is_contiguous
+from memory import memcpy
 
 from endia.functional._utils import (
     op_array,
@@ -39,12 +40,8 @@ struct Reshape(DifferentiableViewOp):
             curr: The ArrayShape to store the result of the computation.
             args: The ArrayShape to reshape, and the shape, stride and storage offset of the target ArrayShape encoded in a  single ArrayShape.
         """
-        # liek the slice method however we only take the real part of the array
-        var arg = args[1]
-        if arg.ndim() == 1 and arg.shape()[0] == -1:
-            curr.setup(args[0].size())
-        else:
-            curr.setup(arg.shape(), arg.stride(), arg.storage_offset())
+        var target = args[1]
+        curr.setup(target.shape())
 
     @staticmethod
     fn __call__(inout curr: Array, args: List[Array]) raises:
@@ -61,12 +58,30 @@ struct Reshape(DifferentiableViewOp):
         #### Constraints:
         - The number of elements in the input array must be equal to the number of elements in the target shape.
         """
-        # var contiguous_arg = contiguous(args[0])
-        # curr.base_(contiguous_arg.base())
-        var array_shape = curr.array_shape()
-        compute_shape(array_shape, curr.requires_grad() or curr.has_fxgraph())
-        if curr.size() != args[0].size():
-            raise "The number of elements in the input array must be equal to the number of elements in the target shape."
+
+        var arg = args[0]
+
+        if is_contiguous(arg.array_shape()):
+            curr.is_view_(True)
+            curr.base_(arg.base())
+            var curr_array_shape = curr.array_shape()
+            compute_shape(curr_array_shape)
+            return
+        else:
+            setup_shape_and_data(curr)
+
+            if curr.size() != args[0].size():
+                raise "The number of elements in the input array must be equal to the number of elements in the target shape."
+
+            var arg_contiguous = contiguous(args[0])
+            var arg_contiguous_data = arg_contiguous.data()
+            var curr_data = curr.data()
+            if curr.is_complex():
+                memcpy(curr_data, arg_contiguous_data, curr.size() * 2)
+            else:
+                memcpy(curr_data, arg_contiguous_data, curr.size())
+            _ = arg_contiguous
+            _ = curr
 
     @staticmethod
     fn jvp(primals: List[Array], tangents: List[Array]) raises -> Array:
@@ -120,9 +135,9 @@ struct Reshape(DifferentiableViewOp):
             Reshape.__call__,
             Reshape.jvp,
             Reshape.vjp,
-            True,
+            # True,
         )
-        curr.base_(arg0.base())
+        # curr.base_(arg0.base())
         return curr
 
 

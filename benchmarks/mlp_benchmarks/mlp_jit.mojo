@@ -52,7 +52,7 @@ def setup_params(
 
 
 def benchmark_mlp_jit():
-    print("\nRunning MLP benchmark with MAX JIT compilation:")
+    print("\nRunning MLP benchmark with regular JIT compilation:")
 
     # define the forward function
     def fwd(args: List[nd.Array]) -> nd.Array:
@@ -63,10 +63,10 @@ def benchmark_mlp_jit():
 
     # define the training loop
     batch_size = 128
-    lr = 0.001
-    beta1 = 0.9
-    beta2 = 0.999
-    eps = 1e-8
+    lr = SIMD[dtype, 1](0.001)
+    beta1 = SIMD[dtype, 1](0.9)
+    beta2 = SIMD[dtype, 1](0.999)
+    eps = SIMD[dtype, 1](1e-8)
     num_iters = 2000
     every = 500
     avg_loss = SIMD[dtype, 1](0)
@@ -83,29 +83,30 @@ def benchmark_mlp_jit():
         v.append(nd.zeros_like(args[i]))
 
     # setup fwd and grad function as one call
-    value_and_grad_fwd = nd.jit(nd.value_and_grad(fwd), compile_with_MAX=True)
+    value_and_grad_fwd = nd.jit(nd.value_and_grad(fwd), compile_with_MAX=False)
 
     # setup time variables
-    start = Float64(0)
-    end = Float64(0)
-    time_all = Float64(0)
-    fwd_start = Float64(0)
-    fwd_end = Float64(0)
-    time_fwd = Float64(0)
-    grad_start = Float64(0)
-    grad_end = Float64(0)
-    time_grad = Float64(0)
-    optim_start = Float64(0)
-    optim_end = Float64(0)
-    time_optim = Float64(0)
+    start = SIMD[dtype, 1](0)
+    end = SIMD[dtype, 1](0)
+    time_all = SIMD[dtype, 1](0)
+    fwd_start = SIMD[dtype, 1](0)
+    fwd_end = SIMD[dtype, 1](0)
+    time_fwd = SIMD[dtype, 1](0)
+    grad_start = SIMD[dtype, 1](0)
+    grad_end = SIMD[dtype, 1](0)
+    time_grad = SIMD[dtype, 1](0)
+    optim_start = SIMD[dtype, 1](0)
+    optim_end = SIMD[dtype, 1](0)
+    time_optim = SIMD[dtype, 1](0)
 
     # training loop
     for t in range(1, num_iters + 1):
         start = now()
 
         # fill input and target inplace
-        nd.randu_(args[0])
-        fill_sin_(args[1], args[0])
+        arg0 = args[0]
+        nd.randu_(arg0)
+        fill_sin_(args[1], arg0)
 
         # compute loss
         fwd_start = now()

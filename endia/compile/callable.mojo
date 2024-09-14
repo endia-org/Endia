@@ -85,7 +85,7 @@ struct Callable(CollectionElement):
                 var arg = self.args[][i]
                 var size = arg_in.base().size()
                 if size != arg.size():
-                    arg.data_(DTypePointer[dtype].alloc(size))
+                    arg.data_(UnsafePointer[Scalar[dtype]].alloc(size))
                 execute_copy_raw(
                     arg_in.data(),
                     arg.data(),

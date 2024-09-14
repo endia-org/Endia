@@ -40,7 +40,7 @@ from compile import *
 ###############################################################################################################
 
 
-fn jit(arg: Callable, compile_with_MAX: Bool = False) raises -> Callable:
+fn jit(arg: Callable, compile_with_MAX: Bool = True) raises -> Callable:
     """
     Jit and cache the given function or Callable.
     """
@@ -55,7 +55,7 @@ fn jit(arg: Callable, compile_with_MAX: Bool = False) raises -> Callable:
 
 
 fn jit(
-    arg: fn (List[Array]) raises -> Array, compile_with_MAX: Bool = False
+    arg: fn (List[Array]) raises -> Array, compile_with_MAX: Bool = True
 ) raises -> Callable:
     """
     Jit and cache the given function or Callable.
@@ -71,7 +71,7 @@ fn jit(
 
 
 fn jit(
-    arg: fn (Array) raises -> Array, compile_with_MAX: Bool = False
+    arg: fn (Array) raises -> Array, compile_with_MAX: Bool = True
 ) raises -> Callable:
     """
     Jit and cache the given function or Callable.

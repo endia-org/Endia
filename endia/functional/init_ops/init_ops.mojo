@@ -22,44 +22,60 @@ from endia.functional._utils import compute_nd_index, compute_storage_offset
 ########################################################################
 
 
-fn array(*dims: Int, requires_grad: Bool = False) raises -> Array:
-    var shape = List[Int]()
-    for dim in dims:
-        shape.append(dim)
-    return Array(shape, requires_grad)
+# fn array(*dims: Int, requires_grad: Bool = False) raises -> Array:
+#     var shape = List[Int]()
+#     for dim in dims:
+#         shape.append(dim)
+#     return Array(shape, requires_grad)
+
+
+fn array(dims: List[Int], requires_grad: Bool = False) raises -> Array:
+    return Array(dims, requires_grad)
 
 
 fn array(arr_str: StringLiteral, requires_grad: Bool = False) raises -> Array:
     return Array(String(arr_str), requires_grad)
 
 
-fn tensor(*dims: Int, requires_grad: Bool = False) raises -> Array:
-    var shape = List[Int]()
-    for dim in dims:
-        shape.append(dim)
-    return Array(shape, requires_grad)
+# fn tensor(*dims: Int, requires_grad: Bool = False) raises -> Array:
+#     var shape = List[Int]()
+#     for dim in dims:
+#         shape.append(dim)
+#     return Array(shape, requires_grad)
+
+
+fn tensor(dims: List[Int], requires_grad: Bool = False) raises -> Array:
+    return Array(dims, requires_grad)
 
 
 fn tensor(arr_str: StringLiteral, requires_grad: Bool = False) raises -> Array:
     return Array(String(arr_str), requires_grad)
 
 
-fn ndarray(*dims: Int, requires_grad: Bool = False) raises -> Array:
-    var shape = List[Int]()
-    for dim in dims:
-        shape.append(dim)
-    return Array(shape, requires_grad)
+# fn ndarray(*dims: Int, requires_grad: Bool = False) raises -> Array:
+#     var shape = List[Int]()
+#     for dim in dims:
+#         shape.append(dim)
+#     return Array(shape, requires_grad)
+
+
+fn ndarray(dims: List[Int], requires_grad: Bool = False) raises -> Array:
+    return Array(dims, requires_grad)
 
 
 fn ndarray(arr_str: StringLiteral, requires_grad: Bool = False) raises -> Array:
     return Array(String(arr_str), requires_grad)
 
 
-fn Tensor(*dims: Int, requires_grad: Bool = False) raises -> Array:
-    var shape = List[Int]()
-    for dim in dims:
-        shape.append(dim)
-    return Array(shape, requires_grad)
+# fn Tensor(*dims: Int, requires_grad: Bool = False) raises -> Array:
+#     var shape = List[Int]()
+#     for dim in dims:
+#         shape.append(dim)
+#     return Array(shape, requires_grad)
+
+
+fn Tensor(dims: List[Int], requires_grad: Bool = False) raises -> Array:
+    return Array(dims, requires_grad)
 
 
 fn Tensor(arr_str: StringLiteral, requires_grad: Bool = False) raises -> Array:
@@ -73,6 +89,22 @@ fn arange_(inout arg: Array) raises:
     else:
         for i in range(arg.size()):
             arg.store(i, i)
+
+
+fn linspace(
+    start: SIMD[dtype, 1] = 0,
+    end: SIMD[dtype, 1] = 1,
+    num: Int = 50,
+    requires_grad: Bool = False,
+) raises -> Array:
+    var res = Array(List(num), requires_grad)
+    var data = res.data()
+    var step = (end - start) / (num - 1)
+    var value = start
+    for i in range(num):
+        data[i] = value
+        value += step
+    return res
 
 
 fn arange(
@@ -192,7 +224,9 @@ fn indeces(
     return res
 
 
-fn randu_(inout arg: Array, min: Float64 = 0, max: Float64 = 1) raises:
+fn randu_(
+    inout arg: Array, min: SIMD[dtype, 1] = 0, max: SIMD[dtype, 1] = 1
+) raises:
     random.seed()
     var data = arg.data()
     var size = arg.base().size()
@@ -203,8 +237,8 @@ fn randu_(inout arg: Array, min: Float64 = 0, max: Float64 = 1) raises:
 
 fn randu(
     shape: List[Int],
-    min: Float64 = 0,
-    max: Float64 = 1,
+    min: SIMD[dtype, 1] = 0,
+    max: SIMD[dtype, 1] = 1,
     requires_grad: Bool = False,
 ) raises -> Array:
     var res = Array(shape, requires_grad)
@@ -213,12 +247,16 @@ fn randu(
 
 
 fn randu_like(
-    inout arg: Array, min: Float64 = 0, max: Float64 = 1
+    inout arg: Array, min: SIMD[dtype, 1] = 0, max: SIMD[dtype, 1] = 1
 ) raises -> Array:
     return randu(arg.shape(), min, max, arg.requires_grad())
 
 
-fn randn_(inout arg: Array, mean: Float64 = 0, std: Float64 = 1) raises:
+fn randn_(
+    inout arg: Array,
+    mean: SIMD[DType.float64, 1] = 0,
+    std: SIMD[DType.float64, 1] = 1,
+) raises:
     random.seed()
     var data = arg.data()
     var size = arg.base().size()
@@ -227,8 +265,8 @@ fn randn_(inout arg: Array, mean: Float64 = 0, std: Float64 = 1) raises:
 
 fn randn(
     shape: List[Int],
-    mean: Float64 = 0,
-    std: Float64 = 1,
+    mean: SIMD[DType.float64, 1] = 0,
+    std: SIMD[DType.float64, 1] = 1,
     requires_grad: Bool = False,
 ) raises -> Array:
     var res = Array(shape, requires_grad)
@@ -237,47 +275,55 @@ fn randn(
 
 
 fn randn_like(
-    inout arg: Array, mean: Float64 = 0, std: Float64 = 1
+    inout arg: Array,
+    mean: SIMD[DType.float64, 1] = 0,
+    std: SIMD[DType.float64, 1] = 1,
 ) raises -> Array:
     return randn(arg.shape(), mean, std, arg.requires_grad())
 
 
-fn rand_he_normal_(inout arg: Array, fan_in: Float64 = 1) raises:
+fn rand_he_normal_(inout arg: Array, fan_in: SIMD[DType.float64, 1] = 1) raises:
     var std = math.sqrt(2 / fan_in)
     randn_(arg, 0, std)
 
 
 fn rand_he_normal(
-    shape: List[Int], fan_in: Float64 = 1, requires_grad: Bool = False
+    shape: List[Int],
+    fan_in: SIMD[DType.float64, 1] = 1,
+    requires_grad: Bool = False,
 ) raises -> Array:
     var res = Array(shape, requires_grad)
     rand_he_normal_(res, fan_in)
     return res
 
 
-fn rand_he_normal_like(arg: Array, fan_in: Float64 = 1) raises -> Array:
+fn rand_he_normal_like(
+    arg: Array, fan_in: SIMD[DType.float64, 1] = 1
+) raises -> Array:
     return rand_he_normal(arg.shape(), fan_in, arg.requires_grad())
 
 
-fn rand_he_uniform_(inout arg: Array, fan_in: Float64 = 1) raises:
+fn rand_he_uniform_(inout arg: Array, fan_in: SIMD[dtype, 1] = 1) raises:
     var limit = math.sqrt(6.0 / fan_in)
     randu_(arg, -limit, limit)
 
 
 fn rand_he_uniform(
-    shape: List[Int], fan_in: Float64 = 1, requires_grad: Bool = False
+    shape: List[Int], fan_in: SIMD[dtype, 1] = 1, requires_grad: Bool = False
 ) raises -> Array:
     var res = Array(shape, requires_grad)
     rand_he_uniform_(res, fan_in)
     return res
 
 
-fn rand_he_uniform_like(arg: Array, fan_in: Float64 = 1) raises -> Array:
+fn rand_he_uniform_like(arg: Array, fan_in: SIMD[dtype, 1] = 1) raises -> Array:
     return rand_he_uniform(arg.shape(), fan_in, arg.requires_grad())
 
 
 fn rand_xavier_normal_(
-    inout arg: Array, fan_in: Float64 = 1, fan_out: Float64 = 1
+    inout arg: Array,
+    fan_in: SIMD[DType.float64, 1] = 1,
+    fan_out: SIMD[DType.float64, 1] = 1,
 ) raises:
     var std = math.sqrt(2.0 / (fan_in + fan_out))
     randn_(arg, 0, std)
@@ -285,8 +331,8 @@ fn rand_xavier_normal_(
 
 fn rand_xavier_normal(
     shape: List[Int],
-    fan_in: Float64 = 1,
-    fan_out: Float64 = 1,
+    fan_in: SIMD[DType.float64, 1] = 1,
+    fan_out: SIMD[DType.float64, 1] = 1,
     requires_grad: Bool = False,
 ) raises -> Array:
     var res = Array(shape, requires_grad)
@@ -295,13 +341,15 @@ fn rand_xavier_normal(
 
 
 fn rand_xavier_normal_like(
-    inout arg: Array, fan_in: Float64 = 1, fan_out: Float64 = 1
+    inout arg: Array,
+    fan_in: SIMD[DType.float64, 1] = 1,
+    fan_out: SIMD[DType.float64, 1] = 1,
 ) raises -> Array:
     return rand_xavier_normal(arg.shape(), fan_in, fan_out, arg.requires_grad())
 
 
 fn rand_xavier_uniform_(
-    inout arg: Array, fan_in: Float64 = 1, fan_out: Float64 = 1
+    inout arg: Array, fan_in: SIMD[dtype, 1] = 1, fan_out: SIMD[dtype, 1] = 1
 ) raises:
     var limit = math.sqrt(6.0 / (fan_in + fan_out))
     randu_(arg, -limit, limit)
@@ -309,8 +357,8 @@ fn rand_xavier_uniform_(
 
 fn rand_xavier_uniform(
     shape: List[Int],
-    fan_in: Float64 = 1,
-    fan_out: Float64 = 1,
+    fan_in: SIMD[dtype, 1] = 1,
+    fan_out: SIMD[dtype, 1] = 1,
     requires_grad: Bool = False,
 ) raises -> Array:
     var res = Array(shape, requires_grad)
@@ -319,20 +367,24 @@ fn rand_xavier_uniform(
 
 
 fn rand_xavier_uniform_like(
-    inout arg: Array, fan_in: Float64 = 1, fan_out: Float64 = 1
+    inout arg: Array, fan_in: SIMD[dtype, 1] = 1, fan_out: SIMD[dtype, 1] = 1
 ) raises -> Array:
     return rand_xavier_uniform(
         arg.shape(), fan_in, fan_out, arg.requires_grad()
     )
 
 
-fn rand_lecun_normal_(inout arg: Array, fan_in: Float64 = 1) raises:
+fn rand_lecun_normal_(
+    inout arg: Array, fan_in: SIMD[DType.float64, 1] = 1
+) raises:
     var std = math.sqrt(1.0 / fan_in)
     randn_(arg, 0, std)
 
 
 fn rand_lecun_normal(
-    shape: List[Int], fan_in: Float64 = 1, requires_grad: Bool = False
+    shape: List[Int],
+    fan_in: SIMD[DType.float64, 1] = 1,
+    requires_grad: Bool = False,
 ) raises -> Array:
     var res = Array(shape, requires_grad)
     rand_lecun_normal_(res, fan_in)
@@ -340,18 +392,18 @@ fn rand_lecun_normal(
 
 
 fn rand_lecun_normal_like(
-    inout arg: Array, fan_in: Float64 = 1
+    inout arg: Array, fan_in: SIMD[DType.float64, 1] = 1
 ) raises -> Array:
     return rand_lecun_normal(arg.shape(), fan_in, arg.requires_grad())
 
 
-fn rand_lecun_uniform_(inout arg: Array, fan_in: Float64 = 1) raises:
+fn rand_lecun_uniform_(inout arg: Array, fan_in: SIMD[dtype, 1] = 1) raises:
     var limit = math.sqrt(3.0 / fan_in)
     randu_(arg, -limit, limit)
 
 
 fn rand_lecun_uniform(
-    shape: List[Int], fan_in: Float64 = 1, requires_grad: Bool = False
+    shape: List[Int], fan_in: SIMD[dtype, 1] = 1, requires_grad: Bool = False
 ) raises -> Array:
     var res = Array(shape, requires_grad)
     rand_lecun_uniform_(res, fan_in)
@@ -359,7 +411,7 @@ fn rand_lecun_uniform(
 
 
 fn rand_lecun_uniform_like(
-    inout arg: Array, fan_in: Float64 = 1
+    inout arg: Array, fan_in: SIMD[dtype, 1] = 1
 ) raises -> Array:
     return rand_lecun_uniform(arg.shape(), fan_in, arg.requires_grad())
 
@@ -374,6 +426,8 @@ fn complex(
         if real.shape()[i] != imag.shape()[i]:
             raise "Error: real and imag parts must have the same shape"
     var res = Array(real.shape(), requires_grad, True)
+
+    # TODO: use __setitem__(with slicing) instead of manual for loop
     for i in range(res.size()):
         res.store_complex(i, real.load(i), imag.load(i))
     return res
@@ -381,8 +435,8 @@ fn complex(
 
 fn randn_complex(
     shape: List[Int],
-    mean: Float64 = 0,
-    std: Float64 = 1,
+    mean: SIMD[DType.float64, 1] = 0,
+    std: SIMD[DType.float64, 1] = 1,
     requires_grad: Bool = False,
 ) raises -> Array:
     var real = randn(shape, mean, std, requires_grad)
@@ -392,8 +446,8 @@ fn randn_complex(
 
 fn randu_complex(
     shape: List[Int],
-    min: Float64 = 0,
-    max: Float64 = 1,
+    min: SIMD[dtype, 1] = 0,
+    max: SIMD[dtype, 1] = 1,
     requires_grad: Bool = False,
 ) raises -> Array:
     var real = randu(shape, min, max, requires_grad)
@@ -403,8 +457,8 @@ fn randu_complex(
 
 fn fill_complex(
     shape: List[Int],
-    value_real: Float64,
-    value_imag: Float64,
+    value_real: SIMD[dtype, 1],
+    value_imag: SIMD[dtype, 1],
     requires_grad: Bool = False,
 ) raises -> Array:
     var real = full(shape, value_real, requires_grad)

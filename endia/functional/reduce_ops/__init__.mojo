@@ -12,11 +12,13 @@
 # ===----------------------------------------------------------------------=== #
 
 from .reduce_add_op import reduce_add
+from .reduce_mul_op import reduce_mul
 from .reduce_max_op import reduce_max
 from .reduce_argmax_op import reduce_argmax
 from .reduce_min_op import reduce_min
 from .reduce_argmin_op import reduce_argmin
 from .sum_op import sum
+from .prod_op import prod
 from .mean_op import mean
 from .std_op import std
 from .variance_op import variance

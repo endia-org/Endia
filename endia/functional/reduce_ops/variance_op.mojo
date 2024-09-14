@@ -65,10 +65,12 @@ def variance(
     var num_elements_arg0 = arg0.size()
     var res = reduce_add(arg0, axes)
     var num_elements_res = res.size()
-    var divisor = (num_elements_arg0 / num_elements_res) - 1 if unbiased else (
-        num_elements_arg0 / num_elements_res
-    )
-    var mean_res = res / (num_elements_arg0 / num_elements_res)
+    var divisor = (num_elements_arg0 / num_elements_res).cast[
+        dtype
+    ]() - 1 if unbiased else (num_elements_arg0 / num_elements_res).cast[
+        dtype
+    ]()
+    var mean_res = res / (num_elements_arg0 / num_elements_res).cast[dtype]()
     var diff = arg0 - mean_res
     var diff_squared = diff * diff
     var variance = reduce_add(diff_squared, axes) / divisor

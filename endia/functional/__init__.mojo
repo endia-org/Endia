@@ -20,3 +20,4 @@ from .index_ops import *
 from .init_ops import *
 from .loss_ops import *
 from .spacial_ops import *
+from .fft_ops import *

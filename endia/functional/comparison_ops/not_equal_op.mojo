@@ -19,7 +19,10 @@ from endia.functional._utils import (
     setup_shape_and_data,
 )
 from ._utils import ComparisonOp, comparison_op_array
-from endia.functional.binary_ops._utils import execute_binary_op
+from endia.functional.binary_ops._utils import (
+    execute_binary_op,
+    binary_op_array,
+)
 
 ####--------------------------------------------------------------------------------------------------------------------####
 #### Not Equal Operation
@@ -29,11 +32,13 @@ from endia.functional.binary_ops._utils import execute_binary_op
 struct NotEqual(ComparisonOp):
     @staticmethod
     fn fwd(arg0: Array, arg1: Array) raises -> Array:
-        return comparison_op_array(
+        return binary_op_array(
             arg0,
             arg1,
             "not_equal",
             NotEqual.__call__,
+            default_jvp,
+            default_vjp,
             NotEqual.comparing_simd_op,
         )
 
@@ -50,8 +55,12 @@ struct NotEqual(ComparisonOp):
         var real = SIMD[dtype, nelts[dtype]() * 2 // 2](0)
         var imag = SIMD[dtype, nelts[dtype]() * 2 // 2](0)
         for i in range(nelts[dtype]() * 2 // 2):
-            real[i] = arg0_real[i] != arg1_real[i]
-            imag[i] = arg0_imag[i] != arg1_imag[i]
+            real[i] = SIMD[dtype, 1](1) if (
+                arg0_real[i] != arg1_real[i]
+            ) else SIMD[dtype, 1](0)
+            imag[i] = SIMD[dtype, 1](1) if (
+                arg0_imag[i] != arg1_imag[i]
+            ) else SIMD[dtype, 1](0)
         return (real, imag)
 
     @staticmethod

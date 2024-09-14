@@ -11,8 +11,8 @@
 # limitations under the License.
 # ===----------------------------------------------------------------------=== #
 
-from tests import *
-from benchmarks import *
+from .test_endia import *
+from .integration_tests import *
 
 
 def run_unit_tests():
@@ -112,6 +112,7 @@ def run_unit_tests():
     # Unit Test: Test reduce ops
     run_test_reduce_add()
     run_test_reduce_add_grad()
+    run_test_reduce_mul()
 
     run_test_mean()
     run_test_mean_grad()
@@ -144,7 +145,6 @@ def run_unit_tests():
     run_test_reshape_grad()
 
     # Unit Tests: Test comparison ops
-    run_test_ge_zero()
     run_test_greater_equal()
     run_test_greater()
     run_test_less_equal()
@@ -170,9 +170,26 @@ def run_integration_tests():
     run_test_foo_grad()
 
 
+def run_fft_tests():
+    # FFT Tests
+    fft_test()
+    fft_grad_test()
+    fft2_test()
+    fft2_grad_test()
+    fftn_test()
+    fftn_grad_test()
+    ifft_test()
+    ifft_grad_test()
+    ifft2_test()
+    ifft2_grad_test()
+    ifftn_test()
+    ifftn_grad_test()
+
+
 def run_tests():
     """
     This is the main function that runs all the tests and benchmarks.
     """
+    # run_fft_tests()
     run_unit_tests()
     # run_integration_tests()

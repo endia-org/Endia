@@ -13,7 +13,7 @@
 
 from endia import Array
 import os
-from python import Python
+from python import Python, PythonObject
 
 
 fn graph_to_json(args: List[Array]) raises -> String:
@@ -33,9 +33,15 @@ fn graph_to_json(args: List[Array]) raises -> String:
     for i in range(len(trace)):
         var curr = trace[i]
         json_str += "       {\n"
-        json_str += '           "type": ' + '"' + curr.name() + '",\n'
+        json_str += (
+            '           "type": '
+            + str('"')
+            + str(curr.name())
+            + str('"')
+            + ",\n"
+        )
         json_str += '           "id": ' + str(curr.id()) + ",\n"
-        json_str += '           "is_view": '  # str(curr.is_view()) + ",\n"
+        json_str += '           "is_view": '
         if curr.is_view():
             json_str += "1,\n"
         else:
@@ -112,7 +118,9 @@ fn visualize_graph(arg: Array, filename: String = "computation_graph") raises:
         elif node["is_view"] == 1:
             node_color = "#ffc2a3"  # Dim gray for view nodes
 
-        var attrs = " " + str(node["id"]) + ', "' + node["type"] + '", '
+        var attrs: String = " " + str(node["id"]) + ', "' + str(
+            node["type"]
+        ) + '", '
         var shape = node["shape"]
         attrs += "("
         for j in range(len(shape)):

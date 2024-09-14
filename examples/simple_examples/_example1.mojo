@@ -34,9 +34,9 @@ def example1():
     d2y_dx2 = endia.autograd.functional.grad(outs=dy_dx, inputs=x)[0]
 
     # Print results
-    print(y)  # 14.0
-    print(dy_dx)  # [2.0, 4.0, 6.0]
-    print(d2y_dx2)  # [[2.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 2.0]]
+    print(str(y))  # 14.0
+    print(str(dy_dx))  # [2.0, 4.0, 6.0]
+    print(str(d2y_dx2))  # [[2.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 2.0]]
 
     print("\nFunctional grad computation:")
 
@@ -53,8 +53,8 @@ def example1():
     d2y_dx2 = foo_hes(x)[endia.Array]
 
     # Print results
-    print(y)  # 14.0
-    print(dy_dx)  # [2.0, 4.0, 6.0]
-    print(d2y_dx2)  # [[2.0, 0.0, 0.0],
+    print(str(y))  # 14.0
+    print(str(dy_dx))  # [2.0, 4.0, 6.0]
+    print(str(d2y_dx2))  # [[2.0, 0.0, 0.0],
     #  [0.0, 2.0, 0.0],
     #  [0.0, 0.0, 2.0]]

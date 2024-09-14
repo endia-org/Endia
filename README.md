@@ -26,7 +26,7 @@
 
 ## Installation
 
-1. **Install [Mojo 24.5](https://docs.modular.com/mojo/manual/get-started) 🔥
+1. **Install [Mojo 24.5](https://docs.modular.com/mojo/manual/get-started) 🔥**
 
 2. **Add the Endia Package** (at the top level of your project):
 

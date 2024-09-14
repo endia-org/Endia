@@ -4,7 +4,7 @@
 
 ###
 
-**Endia** is a lightweight, dynamic Neural Network library for Mojo, featuring:
+**Endia** is a general-purpose scientific computing library, featuring:
 
 - **Automatic differentiation**: Compute derivatives of arbitrary order.
 - **Complex numbers:** Use Endia for advanced scientific applications.

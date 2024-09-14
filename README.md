@@ -26,12 +26,12 @@
 
 ## Installation
 
-1. **Set up your project using [Mojo 24.5](https://docs.modular.com/mojo/manual/get-started) 🔥 via [Magic](https://docs.modular.com/magic/) 🪄**.
+1. **Install [Mojo 24.5](https://docs.modular.com/mojo/manual/get-started) 🔥
 
-2. **Install the Endia Package** (at the top level of your project):
+2. **Add the Endia Package** (at the top level of your project):
 
     ```bash
-    curl -sS https://raw.githubusercontent.com/endia-org/Endia/nightly/install.sh | bash
+    curl -o "endia.📦" https://raw.githubusercontent.com/endia-org/Endia/nightly/endia.%F0%9F%93%A6
     ```
 
     > *<span style="color: green;">**Note:**</span> In the near future, you will be able to simply call `magic add endia`, which will manage this dependency in your project's environment automatically. QOL is in sight!*

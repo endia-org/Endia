@@ -11,4 +11,4 @@
 # limitations under the License.
 # ===----------------------------------------------------------------------=== #
 
-from .custom_mul import custom_mul
+from .custom_mul import custom_mul_example

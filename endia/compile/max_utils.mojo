@@ -20,7 +20,16 @@ from max.engine import InferenceSession, Model, TensorMap, EngineNumpyView
 from max.graph import Graph, TensorType, ops, Symbol, Dim, Type
 from max.tensor import Tensor, TensorShape, TensorSpec
 from python import Python, PythonObject
-from .python_utils import array_to_numpy, tensor_to_array
+
+
+fn tensor_to_array(owned src: Tensor[dtype]) raises -> Array:
+    var shape = List[Int]()
+    for i in range(src.rank()):
+        shape.append(src.shape()[i])
+    var dst = Array(shape, is_view=True)
+    dst.data_(src._steal_ptr())
+    dst.is_view_(False)
+    return dst
 
 
 fn top_order(inout curr: Array) -> List[Array]:
@@ -72,9 +81,7 @@ def build_graph(
     for array in trace:
         var tmp_args = List[Array]()
         for arg in array[].args():
-            tmp_args.append(
-                arg[]  # if (not arg[].name() == "brdcst" or len(arg[].args()) == 0) else arg[].args()[0]
-            )
+            tmp_args.append(arg[])
 
         if len(tmp_args) == 0:
             var idx_in_args = args_idx[str(array[].id())]
@@ -82,11 +89,8 @@ def build_graph(
             continue
 
         elif array[].is_view():
-            var arg0 = symbol_trace[
-                tmp_args[0].id()
-            ]  # if tmp_args[0].has_fxgraph() else graph.constant(to_tensor(tmp_args[0]))
+            var arg0 = symbol_trace[tmp_args[0].id()]
             if array[].name() == "brdcst":
-                # symbol_trace.append(symbol_trace[tmp_args[0].id()])
                 var zero_const = graph.constant(
                     Tensor[DType.float32](array[].shape(), 0)
                 )

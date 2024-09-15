@@ -91,7 +91,12 @@ fn visualize_graph(arg: Array, filename: String = "computation_graph") raises:
     """
     Visualize the computation graph of the given list of arrays using graphviz.
     """
-    var graphviz = Python.import_module("graphviz")
+    var graphviz: PythonObject
+    try:
+        graphviz = Python.import_module("graphviz")
+    except:
+        raise 'Error in graph vizualizer: Please install graphviz using "magic add --pypi "graphviz""'
+
     var json = Python.import_module("json")
     var Digraph = graphviz.Digraph
 

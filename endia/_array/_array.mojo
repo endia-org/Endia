@@ -34,6 +34,7 @@ import math
 from python import Python, PythonObject
 from collections import Optional
 
+
 fn default_fwd(inout curr: Array, args: List[Array]) raises -> None:
     print("Attention: Default fwd is being used!")
     pass

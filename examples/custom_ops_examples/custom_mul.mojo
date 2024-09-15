@@ -11,7 +11,8 @@
 # limitations under the License.
 # ===----------------------------------------------------------------------=== #
 
-from endia.utils import op_array, setup_shape_and_data, clone_shape
+
+from endia.functional._utils import op_array, setup_shape_and_data, clone_shape
 from endia import Array
 
 
@@ -55,7 +56,7 @@ def custom_mul(arg0: Array, arg1: Array) -> Array:
     )
 
 
-def main():
+def custom_mul_example():
     """Simple test of the custom operation.
     We create two arrays, multiply them and sum the result.
     Then we compute the derivative of the output with respect to the two input arrays.
